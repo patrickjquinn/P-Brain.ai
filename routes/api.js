@@ -8,7 +8,7 @@ module.exports = (function() {
     // search function --------------------------------------------------------
     api.get('/ask', function(req, res) {
       var input = req.query['q'];
-      var search = require('../api/ask-core.js');
+      var search = require('../api/core-ask.js');
 
       res.send(search.query(input));
     });

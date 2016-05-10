@@ -42,8 +42,8 @@ export default class SearchBox extends React.Component {
       <div>
 
         {responseBox}
-
         <SearchForm search={this.search.bind(this)} />
+
       </div>
     );
   }
