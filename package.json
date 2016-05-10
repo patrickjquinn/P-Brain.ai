@@ -1,0 +1,27 @@
+{
+  "name": "assistant-ai",
+  "version": "0.0.2",
+  "description": "NodeJS-powered AI assistant",
+  "main": "app.js",
+  "scripts": {
+    "dev": "webpack-dev-server --content-base src --inline --hot",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marcos Castaneda",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.8.0",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "webpack": "^1.13.0",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "natural": "^0.4.0",
+    "react": "^15.0.2",
+    "react-dom": "^15.0.2",
+    "velocity-react": "^1.1.5"
+  }
+}
