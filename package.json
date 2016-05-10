@@ -1,6 +1,6 @@
 {
   "name": "assistant-ai",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "NodeJS-powered AI assistant",
   "main": "server.js",
   "scripts": {

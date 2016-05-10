@@ -21,7 +21,10 @@ function _query(q) {
   // Return value
   var result = classifier.classify(q);
 
-  return result;
+  return {
+    responseType: result,
+    originalQuery: q
+  };
 }
 
 // exports ====================================================================

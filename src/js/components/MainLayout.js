@@ -8,9 +8,9 @@ export default class MainLayout extends React.Component {
   render() {
     return (
       <div id="wrapper" className="container-fluid">
-        <Header />
+        <Header title="Personal Assistant" />
         <SearchBox />
-        <Footer />
+        <Footer version="0.1.0" />
       </div>
     );
   }

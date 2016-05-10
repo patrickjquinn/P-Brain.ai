@@ -14,18 +14,34 @@ export default class SearchBox extends React.Component {
 
   search(search) {
     this.setState({search: search, response: search});
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/ask?q=' + search);
+    xhr.responseType = 'json';
+
+    xhr.onload = function() {
+      this.setState({response: xhr.response});
+    }.bind(this);
+
+    xhr.onerror = function() {
+      console.log("Error");
+    };
+
+    xhr.send();
   }
 
   render() {
+
+    // Conditional search result
+    var responseBox;
+    if (this.state.response) {
+      responseBox = <SearchResponse response={this.state.response} />;
+    }
+
     return (
       <div>
 
-        {(() => {
-           switch (this.state.response) {
-             case 'weather': return <SearchResponse response={this.state.response} />;
-             default: return;
-           }
-         })()}
+        {responseBox}
 
         <SearchForm search={this.search.bind(this)} />
       </div>
