@@ -67,19 +67,18 @@ function _query(q) {
   classifier.addDocument('whats my fathers name', 'id');
 
   // Laughter train
-  classifier.addDocument('im feeling sad', 'joke');
-  classifier.addDocument('im feeling blue', 'joke');
-  classifier.addDocument('im feeling down', 'joke');
-  classifier.addDocument('tell a joke', 'joke');
-  classifier.addDocument('tell me something funny', 'joke');
-  classifier.addDocument('tell me a joke', 'joke');
-  classifier.addDocument('make me laugh', 'joke');
+  classifier.addDocument('feeling sad', 'joke');
+  classifier.addDocument('feeling blue', 'joke');
+  classifier.addDocument('feeling down', 'joke');
+  classifier.addDocument('joke', 'joke');
+  classifier.addDocument('funny', 'joke');
+  classifier.addDocument('laugh', 'joke');
 
   // Fact train
   classifier.addDocument('what is', 'fact');
   classifier.addDocument('who is', 'fact');
   classifier.addDocument('when is', 'fact');
-  classifier.addDocument('how old is', 'fact');
+  classifier.addDocument('how old', 'fact');
   classifier.addDocument('who is in', 'fact');
 
   // Lang train
