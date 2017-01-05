@@ -1,97 +1,108 @@
 var natural = require('natural'),
     classifier = new natural.BayesClassifier();
 
+var response = require('../response/index.js');
+
 // search functionality =======================================================
-function _query(q) {
 
-  // Placeholder classifiers to test data!
+function train_recognizer(classifier) {
+// Weather train
 
-  // Weather train
-  classifier.addDocument('is it raining', 'weather');
-  classifier.addDocument('is it cold outside', 'weather');
   classifier.addDocument('what is the weather', 'weather');
-  classifier.addDocument('whats the weather', 'weather');
-  classifier.addDocument('whats it like outside', 'weather');
-  classifier.addDocument('whats it like in', 'weather');
+  classifier.addDocument('whats it like in qqqq', 'weather');
+  classifier.addDocument('temperature', 'weather');
 
+
+  // Fact train
+  classifier.addDocument('who is qqqq', 'fact');
+  classifier.addDocument('where is qqqq', 'fact');
+  classifier.addDocument('what is qqqq', 'fact');
+  classifier.addDocument(['√ ','-','+','%'], 'fact');
+
+  classifier.addDocument('news', 'news');
 
 
   // Time train
   classifier.addDocument('what time is it', 'time');
-  classifier.addDocument('what day is it', 'time');
-  classifier.addDocument('monday tuesday wednesday thursday friday', 'time');
-
-
+  classifier.addDocument('what is the time', 'time');
   // Year train
-  classifier.addDocument('what year is it', 'year');
-  classifier.addDocument('what is the year', 'year');
+  // classifier.addDocument('what year is it', 'year');
+  // classifier.addDocument('what is the year', 'year');
 
   // Location train
-  classifier.addDocument('where am i', 'location');
+  classifier.addDocument('where am I', 'location');
   classifier.addDocument('whats my location', 'location');
 
   // Sport train
-  classifier.addDocument('who won the game', 'sports');
-  classifier.addDocument('who is playing', 'sports');
-  classifier.addDocument('who is winning', 'sports');
-  classifier.addDocument('what is the score', 'sports');
-  classifier.addDocument('sports', 'sports');
+  // classifier.addDocument('who won the game', 'sports');
+  // classifier.addDocument('who is playing', 'sports');
+  // classifier.addDocument('who is winning', 'sports');
+  // classifier.addDocument('what is the score', 'sports');
+  // classifier.addDocument('sports', 'sports');
 
-  // Media play train 
-  classifier.addDocument('play song', 'play');
-  classifier.addDocument('play', 'play');
-  classifier.addDocument('start song', 'play');
+  classifier.addDocument('heads or tails', 'coin');
+  classifier.addDocument('coin flip', 'coin');
+  classifier.addDocument('coin toss', 'coin');
 
-  // Media pause train
-  classifier.addDocument('play song', 'play');
-  classifier.addDocument('play', 'play');
-  classifier.addDocument('start song', 'play');
+  // // Media play train 
+  // classifier.addDocument('play song', 'play');
+  // classifier.addDocument('play', 'play');
+  // classifier.addDocument('start song', 'play');
 
-  // Media next train
-  classifier.addDocument('play next', 'next');
-  classifier.addDocument('play next song', 'next');
-  classifier.addDocument('next song', 'nex');
+  // // Media pause train
+  // classifier.addDocument('play song', 'play');
+  // classifier.addDocument('play', 'play');
+  // classifier.addDocument('start song', 'play');
+
+  // // Media next train
+  // classifier.addDocument('play next', 'skip');
+  // classifier.addDocument('play next song', 'skip');
+  // classifier.addDocument('next song', 'skip');
 
   // Media song train
-  classifier.addDocument('play a song', 'song');
-  classifier.addDocument('play me a song', 'song');
-  classifier.addDocument('start some music', 'song');
-
+  classifier.addDocument('play qqqq by qqqq', 'song');
   // ID train
-  classifier.addDocument('who am i', 'id');
-  classifier.addDocument('whats my name', 'id');
-  classifier.addDocument('where do i live', 'id');
-  classifier.addDocument('where do i work', 'id');
-  classifier.addDocument('what age am i', 'id');
-  classifier.addDocument('whats my mothers name', 'id');
-  classifier.addDocument('whats my fathers name', 'id');
+  classifier.addDocument('What is my name', 'id');
 
+
+  classifier.addDocument('start movie qqqq', 'movie');
+  classifier.addDocument('play movie', 'movie');
+
+
+
+
+  // classifier.addDocument('whats my name', 'id');
+  // classifier.addDocument('where do i live', 'id');
+  // classifier.addDocument('where do i work', 'id');
+  // classifier.addDocument('what age am i', 'id');
+  // classifier.addDocument('whats my mothers name', 'id');
+  // classifier.addDocument('whats my fathers name', 'id');
   // Laughter train
-  classifier.addDocument('feeling sad', 'joke');
-  classifier.addDocument('feeling blue', 'joke');
-  classifier.addDocument('feeling down', 'joke');
-  classifier.addDocument('joke', 'joke');
-  classifier.addDocument('funny', 'joke');
-  classifier.addDocument('laugh', 'joke');
 
-  // Fact train
-  classifier.addDocument('what is', 'fact');
-  classifier.addDocument('who is', 'fact');
-  classifier.addDocument('when is', 'fact');
-  classifier.addDocument('how old', 'fact');
-  classifier.addDocument('who is in', 'fact');
+  classifier.addDocument('tell me a joke', 'joke');
+  classifier.addDocument('say something funny', 'joke');
+  classifier.addDocument('make me laugh', 'joke');
 
   // Lang train
-  classifier.addDocument('spell', 'lang');
-  classifier.addDocument('what is the definition of', 'fact');
-  classifier.addDocument('pronounce', 'fact');
+  // classifier.addDocument('spell', 'lang');
+  // classifier.addDocument('what is the definition of', 'lang');
+  // classifier.addDocument('pronounce', 'lang');
 
   // News train
-  classifier.addDocument('spell', 'lang');
-  classifier.addDocument('what is the definition of', 'fact');
-  classifier.addDocument('pronounce', 'fact');
+  // classifier.addDocument('spell', 'lang');
+  // classifier.addDocument('what is the definition of', 'fact');
+  // classifier.addDocument('pronounce', 'fact');
 
   classifier.train();
+
+}
+
+
+function * _query(q) {
+
+  // Placeholder classifiers to test data!
+  train_recognizer(classifier);
+
 
   // classifier.save('./api/classifier.json', function(err, classifier) { });
 
@@ -99,23 +110,24 @@ function _query(q) {
   var result = classifier.getClassifications(q)[0];
   var confidence = result.value;
 
+  var resp;
+
   // Confidence is not high enough
   if (confidence > 0.3) {
-    return {
-      responseType: "error",
-      originalQuery: q
-    }
+    return 'error';
   }
 
-  return {
+
+
+  var resp = yield response.get({
     responseType: result.label,
     originalQuery: q
-  };
+  });
+
+  return resp;
 }
 
 // exports ====================================================================
-module.exports = (function() {
-    return {
+module.exports = {
       query: _query
-    };
-})();
+}

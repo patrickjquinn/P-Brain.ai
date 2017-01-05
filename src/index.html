@@ -1,14 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Personal Assistant</title>
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-  <link rel="stylesheet" href="./css/app.css">
-  <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300' rel='stylesheet' type='text/css'>
+    <meta charset="UTF-8">
+    <title>Speech KITT</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
+	<script src="js/speechkitt.min.js"></script>
+    <style>
+        body {
+            margin: 0 0;
+            padding: 0 0;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+        }
+
+        #skitt-ui {
+		    left: 50% !important;
+		    transform: translate(-50%, 0) !important;
+        }
+
+        #resp_text {
+        	position: absolute;
+		  	top: 45%;
+		    -webkit-transform:translate(0%, -50%);
+		    -moz-transform:translate(0%, -50%);
+		    -ms-transform:translate(0%, -50%);
+		    -o-transform:translate(0%, -50%);
+		  	transform:translate(0%, -50%);
+		  	margin: 0;
+/*		  	font-size: 3.75vw; 
+*/		  	font-family: Arial, Helvetica, sans-serif;
+		  	color: #2980B9;
+		  	display: block;
+		  	width: 100%;
+		  	text-align: center;
+
+		  	text-overflow: ellipsis;
+        }
+
+        .top {
+        	top: 12% !important;
+		    -webkit-transform:translate(0%, -50%);
+		    -moz-transform:translate(0%, -50%);
+		    -ms-transform:translate(0%, -50%);
+		    -o-transform:translate(0%, -50%);
+		  	transform:translate(0%, -50%);
+        }
+
+        .pulse {
+		  animation: pulse 1s alternate infinite;
+		  -webkit-animation: pulse 1s alternate infinite;
+		}
+		@keyframes pulse {
+		  from {opacity:1}
+		  to {opacity:0}
+		}
+		@-webkit-keyframes pulse {
+		  from {opacity:1}
+		  to {opacity:0}
+		}
+
+       	@media only screen and (max-width: 767px) {
+
+		   #resp_text {
+		   		font-size:200%;
+		   }
+
+		}
+
+		#player {
+        	position: absolute;
+		  	top: 50%;
+		  	left: 50%;
+		    -webkit-transform:translate(-50%, -50%);
+		    -moz-transform:translate(-50%, -50%);
+		    -ms-transform:translate(-50%, -50%);
+		    -o-transform:translate(-50%, -50%);
+		  	transform:translate(-50%, -50%);
+		  	margin: 0;
+		  	display: block;
+		}
+
+    </style>
 </head>
-<body>
-  <div id="app"></div>
-  <script src="./client.min.js"></script>
+<body onload="">
+
+<h1 id="resp_text"></h1>
+<div id="player_container"><div id="player"></div></div>
+
+<script src="js/resp_types.js"></script>
+<script src="js/iframe.js"></script>
+
+<script>
+    if (annyang) {
+        var commands = {
+            'hey brain': observe_speech,
+            'brain': observe_speech,
+            'okay brain': observe_speech,
+            'hey brain *tag': log_speech,
+            'brain *tag': log_speech,
+            'okay brain *tag': log_speech,
+			'(hey) brain': observe_speech,
+            '(okay) brain': observe_speech,
+            '(hey) brain *tag': log_speech,
+            '(okay) brain *tag': log_speech
+        };
+
+        // Add our commands to annyang
+        annyang.addCommands(commands);
+
+        // Add our commands to annyang
+        annyang.start();
+
+        // Tell KITT to communicate with annyang
+        SpeechKITT.annyang();
+
+        // Define KITT's style
+        SpeechKITT.setStylesheet('themes/flat.css');
+
+        // Add instructional texts
+        SpeechKITT.setInstructionsText('Say "Brain" followed by…');
+
+        SpeechKITT.setSampleCommands(["What's the time", "Show cat pics etc"]);
+        
+        // Render KITT's interface
+        SpeechKITT.vroom();
+    }
+
+    display_greeting();
+
+
+</script>
 </body>
+
+
 </html>
