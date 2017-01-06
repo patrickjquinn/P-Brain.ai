@@ -41,7 +41,7 @@ function push_movie_response(id) {
     $( ".chat" ).append('<div style="border-radius: 5px !important;" class="bubble you"><div id="movie"><div class="loader"></div></div></div>');
 }
 
-$(#'textbox').unbind('keypress').bind('keypress', function (e) {
+$('#textbox').unbind('keypress').bind('keypress', function (e) {
    // some logic here
    e.preventDefault();
     e.stopImmediatePropagation();
