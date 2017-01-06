@@ -8,7 +8,7 @@ var fs = require('fs');
 
 var ip = require("ip");
 
-var address = 'var ip_addr ='+ip.address()+';';
+var address = 'var ip_addr ="'+ip.address()+'";';
 
   fs.writeFile("./src/js/ip.js", address, function(err) {
 	    if(err) {
