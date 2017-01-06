@@ -199,7 +199,7 @@ function * weather_resp(query){
 	return weather;
 }
 
-function *get_ddg_result(query) {
+function get_ddg_result(query) {
 	var ddg_url = 'http://api.duckduckgo.com/?q=<query>&format=json&pretty=1';
 
 	var data = request('GET',ddg_url.replace('<query>', query));
@@ -220,7 +220,7 @@ String.prototype.replaceAll = function(str1, str2, ignore)
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
 }
 
-function *get_wlfra_result(query) {
+function get_wlfra_result(query) {
 	var url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid=U7L4VR-K3WJPLK6Y2';
 
 	var data = request('GET', url.replace('<query>',query));
