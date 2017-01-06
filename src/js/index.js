@@ -46,13 +46,12 @@ $('#textbox').unbind('keypress').bind('keypress', function (e) {
     e.preventDefault();
     e.stopImmediatePropagation();
 
-    window.focus()
-
          if(e.which === 13 &&  $('#textbox').val() != ""){
             push_statment($('#textbox').val());
             log_speech($('#textbox').val())
             document.getElementById('textbox').value = '';
          }
+    return false;
 });
 
 // $('#textbox').on('keypress', function (e) {

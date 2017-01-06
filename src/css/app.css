@@ -246,6 +246,7 @@ body {
   outline: none;
   background-color: #eceff1;
   font-weight: 400;
+  z-index: 1000;
 }
 .container .right .write .write-link.attach:before {
   display: inline-block;
