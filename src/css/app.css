@@ -290,6 +290,22 @@ body {
   -webkit-border-radius: 35px;
   border-radius: 35px;
 }
+
+@media only screen and (max-width: 767px) {
+    .container .right .bubble {
+      font-size: 10px;
+      position: relative;
+      display: inline-block;
+      clear: both;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      vertical-align: middle;
+      -moz-border-radius: 25px;
+      -webkit-border-radius: 25px;
+      border-radius: 25px;
+    }
+
+  }
 /*.container .right .bubble:before {
   position: absolute;
   top: 25px;
