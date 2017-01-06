@@ -1,4 +1,4 @@
-var api = "http://localhost:4567/api/ask?q=";
+var api = "http://"+ip_addr+":4567/api/ask?q=";
 var player;
 var recognition = new webkitSpeechRecognition();
 var client = new WebTorrent();
