@@ -294,16 +294,16 @@ body {
 
 @media only screen and (max-width: 767px) {
     .container .right .bubble {
-      font-size: 10px;
+      font-size: 15px;
       position: relative;
       display: inline-block;
       clear: both;
-      margin-bottom: 10px;
-      padding: 6px 10px;
+      margin-bottom: 15px;
+      padding: 9px 15px;
       vertical-align: middle;
-      -moz-border-radius: 25px;
-      -webkit-border-radius: 25px;
-      border-radius: 25px;
+      -moz-border-radius: 30px;
+      -webkit-border-radius: 30px;
+      border-radius: 30px;
     }
 }
 /*.container .right .bubble:before {
