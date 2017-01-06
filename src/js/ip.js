@@ -1,1 +1,1 @@
-var ip_addr='ip.address()';
+var ip_addr ="192.168.0.16";
