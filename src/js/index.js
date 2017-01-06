@@ -48,7 +48,7 @@ $('#textbox').unbind('keypress').bind('keypress', function (e) {
 
     console.log('pushing statement');
 
-         if(e.which === 13){
+         if(e.which === 13 &&  $('#textbox').val() != ""){
             push_statment($('#textbox').val());
             log_speech($('#textbox').val())
             document.getElementById('textbox').value = '';

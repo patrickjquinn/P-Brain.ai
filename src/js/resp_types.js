@@ -54,6 +54,20 @@ if (!detectmob){
 
         console.log(inputString);
     };
+
+    recognition.onerror = function(event) {
+        console.log(event.error);
+
+        if (player) {
+            if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() == 0) {}
+        }
+        if (event.error != 'aborted') {
+            annyang.start({
+                autoRestart: true,
+                continuous: false
+            });
+        }
+    };
 }
 
 function hasExtension(inputID, exts) {
@@ -90,19 +104,7 @@ var delay = (function() {
     };
 })();
 
-recognition.onerror = function(event) {
-    console.log(event.error);
 
-    if (player) {
-        if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() == 0) {}
-    }
-    if (event.error != 'aborted') {
-        annyang.start({
-            autoRestart: true,
-            continuous: false
-        });
-    }
-};
 
 /** Response Helper Functions **/
 
