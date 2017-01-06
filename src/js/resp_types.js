@@ -1,9 +1,7 @@
 var api = "http://"+ip_addr+":4567/api/ask?q=";
 var player;
 
-if (!detectmob){
-    var recognition = new webkitSpeechRecognition();
-}
+
 var client = new WebTorrent();
 
 client.on('error', function(err) {
@@ -13,46 +11,50 @@ client.on('error', function(err) {
 
 /** Voice Recognition **/
 
-recognition.continuous = true;
-
-recognition.lang = "en-GB";
-
-recognition.onresult = function(event) {
+if (!detectmob){
+    var recognition = new webkitSpeechRecognition();
 
 
+    recognition.continuous = true;
 
-    var inputString = event.results['0']['0'].transcript;
+    recognition.lang = "en-GB";
 
-    push_statment(inputString);
+    recognition.onresult = function(event) {
 
-    if (inputString != null && typeof inputString != undefined) {
-        if (player && inputString.indexOf('pause') != -1) {
-            pause_song();
-        } else if (player && inputString.toUpperCase().trim() == 'PLAY') {
-            play_song();
-        } else if (player && inputString.indexOf('stop') != -1) {
-            stop_song();
+
+        var inputString = event.results['0']['0'].transcript;
+
+        push_statment(inputString);
+
+        if (inputString != null && typeof inputString != undefined) {
+            if (player && inputString.indexOf('pause') != -1) {
+                pause_song();
+            } else if (player && inputString.toUpperCase().trim() == 'PLAY') {
+                play_song();
+            } else if (player && inputString.indexOf('stop') != -1) {
+                stop_song();
+            } else {
+                get_resp(api + inputString, inputString);
+            }
         } else {
-            get_resp(api + inputString, inputString);
+            console.log('testing');
         }
-    } else {
-        console.log('testing');
-    }
 
-    if (player) {
-        if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() == 0) {
-            // document.getElementById("resp_text").className = "top";
-            console.log('added top');
+        if (player) {
+            if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() == 0) {
+                // document.getElementById("resp_text").className = "top";
+                console.log('added top');
+            }
         }
-    }
 
-    annyang.start({
-        autoRestart: true,
-        continuous: false
-    });
+        annyang.start({
+            autoRestart: true,
+            continuous: false
+        });
 
-    console.log(inputString);
-};
+        console.log(inputString);
+    };
+}
 
 function hasExtension(inputID, exts) {
     var fileName = inputID;

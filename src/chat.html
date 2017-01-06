@@ -5,12 +5,22 @@
     <title>P-Brainz</title>
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
-        <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="cleartype" content="on">
     
     <link rel="stylesheet" href="css/app.css">
     <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <script src="js/ip.js"></script>
+
+    <script type="text/javascript">
+        function detectmob() { 
+             if (typeof window.orientation !== 'undefined') {
+                return true;
+             }
+
+             return false;
+        }
+    </script>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
     <script src="https://cdn.jsdelivr.net/webtorrent/latest/webtorrent.min.js"></script>
@@ -28,13 +38,6 @@
 
     display_greeting();
 
-    function detectmob() { 
-         if (typeof window.orientation !== 'undefined') {
-            return true;
-         }
-
-         return false;
-    }
 
 
     if (annyang && !detectmob()) {
