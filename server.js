@@ -9,15 +9,13 @@ var fs = require('fs');
 var ip = require("ip");
 
 
-// require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-  fs.writeFile("./src/js/ip.js", "var ip_addr='ip.address()';", function(err) {
+  fs.writeFile("./src/js/ip.js", "var ip_addr="+ip.address()+";", function(err) {
 	    if(err) {
 	        return console.log(err);
 	    }
 
 	    console.log(ip.address());
 	}); 
-// });
 
 
 
