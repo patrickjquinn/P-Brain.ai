@@ -42,6 +42,7 @@ function push_movie_response(id) {
 }
 
 $('#textbox').on('keypress', function (e) {
+    e.preventDefault();
          if(e.which === 13){
             push_statment($('#textbox').val());
             log_speech($('#textbox').val())
