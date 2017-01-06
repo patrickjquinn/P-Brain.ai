@@ -44,6 +44,7 @@ function push_movie_response(id) {
 $('#textbox').on('keypress', function (e) {
          if(e.which === 13){
             push_statment($('#textbox').val());
+            log_speech($('#textbox').val())
             document.getElementById('textbox').value = '';
          }
 });
