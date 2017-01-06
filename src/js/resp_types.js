@@ -1,6 +1,17 @@
 var api = "http://"+ip_addr+":4567/api/ask?q=";
 var player;
-var recognition = new webkitSpeechRecognition();
+
+    function detectmob() { 
+         if (typeof window.orientation !== 'undefined') {
+            return true;
+         }
+
+         return false;
+     }
+
+if (!detectmob){
+    var recognition = new webkitSpeechRecognition();
+}
 var client = new WebTorrent();
 
 client.on('error', function(err) {
