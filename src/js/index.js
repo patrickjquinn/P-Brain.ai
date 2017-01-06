@@ -43,8 +43,10 @@ function push_movie_response(id) {
 
 $('#textbox').unbind('keypress').bind('keypress', function (e) {
    // some logic here
-   e.preventDefault();
+    e.preventDefault();
     e.stopImmediatePropagation();
+
+    console.log('pushing statement');
 
          if(e.which === 13){
             push_statment($('#textbox').val());
