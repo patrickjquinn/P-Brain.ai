@@ -41,9 +41,14 @@ function push_movie_response(id) {
     $( ".chat" ).append('<div style="border-radius: 5px !important;" class="bubble you"><div id="movie"><div class="loader"></div></div></div>');
 }
 
-$('#textbox').submit(function(e){ 
+$('#textbox').on('keypress', function (e) {
     e.preventDefault();
+    e.stopImmediatePropagation();
+
+         if(e.which === 13){
             push_statment($('#textbox').val());
             log_speech($('#textbox').val())
             document.getElementById('textbox').value = '';
+         }
+    return false;
 });
