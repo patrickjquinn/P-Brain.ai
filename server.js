@@ -6,16 +6,18 @@ var compression = require('compression');
 var search = require('./api/core-ask.js');
 var fs = require('fs');
 
+var ip = require("ip");
 
-require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-  fs.writeFile("./src/js/ip.js", "var ip_addr='"+add+"';", function(err) {
+
+// require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+  fs.writeFile("./src/js/ip.js", "var ip_addr='ip.address()';", function(err) {
 	    if(err) {
 	        return console.log(err);
 	    }
 
-	    console.log(add);
+	    console.log(ip.address());
 	}); 
-});
+// });
 
 
 
