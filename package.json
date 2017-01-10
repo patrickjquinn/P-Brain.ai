@@ -29,6 +29,6 @@
     "thunkify-wrap": "*",
     "co-express": "*",
     "compression": "*",
-    "magnet-link": "*"
+    "words-to-num": "*"
   }
 }

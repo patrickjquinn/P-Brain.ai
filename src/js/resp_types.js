@@ -1,4 +1,4 @@
-var api = "http://"+ip_addr+":4567/api/ask?q=";
+var api = "http://localhost:4567/api/ask?q=";
 var player;
 
 
@@ -11,7 +11,6 @@ client.on('error', function(err) {
 
 /** Voice Recognition **/
 
-if (!detectmob){
     var recognition = new webkitSpeechRecognition();
 
 
@@ -68,7 +67,6 @@ if (!detectmob){
             });
         }
     };
-}
 
 function hasExtension(inputID, exts) {
     var fileName = inputID;
@@ -178,6 +176,90 @@ function isURL(str) {
     return pattern.test(str);
 }
 
+function set_timer(timer){
+
+    push_timer_response();
+
+
+    timer = timer.replace(':timer:', '');
+
+    var countdown, time;
+
+    if (timer.indexOf('DAY') != -1){
+        time = timer.toUpperCase().split('DAY')[0].trim();
+
+
+        countdown = parseInt(time) * 86400;
+
+        message = time+" Days";
+    } else if (timer.indexOf('HOUR') != -1){
+        time = timer.toUpperCase().split('HOUR')[0].trim();
+        countdown = parseInt(time) * 3600;
+        message = time+" Hours";
+    } else if (timer.toUpperCase().indexOf('MINUTE') != -1){
+        var time = timer.toUpperCase().split('MINUTE')[0].trim();
+        countdown = parseInt(time) * 60;
+        message = time+" Minutes";
+    } else {
+        time = timer.toUpperCase().split('SECOND')[0].trim();
+        countdown = parseInt(time) ;
+
+        message = time+" Seconds";
+    }
+
+    initializeClock(countdown);
+
+    speak_response('Okay, timer set for '+message);
+
+}
+
+function getTimeRemaining(endtime) {
+  var t = Date.parse(endtime) - Date.parse(new Date());
+  var seconds = Math.floor((t / 1000) % 60);
+  var minutes = Math.floor((t / 1000 / 60) % 60);
+  var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+  var days = Math.floor(t / (1000 * 60 * 60 * 24));
+  return {
+    'total': t,
+    'days': days,
+    'hours': hours,
+    'minutes': minutes,
+    'seconds': seconds
+  };
+}
+
+function initializeClock(time) {
+
+    var deadline = new Date(Date.parse(new Date()) + time * 1000);
+
+  var clock = document.getElementsByClassName('countdown')[0];
+  var daysSpan = clock.querySelector('.days');
+  var hoursSpan = clock.querySelector('.hours');
+  var minutesSpan = clock.querySelector('.minutes');
+  var secondsSpan = clock.querySelector('.seconds');
+
+
+  function updateClock() {
+    var t = getTimeRemaining(deadline);
+
+    daysSpan.innerHTML = t.days;
+    hoursSpan.innerHTML = ('0' + t.hours).slice(-2);
+    minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
+    secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+
+    if (t.total <= 0) {
+      clearInterval(timeinterval);
+      speak_response('Hey there! Your timer is finished!');
+      push_timer_response('Hey there! Your timer is finished!');
+    }
+  }
+
+  updateClock();
+  var timeinterval = setInterval(updateClock, 1000);
+}
+
+
+
 
 function get_resp(api, q) {
     var xmlhttp;
@@ -195,8 +277,13 @@ function get_resp(api, q) {
                     display_response("I Don't Understand '" + q + "'");
                     speak_response("I Don't Understand '" + q + "'");
                 } else {
-                    display_response(xmlhttp.responseText);
-                    speak_response(xmlhttp.responseText);
+                    if (xmlhttp.responseText.indexOf(':timer:')!= -1){
+                        set_timer(xmlhttp.responseText);
+                    } else {
+                        display_response(xmlhttp.responseText);
+                        speak_response(xmlhttp.responseText);
+                    }
+
                 }
 
                 play_song();

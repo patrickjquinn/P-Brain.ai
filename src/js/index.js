@@ -23,13 +23,37 @@ function push_response(msg) {
     if (msg == "Just a second..."){
         $( ".chat" ).append('<div class="bubble you loading">'+msg+'</div>');
     } else {
-        $( ".chat" ).append('<div class="bubble you">'+msg+'</div>');
+        if (msg.toUpperCase().indexOf(' CLOUD') != -1){
+            $( ".chat" ).append('<div class="bubble you"><i class="fa fa-cloud" aria-hidden="true"></i>  '+" "+msg+'</div>');
+        } else if (msg.toUpperCase().indexOf(' RAIN') != -1) {
+            $( ".chat" ).append('<div class="bubble you"><i class="fa fa-tint" aria-hidden="true"></i>  '+" "+msg+'</div>');
+        } else if (msg.toUpperCase().indexOf(' SUN') != -1 || msg.toUpperCase().indexOf('AND CLEAR') != -1) {
+            $( ".chat" ).append('<div class="bubble you"><i class="fa fa-sun-o" aria-hidden="true"></i>  '+" "+msg+'</div>');
+        } else if (msg.toUpperCase().indexOf(' SNOW') != -1) {
+            $( ".chat" ).append('<div class="bubble you"><i class="fa fa-snowflake-o" aria-hidden="true"></i>  '+" "+msg+'</div>');
+        } else if (msg.indexOf(' AM') != -1 || msg.indexOf(' PM') != -1) {
+            $( ".chat" ).append('<div class="bubble you"><i class="fa fa-clock-o" aria-hidden="true"></i>'+" "+msg+'</div>');
+        } else {
+            $( ".chat" ).append('<div class="bubble you">'+msg+'</div>');
+        }
+
     }
 }
 
 function push_yt_response(id) {
     
     $( ".chat" ).append('<div style="border-radius: 5px !important;" class="bubble you"><div id="player_container"><div class="player" id="player'+id+'"></div></div></div>');
+}
+
+function push_timer_response(msg) {
+    if (!msg){
+        $( ".chat" ).append('<div class="bubble you countdown"><span class="days"></span>:<span class="hours"></span>:<span class="minutes"></span>:<span class="seconds"></span></div>');
+    } else {
+        // $('.countdown').remove();
+        var old = document.getElementsByClassName('countdown')[0];
+        old.innerHTML = msg;
+        $('.countdown').removeClass('countdown');        
+    }
 }
 
 function push_movie_response(id) {

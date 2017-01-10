@@ -8,19 +8,15 @@ var fs = require('fs');
 
 var ip = require("ip");
 
-var address = 'var ip_addr ="'+ip.address()+'";';
+var address = 'var ip_addr ="' + ip.address() + '";';
 
-  fs.writeFile("./src/js/ip.js", address, function(err) {
-	    if(err) {
-	        return console.log(err);
-	    }
+fs.writeFile("./src/js/ip.js", address, function(err) {
+    if (err) {
+        return console.log(err);
+    }
 
-	    console.log(ip.address());
-	}); 
-
-
-
-
+    console.log(ip.address());
+});
 
 app.use(compression({
     threshold: 0,
@@ -37,13 +33,21 @@ app.use(express.static('./src'));
 
 
 app.get('/api/ask', wrap(function*(req, res) {
-      var input = req.query['q'];
+    var input = req.query['q'];
 
-      var result = yield search.query(input)
+    var result = yield search.query(input)
 
-      res.send(result);
+    res.send(result);
+}));
+
+app.get('/api/natlang', wrap(function*(req, res) {
+    var input = req.query['q'];
+
+    var result = yield nlm.query(input)
+
+    res.send(result);
 }));
 
 
-console.log('Listening on port 4567');
+console.log('P-Brain is listening on port 4567');
 app.listen(4567);

@@ -83,6 +83,11 @@ function train_recognizer(classifier) {
   classifier.addDocument('say something funny', 'joke');
   classifier.addDocument('make me laugh', 'joke');
 
+  classifier.addDocument('set timer', 'timer');
+  classifier.addDocument('set timer for qqqq', 'timer');
+
+
+
   // Lang train
   // classifier.addDocument('spell', 'lang');
   // classifier.addDocument('what is the definition of', 'lang');
