@@ -1,11 +1,14 @@
 # P-Brain.ai - Voice Controlled Personal Assistant
+
 Natural language virtual assistant using Node + Bootstrap
 
 ### Screenshot
+
 ![alt tag](app_screenshot.png)
 
 ## Install
-Clone to your directory and type `npm install` & `npm start`
+
+Clone repo, cd to its directory and type `npm install` & `npm start`
 
 Add api info for http://openweathermap.org/api and https://newsapi.org/account to `config/index.js`
 
