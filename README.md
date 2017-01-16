@@ -22,9 +22,9 @@ Add a skill by creating a new folder with the name of your new skill and adding 
 
 Add functions for `_intent` and `{skill_name}_resp` to that index, the latter contining the logic that will respond to a query.
 
-In `_intent` add `return {keywords:['key 1','key 2'], module:'module_name'}` where `keywords` are the phrases you wish the skill to respond to and `module` is the name of your new skill.
+In `_intent` add `return {keywords:['key 1','key 2'], module:'{skill_name}'}` where `keywords` are the phrases you wish the skill to respond to and `{skill_name}` is the name of your new skill.
 
-Add `module.exports = {intent:_intent, get: {module_name}_resp};` to the end of your `index.js`
+Add `module.exports = {intent:_intent, get: {skill_name}_resp};` to the end of your `index.js`
 
 Add that new folder to the `skills` directory in the project.
 
