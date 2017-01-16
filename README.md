@@ -2,6 +2,10 @@
 
 Natural language virtual assistant using Node + Bootstrap
 
+## Video Introduction to the project
+
+https://www.youtube.com/watch?v=4EF_qEYNNwU
+
 ### Screenshot
 
 ![alt tag](app_screenshot.png)

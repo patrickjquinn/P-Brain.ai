@@ -45,7 +45,7 @@ function * _query(q) {
   console.log(confidence);
 
   // Confidence is not high enough
-  if (confidence > 0.22) {
+  if (confidence > 0.25) {
     throw 'error';
     return;
   }
