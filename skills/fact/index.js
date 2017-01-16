@@ -1,8 +1,8 @@
 var request = require('sync-request');
 var parser = require('xml2json');
-var config = require('../../config');
+var config = require('../../config/');
 
-var keys = config.get();
+var keys = config.get;
 
 
 String.prototype.replaceAll = function(str1, str2, ignore) 

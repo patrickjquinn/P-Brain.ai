@@ -1,7 +1,7 @@
 var request = require('sync-request');
 var news = ['the-verge', 'bbc-news', 'bloomberg','bbc-sport','new-scientist',];
 var config = require('../../config');
-var keys = config.get();
+var keys = config.get;
 
 function * _intent(){
 	return {keywords:['news'], module:'news'};
