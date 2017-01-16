@@ -17,7 +17,7 @@ Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain,
 
 Add a skill by creating a new folder with the name of your new skill and adding an `index.js`. 
 
-Add functions for `_intent` and {skill_name}_resp to that index, the latter contining the logic that reponse to the query.
+Add functions for `_intent` and `{skill_name}_resp` to that index, the latter contining the logic that reponse to the query.
 
 In `_intent` add `return {keywords:['key 1','key 2'], module:'module_name'}` where `keywords` are the phrases you wish the skill to respond to and `module` is the name of your new skill.
 
