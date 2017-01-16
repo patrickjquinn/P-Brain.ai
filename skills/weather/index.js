@@ -1,8 +1,10 @@
 var request = require('sync-request');
+var config = require('../../config');
+var keys = config.get;
 
-var api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units=metric&appid=f08bfa92a064d679ae0fad789a886f66';
-var api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=f08bfa92a064d679ae0fad789a886f66&units=metric&q=';
-var api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=f08bfa92a064d679ae0fad789a886f66&units=metric&q=';
+var api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units=metric&appid='+keys.openweathermap.key;
+var api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid='+keys.openweathermap.key+'&units=metric&q=';
+var api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid='+keys.openweathermap.key+'&units=metric&q=';
 
 function * _intent(){
 	return {keywords:['what is the weather','whats it like in qqqq','temperature'], module:'weather'};
