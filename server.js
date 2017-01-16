@@ -14,7 +14,6 @@ fs.writeFile("./src/js/ip.js", address, function(err) {
     if (err) {
         return console.log(err);
     }
-
     console.log(ip.address());
 });
 
@@ -25,19 +24,25 @@ app.use(compression({
 }));
 
 app.use(function(req, res, next) {
-    req.connection.setNoDelay(true);
-    next();
+  req.connection.setNoDelay(true);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
 });
 
 app.use(express.static('./src'));
 
-
 app.get('/api/ask', wrap(function*(req, res) {
-    var input = req.query['q'];
+    var input = req.query['q'].toLowerCase();
 
-    var result = yield search.query(input)
+    res.header("Content-Type", "application/json");
 
-    res.send(result);
+    try {
+      var result = yield search.query(input);
+      res.send(result);
+    } catch (e) {
+      res.status(500).send({msg:"Sorry, I didnt understand "+input, type:"error",msg:input});
+    }
 }));
 
 app.get('/api/natlang', wrap(function*(req, res) {
@@ -49,5 +54,5 @@ app.get('/api/natlang', wrap(function*(req, res) {
 }));
 
 
-console.log('P-Brain is listening on port 4567');
+console.log('PAT is listening on port 4567');
 app.listen(4567);

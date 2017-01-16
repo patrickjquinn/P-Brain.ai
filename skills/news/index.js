@@ -1,7 +1,11 @@
 var request = require('sync-request');
-
 var news = ['the-verge', 'bbc-news', 'bloomberg','bbc-sport','new-scientist',];
+var config = require('../../config');
+var keys = config.get();
 
+function * _intent(){
+	return {keywords:['news'], module:'news'};
+}
 
 function * news_resp(query){
 
@@ -18,7 +22,7 @@ function * news_resp(query){
 	}
 
 
-	var news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey=f4504df34ba9432f80ff040a41736518&source='+source;
+	var news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey='+keys.newsapi.key+'&source='+source;
 
 	if (source == 'bbc-news' || source == 'bbc-sport' || source == 'new-scientist' || source == 'bloomberg') {
 		news_url = news_url.replace('latest', 'top');
@@ -42,5 +46,6 @@ function * news_resp(query){
 }
 
 module.exports = {
-	get:news_resp
+	get:news_resp,
+	intent:_intent
 }

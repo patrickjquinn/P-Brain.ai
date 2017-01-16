@@ -1,5 +1,8 @@
 var request = require('sync-request');
 var parser = require('xml2json');
+var config = require('../../config');
+
+var keys = config.get();
 
 
 String.prototype.replaceAll = function(str1, str2, ignore) 
@@ -7,8 +10,12 @@ String.prototype.replaceAll = function(str1, str2, ignore)
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
 }
 
+function * _intent(){
+	return {keywords:['who is qqqq','where is qqqq', 'when did qqqq','what is qqqq','√ ','-','+','%'], module:'fact'};
+}
+
 function get_wlfra_result(query) {
-	var url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid=U7L4VR-K3WJPLK6Y2';
+	var url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid='+keys.wolframalpha.key;
 
 	var data = request('GET', url.replace('<query>',query));
 
@@ -44,20 +51,6 @@ function get_wlfra_result(query) {
 			}
 		}
 
-		// if (result.indexOf('1 | ') == 0) {
-
-	 //        var idx = 1;
-	 //        var defns = result.split(/\n/);
-
-	 //        var len  = (defns.length > 3) ? 3 : defns.length,
-	 //            result = '';
-
-	 //        for (var i = 0; i < len; i++) {
-	 //          result += defns[i].replace(/^(.*)\|(.*)\|/, '') + '.';
-	 //        }
-
-  //     	}
-
       	if (result.indexOf('|') != -1){
       		result = result.replaceAll(' |', ', ');
       	}
@@ -67,8 +60,6 @@ function get_wlfra_result(query) {
 		console.log(e);
 		return "";
 	}
-
-
 }
 
 
@@ -100,5 +91,6 @@ function * fact_resp(query){
 }
 
 module.exports = {
-	get: fact_resp
+	get: fact_resp,
+	intent: _intent
 }

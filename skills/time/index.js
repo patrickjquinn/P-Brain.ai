@@ -1,3 +1,7 @@
+function * _intent(){
+	return {keywords:['what time is it','what is the time'], module:'time'};
+}
+
 function * time_resp(query){
 	var time = new Date().toLocaleTimeString('en-GB', { hour: "numeric", 
                                              minute: "numeric"});
@@ -6,5 +10,6 @@ function * time_resp(query){
 }
 
 module.exports = {
-	get: time_resp
+	get: time_resp,
+	intent:_intent
 }

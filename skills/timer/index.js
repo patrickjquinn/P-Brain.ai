@@ -1,5 +1,9 @@
 var WtoN = require('words-to-num');
 
+function * _intent(){
+	return {keywords:['set timer','set timer for qqqq'], module:'timer'};
+}
+
 function * timer_resp(query){
 	var time_to_set = query.split('for ')[1];
 
@@ -21,5 +25,6 @@ function * timer_resp(query){
 }
 
 module.exports = {
-	get: timer_resp
+	get: timer_resp,
+	intent: _intent
 }

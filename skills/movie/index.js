@@ -1,5 +1,9 @@
 var request = require('sync-request');
 
+function * _intent(){
+	return {keywords:['start movie qqqq'], module:'movie'};
+}
+
 function *movie_resp(query){
 	var term = query.split(' movie ')[1];
 
@@ -13,5 +17,6 @@ function *movie_resp(query){
 }
 
 module.exports = {
-	get:movie_resp
+	get:movie_resp,
+	intent:_intent
 }

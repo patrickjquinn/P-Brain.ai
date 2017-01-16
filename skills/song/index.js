@@ -1,4 +1,8 @@
-var yt = require('../../youtube');
+var yt = require('./youtube');
+
+function * _intent(){
+	return {keywords:['play qqqq by qqqq','play qqqq'], module:'song'};
+}
 
 function * song_resp(query){
 
@@ -19,5 +23,6 @@ function * song_resp(query){
 }
 
 module.exports = {
-	get: song_resp
+	get: song_resp,
+	intent:_intent
 }
