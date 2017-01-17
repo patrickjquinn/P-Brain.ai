@@ -45,14 +45,5 @@ app.get('/api/ask', wrap(function*(req, res) {
     }
 }));
 
-app.get('/api/natlang', wrap(function*(req, res) {
-    var input = req.query['q'];
-
-    var result = yield nlm.query(input)
-
-    res.send(result);
-}));
-
-
 console.log('PAT is listening on port 4567');
 app.listen(4567);
