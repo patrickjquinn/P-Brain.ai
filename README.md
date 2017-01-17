@@ -1,5 +1,7 @@
 # P-Brain.ai - Voice Controlled Personal Assistant
 
+[![Join the chat at https://gitter.im/P-Brain/Lobby](https://badges.gitter.im/P-Brain/Lobby.svg)](https://gitter.im/P-Brain/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Natural language virtual assistant using Node + Bootstrap
 
 ### Screenshot
