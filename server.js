@@ -41,6 +41,7 @@ app.get('/api/ask', wrap(function*(req, res) {
       var result = yield search.query(input);
       res.send(result);
     } catch (e) {
+      console.log(e);
       res.status(500).send({msg:"Sorry, I didnt understand "+input, type:"error",msg:input});
     }
 }));

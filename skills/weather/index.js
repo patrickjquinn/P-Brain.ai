@@ -55,6 +55,10 @@ function* weather_resp(query) {
     var forcast = false;
     var current_loc = yield get_country();
 
+    if (!current_loc || current_loc == ''){
+        current_loc = 'dublin';
+    }
+
 
     if (query.indexOf(' in ') != -1) {
         country = query.split(' in ')[1];

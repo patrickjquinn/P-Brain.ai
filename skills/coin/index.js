@@ -5,7 +5,7 @@ function * coin_resp(){
 }
 
 function * _intent(){
-	return {keywords:['heads','tails','flip','toss','flipacoin'], module:'coin'};
+	return {keywords:['heads or tails','flip a coin','toss a coin'], module:'coin'};
 }
 
 module.exports = {
