@@ -24,7 +24,7 @@ Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain,
 
 ## Adding Skills
 
-Add a skill by creating a new folder with the name of your new skill and adding an `index.js`. 
+Add a skill by creating a new folder with the name of your new skill and adding an `index.js`.
 
 
 
@@ -50,3 +50,16 @@ And bang, Brain will automatically import and enable your new skill!
 ### End Points
 `http://localhost:4567/api/ask?q={query}`
 `http://localhost:4567/`
+
+
+# Docker
+
+You can run this application via Docker. Prequisites are that you have docker installed
+and cloned this repository locally. Then execute the following command to create an docker image
+called _p-brain_ and a container called _p-brain_.
+
+    docker build -t p-brain .
+    docker run --name=p-brain -v `pwd`:/home/app -v /home/app/node_modules -p4567:4567  p-brain npm start
+
+After doing this you can stop the container by running `docker stop p-brain`. Starting it again
+is done by running `docker start p-brain`.
