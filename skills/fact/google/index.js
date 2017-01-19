@@ -1,6 +1,6 @@
 'use strict';
 
-var rp = require('request-promise');
+var request = require('co-request');
 var $ = require('cheerio');
 var Entities = require('html-entities').XmlEntities;
 var entities = new Entities();
@@ -9,17 +9,10 @@ var tabletojson = require('tabletojson');
 var xray = require('x-ray')();
 var json2csv = require('json2csv');
 
-function* _intent() {
-    return {
-        keywords: ['google', 'ask google'],
-        module: 'google'
-    };
-}
-
 function* google_resp(query) {
     // Remove spaces and replace with +
     query = query.toLowerCase();
-    query = query.replace('ask google','');
+    query = query.replace('ask google', '');
     query = query.replace(" ", "+");
 
     // Remove _ and replace with +
@@ -46,7 +39,9 @@ function* google_resp(query) {
         'User-Agent': userAgentRandom
     };
 
-    var body = yield rp(options);
+    var body = yield request(options);
+
+    body = body.body;
 
     // result variable init
     var found = 0;
@@ -119,10 +114,7 @@ function* google_resp(query) {
                 csv = csv.replace(/\{(.*?)\:/g, ", ");
 
                 found = csv.toString();
-
             }
-
-
         });
     }
 
@@ -132,7 +124,7 @@ function* google_resp(query) {
         found = $('._rkc._Peb', body).html();
 
     }
-    //Maths	
+    //Maths 
     if (!found && $('.nobr>.r', body).length > 0) {
         found = $('.nobr>.r', body).html();
     }
@@ -146,7 +138,6 @@ function* google_resp(query) {
     //Definition
     if (!found && $('.r>div>span', body).first().length > 0) {
         found = $('.r>div>span', body).first().html() + " definition. ";
-        //how many
         items = $('.g>div>table>tr>td>ol>li', body).get().length; // find how many lines there are in answer table
 
         if (items) {
@@ -160,11 +151,9 @@ function* google_resp(query) {
     //TV show
     if (!found && $('._B5d', body).length > 0) {
         found = $('._B5d', body).html();
-        //how many
         if ($('._Pxg', body).length > 0) {
             found += ". " + $('._Pxg', body).html();
         }
-        //how many
         if ($('._tXc', body).length > 0) {
 
             found += ". " + $('._tXc', body).html();
@@ -175,49 +164,27 @@ function* google_resp(query) {
     if (!found && $('.g>.e>h3', body).length > 0) {
 
         found = $('.g>.e>h3', body).html();
-        //how many
+
         if ($('.wob_t', body).first().length > 0) {
 
             found += " " + $('.wob_t', body).first().html();
         }
 
-        //how many
         if ($('._Lbd', body).length > 0) {
 
             found += " " + $('._Lbd', body).html();
         }
     }
 
-    // strip out html tags to leave just text
     var speechOutputTemp = entities.decode(striptags(found));
-    // var cardOutputText = speechOutputTemp;
-    // make sure all full stops have space after them otherwise alexa says the word dot 
 
-    // speechOutputTemp = speechOutputTemp.split('.com').join(" dot com "); // deal with dot com
-    // speechOutputTemp = speechOutputTemp.split('.co.uk').join(" dot co dot uk "); // deal with .co.uk
-    // speechOutputTemp = speechOutputTemp.split('.net').join(" dot net "); // deal with .net
-    // speechOutputTemp = speechOutputTemp.split('.org').join(" dot org "); // deal with .org
-    // speechOutputTemp = speechOutputTemp.split('a.m').join("am"); // deal with a.m
-    // speechOutputTemp = speechOutputTemp.split('p.m').join("pm"); // deal with a.m
-
-
-    // // deal with decimal places
-    // speechOutputTemp = speechOutputTemp.replace(/\d[\.]{1,}/g, '\$&DECIMALPOINT');
-    // speechOutputTemp = speechOutputTemp.replace(/.DECIMALPOINT/g, 'DECIMALPOINT');
-
-    // // deal with characters that are illegal in SSML
-
-    // speechOutputTemp = speechOutputTemp.replace(/&/g, ' and ');
-    // speechOutputTemp = speechOutputTemp.replace(/</g, ' less than ');
-    // speechOutputTemp = speechOutputTemp.replace(/""/g, '');
-    if (speechOutputTemp == "" || typeof speechOutputTemp == undefined ){
-    	return 'Hmmm I couldnt get the answer to that on Google';
+    if (speechOutputTemp === "" || typeof speechOutputTemp === undefined) {
+        return null;
     }
 
     return speechOutputTemp;
 }
 
 module.exports = {
-    get: google_resp,
-    intent: _intent
+    get: google_resp
 };

@@ -18,7 +18,7 @@
   "dependencies": {
     "express": "*",
     "natural": "*",
-    "sync-request": "*",
+    "co-request": "*",
     "xml2json": "*",
     "thunkify-wrap": "*",
     "co-express": "*",
@@ -26,7 +26,6 @@
     "words-to-num": "*",
     "ip":"*",
     "co":"*",
-    "request-promise":"*",
     "cheerio":"*",
     "striptags":"*",
     "tabletojson":"*",

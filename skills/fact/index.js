@@ -1,25 +1,32 @@
-var request = require('sync-request');
+var request = require('co-request');
 var parser = require('xml2json');
 var config = require('../../config/');
+var google = require('./google/');
 
 var keys = config.get;
-
 
 String.prototype.replaceAll = function(str1, str2, ignore) 
 {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
-}
+};
 
 function * _intent(){
 	return {keywords:['who is qqqq','where is qqqq', 'when did qqqq','what is qqqq','√ ','-','+','%'], module:'fact'};
 }
 
-function get_wlfra_result(query) {
+function * get_wlfra_result(query) {
 	var url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid='+keys.wolframalpha.key;
 
-	var data = request('GET', url.replace('<query>',query));
+	var data = yield request(url.replace('<query>',query));
 
-	data = JSON.parse(parser.toJson(data.getBody()));
+	try {
+		data = JSON.parse(parser.toJson(data.body));
+	} catch (e){
+		if (e){
+			console.log('error parsing wolframalpha body '+e);
+		}
+		return null;
+	}
 
 	var pods = data.queryresult.pod;
 
@@ -40,7 +47,7 @@ function get_wlfra_result(query) {
 			}
 		}
 
-		if (result == ""){
+		if (result === ""){
 			for (var i = 0; i < pods.length; i++){
 				var index = pods[i];
 
@@ -58,33 +65,43 @@ function get_wlfra_result(query) {
 		return result;
 	} catch (e){
 		console.log(e);
-		return "";
+		return null;
 	}
 }
 
-
-function get_ddg_result(query) {
+function * get_ddg_result(query) {
 	var ddg_url = 'http://api.duckduckgo.com/?q=<query>&format=json&pretty=1';
 
-	var data = request('GET',ddg_url.replace('<query>', query));
+	var data = yield request(ddg_url.replace('<query>', query));
 
-	data = JSON.parse(data.getBody());
+	try {
+		data = JSON.parse(data.body);
+	} catch (e){
+		if (e){
+			console.log('error parsing duckduckgo body '+e);
+		}
+		return null;
+	}
 
 	var resp = data.AbstractText;
 
-	if (resp.split('.')[1] && resp.split('.')[1] != ""){
+	if (resp.split('.')[1] && resp.split('.')[1] !== ""){
 		return resp.split('.')[0];
 	} else {
 		return resp;
 	}
 }
 
-
 function * fact_resp(query){
-	var fact = get_ddg_result(query);
 
-	if (!fact || fact == ""){
-		fact = get_wlfra_result(query);
+	var fact = yield google.get(query);
+	
+	if (!fact || fact === ""){
+		fact = yield get_ddg_result(query);
+	}
+
+	if (!fact || fact === ""){
+		fact = yield get_wlfra_result(query);
 	}
 	
 	return fact;
@@ -93,4 +110,4 @@ function * fact_resp(query){
 module.exports = {
 	get: fact_resp,
 	intent: _intent
-}
+};

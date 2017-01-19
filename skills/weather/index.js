@@ -1,13 +1,16 @@
-var request = require('sync-request');
+var request = require('co-request');
 var config = require('../../config');
 var keys = config.get;
 
-var api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units=metric&appid='+keys.openweathermap.key;
-var api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid='+keys.openweathermap.key+'&units=metric&q=';
-var api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid='+keys.openweathermap.key+'&units=metric&q=';
+var api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units=metric&appid=' + keys.openweathermap.key;
+var api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=' + keys.openweathermap.key + '&units=metric&q=';
+var api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=' + keys.openweathermap.key + '&units=metric&q=';
 
-function * _intent(){
-	return {keywords:['what is the weather','whats it like in qqqq','temperature'], module:'weather'};
+function* _intent() {
+    return {
+        keywords: ['what is the weather', 'whats it like in qqqq', 'temperature'],
+        module: 'weather'
+    };
 }
 
 function get_index_from_day() {
@@ -18,9 +21,9 @@ function get_index_from_day() {
 }
 
 function* get_country() {
-    var country_res = request('GET', 'http://ipinfo.io');
+    var country_res = yield request('http://ipinfo.io');
 
-    country_res = JSON.parse(country_res.getBody());
+    country_res = JSON.parse(country_res.body);
 
     var loc_string = country_res.city + "," + country_res.country;
 
@@ -55,7 +58,7 @@ function* weather_resp(query) {
     var forcast = false;
     var current_loc = yield get_country();
 
-    if (!current_loc || current_loc == ''){
+    if (!current_loc || current_loc == '') {
         current_loc = 'dublin';
     }
 
@@ -64,13 +67,13 @@ function* weather_resp(query) {
         country = query.split(' in ')[1];
 
         if (country && country != '') {
-            res = request('GET', api_opnw_in + country, {
+            res = yield request(api_opnw_in + country, {
                 'headers': {
                     'Content-type': 'application/json'
                 }
             });
         } else {
-            res = request('GET', api_opnw.replace('<query>', current_loc), {
+            res = yield request(api_opnw.replace('<query>', current_loc), {
                 'headers': {
                     'Content-type': 'application/json'
                 }
@@ -92,7 +95,7 @@ function* weather_resp(query) {
         }
 
 
-        res = request('GET', api_opnw_on + current_loc, {
+        res = yield request(api_opnw_on + current_loc, {
             'headers': {
                 'Content-type': 'application/json'
             }
@@ -102,20 +105,20 @@ function* weather_resp(query) {
     } else if (query.indexOf(' tomorrow') != -1) {
         index = get_index_from_day() + 1;
         forcast = true;
-        res = request('GET', api_opnw_on + current_loc, {
+        res = yield request(api_opnw_on + current_loc, {
             'headers': {
                 'Content-type': 'application/json'
             }
         });
     } else {
-        res = request('GET', api_opnw.replace('<query>', current_loc), {
+        res = yield request(api_opnw.replace('<query>', current_loc), {
             'headers': {
                 'Content-type': 'application/json'
             }
         });
     }
 
-    res = JSON.parse(res.getBody());
+    res = JSON.parse(res.body);
 
     var weather_cond;
     var temp;
@@ -171,5 +174,5 @@ function* weather_resp(query) {
 
 module.exports = {
     get: weather_resp,
-    intent:_intent
+    intent: _intent
 };

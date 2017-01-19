@@ -42,9 +42,9 @@ app.get('/api/ask', wrap(function*(req, res) {
       res.send(result);
     } catch (e) {
       console.log(e);
-      res.status(500).send({msg:"Sorry, I didnt understand "+input, type:"error",msg:input});
+      res.send({msg:"Sorry, I didnt understand "+input, type:"error",msg:input});
     }
 }));
 
-console.log('PAT is listening on port 4567');
+console.log('P-Brain is listening on port 4567');
 app.listen(4567);
