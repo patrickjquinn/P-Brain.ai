@@ -11,7 +11,7 @@ function *movie_resp(query){
 	
 	var data = yield request(movie_api.replace('<query>', term));
 
-	data = JSON.parse(data.body;
+	data = JSON.parse(data.body);
 
 	return data.data.movies[0].torrents[0].url;
 }
