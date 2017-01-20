@@ -1,4 +1,4 @@
-var request = require('sync-request');
+var request = require('co-request');
 
 function * _intent(){
 	return {keywords:['start movie qqqq'], module:'movie'};
@@ -9,9 +9,9 @@ function *movie_resp(query){
 
 	var movie_api = 'https://yts.ag/api/v2/list_movies.json?query_term=<query>&sort_by=peers'
 	
-	var data = request('GET', movie_api.replace('<query>', term));
+	var data = yield request(movie_api.replace('<query>', term));
 
-	data = JSON.parse(data.getBody());
+	data = JSON.parse(data.body;
 
 	return data.data.movies[0].torrents[0].url;
 }

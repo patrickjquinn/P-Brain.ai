@@ -1,4 +1,4 @@
-var request = require('sync-request');
+var request = require('co-request');
 
 function * _intent(){
 	return {keywords:['tell me a joke','say something funny','make me laugh'], module:'joke'};
@@ -7,9 +7,9 @@ function * _intent(){
 function * joke_resp(query){
 	var joke_url = 'https://api.chucknorris.io/jokes/random';
 
-	var data = request('GET', joke_url);
+	var data = yield request(joke_url);
 
-	data = JSON.parse(data.getBody());
+	data = JSON.parse(data.body);
 
 	return data.value;
 }

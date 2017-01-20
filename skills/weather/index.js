@@ -16,7 +16,6 @@ function* _intent() {
 function get_index_from_day() {
     var d = new Date();
     var n = d.getDay();
-
     return n;
 }
 
@@ -170,7 +169,6 @@ function* weather_resp(query) {
 
     return weather;
 }
-
 
 module.exports = {
     get: weather_resp,
