@@ -51,10 +51,18 @@
             };
 
             annyang.addCommands(commands);
-            annyang.start({
-                autoRestart: true,
-                continuous: false
-            });
+
+            if (detectmob()){
+                annyang.start({
+                    autoRestart: true,
+                    continuous: true
+                });
+            } else {
+                annyang.start({
+                    autoRestart: true,
+                    continuous: false
+                });
+            }
 
             SpeechKITT.annyang();
             SpeechKITT.setStylesheet('themes/flat.css');
