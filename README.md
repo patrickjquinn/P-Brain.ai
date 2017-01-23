@@ -14,7 +14,9 @@ https://www.youtube.com/watch?v=4EF_qEYNNwU
 
 ## Install
 
-Clone repo, cd to its directory and type `npm install` & `npm start`
+Install Yarn https://yarnpkg.com/en/docs/install
+
+Clone repo, cd into its directory and type `yarn install` & `npm start`
 
 Add api info for http://openweathermap.org/api and https://newsapi.org/account to `config/index.js`
 

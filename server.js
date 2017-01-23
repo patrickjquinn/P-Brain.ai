@@ -2,11 +2,10 @@ var express = require('express');
 var app = express();
 var wrap = require('co-express');
 var compression = require('compression');
+var fs = require('fs');
+var ip = require("ip");
 
 var search = require('./api/core-ask.js');
-var fs = require('fs');
-
-var ip = require("ip");
 
 var address = 'var ip_addr ="' + ip.address() + '";';
 
@@ -46,5 +45,5 @@ app.get('/api/ask', wrap(function*(req, res) {
     }
 }));
 
-console.log('P-Brain is listening on port 4567');
 app.listen(4567);
+console.log('P-Brain is listening on port 4567');
