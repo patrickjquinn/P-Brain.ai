@@ -1,13 +1,13 @@
 'use strict';
 
-var request = require('co-request');
-var $ = require('cheerio');
-var Entities = require('html-entities').XmlEntities;
-var entities = new Entities();
-var striptags = require('striptags');
-var tabletojson = require('tabletojson');
-var xray = require('x-ray')();
-var json2csv = require('json2csv');
+var request = require('co-request'),
+    $ = require('cheerio'),
+    Entities = require('html-entities').XmlEntities,
+    entities = new Entities(),
+    striptags = require('striptags'),
+    tabletojson = require('tabletojson'),
+    xray = require('x-ray')(),
+    json2csv = require('json2csv');
 
 function* google_resp(query) {
     // Remove spaces and replace with +

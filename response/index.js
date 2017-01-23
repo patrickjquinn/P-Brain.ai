@@ -1,3 +1,5 @@
+'use strict';
+
 function *handle_response(request) {
 	console.log(request);
 

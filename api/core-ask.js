@@ -14,7 +14,7 @@ function getDirectories(srcpath) {
 }
 
 function * train_recognizer() {
-  "use strict";
+  'use strict';
 
   var skills_dir = __dirname+'/skills/';
   skills_dir = skills_dir.replace('/api','');
@@ -42,9 +42,6 @@ function * _query(q) {
 
   var resp;
 
-  console.log(confidence);
-
-  // Confidence is not high enough
   if (confidence > 0.25) {
     throw 'error';
     return;
