@@ -1,0 +1,20 @@
+{
+    "queries": [
+        {
+            "query": "what is the weather in paris",
+            "timestamp": 1485373116
+        },
+        {
+            "query": "what is the weather in spain",
+            "timestamp": 1485373143
+        },
+        {
+            "query": "what is the weather in spain",
+            "timestamp": 1485373521
+        },
+        {
+            "query": "what's the tech news",
+            "timestamp": 1485373923
+        }
+    ]
+}

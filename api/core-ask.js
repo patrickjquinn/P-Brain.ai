@@ -1,12 +1,15 @@
 var natural = require('natural'),
     classifier = new natural.BayesClassifier(),
     co = require('co'),
-    speakeasy = require('speakeasy-nlp');
-
-var response = require('../response/index.js');
-
-var fs = require('fs'),
+    speakeasy = require('speakeasy-nlp'),
+    fs = require('fs'),
+    genify = require('thunkify-wrap').genify,
     path = require('path');
+
+var response = require('../response'),
+    log = require('../log');
+
+natural.BayesClassifier.load = genify(natural.BayesClassifier.load);
 
 function getDirectories(srcpath) {
   return fs.readdirSync(srcpath).filter(function(file) {
@@ -22,6 +25,8 @@ function * train_recognizer() {
 
   var dirs = getDirectories(skills_dir);
 
+  classifier = yield natural.BayesClassifier.load('./api/classifier.json',null);
+
   for (var i = 0; i<dirs.length;i++){
       var dir = dirs[i];
       var intent_funct = require('../skills/'+dir).intent;
@@ -34,6 +39,7 @@ function * train_recognizer() {
   }
 
   classifier.train();
+  classifier.save('./api/classifier.json');
 }
 
 function * _query(q) {
@@ -47,6 +53,8 @@ function * _query(q) {
     throw 'error';
     return;
   }
+
+  yield log.add(q);
 
   var intent_breakdown = speakeasy.classify(q);
 

@@ -213,6 +213,23 @@ co-express@*:
   dependencies:
     co "^4.6.0"
 
+co-from-stream@0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/co-from-stream/-/co-from-stream-0.0.0.tgz#1a5cd8ced77263946094fa39f2499a63297bcaf9"
+  dependencies:
+    co-read "0.0.1"
+
+co-fs@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/co-fs/-/co-fs-1.2.0.tgz#a6df045ce58c04eed45586ff4385032813aba64e"
+  dependencies:
+    co-from-stream "0.0.0"
+    thunkify "0.0.1"
+
+co-read@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/co-read/-/co-read-0.0.1.tgz#f81b3eb8a86675fec51e3d883a7f564e873c9389"
+
 co-request@*:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/co-request/-/co-request-1.0.0.tgz#8eb5fb656c2ee1e82e36c4ccfe9376846406b260"
@@ -1388,6 +1405,10 @@ thunkify-wrap@*:
   resolved "https://registry.yarnpkg.com/thunkify-wrap/-/thunkify-wrap-1.0.4.tgz#b52be548ddfefda20e00b58c6096762b43dd6880"
   dependencies:
     enable "1"
+
+thunkify@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/thunkify/-/thunkify-0.0.1.tgz#bd5d36b1069b4078e5dcbac8fab45359bea6183d"
 
 topo@2.x.x:
   version "2.0.2"

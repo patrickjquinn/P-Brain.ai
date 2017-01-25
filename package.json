@@ -12,6 +12,7 @@
     "cheerio": "*",
     "co": "*",
     "co-express": "*",
+    "co-fs": "^1.2.0",
     "co-request": "*",
     "compression": "*",
     "express": "*",
