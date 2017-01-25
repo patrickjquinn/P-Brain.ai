@@ -1,6 +1,7 @@
 var natural = require('natural'),
     classifier = new natural.BayesClassifier(),
-    co = require('co');
+    co = require('co'),
+    speakeasy = require('speakeasy-nlp');
 
 var response = require('../response/index.js');
 
@@ -47,10 +48,12 @@ function * _query(q) {
     return;
   }
 
-  var resp = yield response.get({
-    responseType: result.label,
-    originalQuery: q
-  });
+  var intent_breakdown = speakeasy.classify(q);
+
+  intent_breakdown.responseType = result.label;
+  intent_breakdown.originalQuery = q;
+
+  var resp = yield response.get(intent_breakdown);
 
   var response_obj = {
     msg: resp,
