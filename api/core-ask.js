@@ -63,6 +63,8 @@ function * _query(q) {
 
   var resp = yield response.get(intent_breakdown);
 
+  yield log.response(q,resp,result.label);
+
   var response_obj = {
     msg: resp,
     type: result.label,
