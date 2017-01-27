@@ -1,67 +1,67 @@
-'use strict';
+'use strict'
 
-var request = require('co-request'),
-    parser = require('xml2json');
+let request = require('co-request'),
+    parser = require('xml2json')
 
-var config = require('../../../config/'),
-    keys = config.get;
+let config = require('../../../config/'),
+    keys = config.get
 
-function* wlfra_resp(query) {
-    var url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid=' + keys.wolframalpha.key;
+function * wlfra_resp(query) {
+    const url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid=' + keys.wolframalpha.key
 
-    var data = yield request(url.replace('<query>', query));
+    let data = yield request(url.replace('<query>', query))
 
     try {
-        data = JSON.parse(parser.toJson(data.body));
+        data = JSON.parse(parser.toJson(data.body))
     } catch (e) {
         if (e) {
-            console.log('error parsing wolframalpha body ' + e);
+            console.log('error parsing wolframalpha body ' + e)
         }
-        return null;
+        return null
     }
 
-    var pods = data.queryresult.pod;
+    const pods = data.queryresult.pod
 
-    var result = "";
+    let result = ''
 
     try {
         if (pods && pods.length && pods.length > 0) {
             for (var i = 0; i < pods.length; i++) {
-                var index = pods[i];
+                var index = pods[i]
 
                 if (index.primary === 'true') {
-                    result = index.subpod.plaintext;
-                    break;
+                    result = index.subpod.plaintext
+                    break
                 }
 
-                if (index.id == "Result") {
-                    result = index.subpod.plaintext;
-                    break;
+                if (index.id == 'Result') {
+                    result = index.subpod.plaintext
+                    break
                 }
             }
 
-            if (result === "") {
+            if (result === '') {
                 for (var i = 0; i < pods.length; i++) {
-                    var index = pods[i];
+                    var index = pods[i]
 
-                    if (index.title == "Basic information") {
-                        result = index.subpod.plaintext;
-                        break;
+                    if (index.title == 'Basic information') {
+                        result = index.subpod.plaintext
+                        break
                     }
                 }
             }
         } else {
-            return null;
+            return null
         }
 
         if (result.indexOf('|') != -1) {
-            result = result.replaceAll(' |', ', ');
+            result = result.replaceAll(' |', ', ')
         }
 
-        return result;
+        return result
     } catch (e) {
-        console.log(e);
-        return null;
+        console.log(e)
+        return null
     }
 }
 

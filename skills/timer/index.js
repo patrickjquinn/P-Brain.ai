@@ -1,30 +1,30 @@
-var WtoN = require('words-to-num');
+const WtoN = require('words-to-num')
 
-function * _intent(){
-	return {keywords:['set timer','set timer for qqqq'], module:'timer'};
+function * _intent() {
+    return {keywords: ['set timer', 'set timer for qqqq'], module: 'timer'}
 }
 
-function * timer_resp(query){
-	var time_to_set = query.split('for ')[1];
+function * timer_resp(query) {
+    const time_to_set = query.split('for ')[1]
 
-	var number = time_to_set.split(' ')[0];
+    let number = time_to_set.split(' ')[0]
 
-	if (!number){
-		number = time_to_set;
-	}
+    if (!number) {
+        number = time_to_set
+    }
 
-	number = WtoN.convert(number);
+    number = WtoN.convert(number)
 
-	var unit = time_to_set.split(' ')[1];
+    const unit = time_to_set.split(' ')[1]
 
-	if (number){
-		return ':timer: ' +number+' '+unit;
-	} else {
-		return 'Sorry, I dont understand '+query;
-	}
+    if (number) {
+        return ':timer: ' + number + ' ' + unit
+    } else {
+        return 'Sorry, I dont understand ' + query
+    }
 }
 
 module.exports = {
-	get: timer_resp,
-	intent: _intent
+    get: timer_resp,
+    intent: _intent
 }
