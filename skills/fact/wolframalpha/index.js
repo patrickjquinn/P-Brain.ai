@@ -1,7 +1,5 @@
-'use strict'
-
-let request = require('co-request'),
-    parser = require('xml2json')
+const request = require('co-request')
+const parser = require('xml2json')
 
 let config = require('../../../config/'),
     keys = config.get
