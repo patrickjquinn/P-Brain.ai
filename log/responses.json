@@ -71,6 +71,12 @@
             "response": ":timer: 3 minutes",
             "skill": "timer",
             "timestamp": 1485531393
+        },
+        {
+            "query": "whats the wather?",
+            "response": "It is currently -6° with Mist",
+            "skill": "weather",
+            "timestamp": 1485547698
         }
     ]
 }

@@ -1,14 +1,11 @@
-'use strict';
+function * handle_response(request) {
+    console.log(request)
 
-function *handle_response(request) {
-	console.log(request);
+    const funct = require('../skills/' + request.responseType)
 
-	var funct = require('../skills/'+request.responseType);
-	var response = yield funct.get(request.originalQuery);
-
-	return response;
+	return yield funct.get(request.originalQuery)
 }
 
 module.exports = {
-	get : handle_response
-};
+    get: handle_response
+}

@@ -1,50 +1,49 @@
-var request = require('co-request');
-var config = require('../../config');
-var keys = config.get;
+const request = require('co-request')
+const config = require('../../config')
+const keys = config.get
 
-function* _intent() {
+function * _intent() {
     return {
         keywords: ['news'],
         module: 'news'
-    };
+    }
 }
 
-function* news_resp(query) {
-
-    var source = 'bbc-news';
+function * news_resp(query) {
+    let source = 'bbc-news'
 
     if (query.indexOf('tech') != -1) {
-        source = 'the-verge';
+        source = 'the-verge'
     } else if (query.indexOf('sport') != -1) {
-        source = 'bbc-sport';
+        source = 'bbc-sport'
     } else if (query.indexOf('science') != -1) {
-        source = 'new-scientist';
+        source = 'new-scientist'
     } else if (query.indexOf('business') != -1) {
-        source = 'bloomberg';
+        source = 'bloomberg'
     }
 
-    var news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey=' + keys.newsapi.key + '&source=' + source;
+    let news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey=' + keys.newsapi.key + '&source=' + source
 
     if (source == 'bbc-news' || source == 'bbc-sport' || source == 'new-scientist' || source == 'bloomberg') {
-        news_url = news_url.replace('latest', 'top');
+        news_url = news_url.replace('latest', 'top')
     }
 
-    var data = yield request(news_url);
+    let data = yield request(news_url)
 
-    data = JSON.parse(data.body);
+    data = JSON.parse(data.body)
 
-    var resp = data.articles;
+    const resp = data.articles
 
-    var item = resp[Math.floor(Math.random() * resp.length)];
+    const item = resp[Math.floor(Math.random() * resp.length)]
 
     if (item.title.toUpperCase() != item.description.toUpperCase()) {
-        return item.title + '. ' + item.description;
+        return item.title + '. ' + item.description
     } else {
-        return item.title + '.';
+        return item.title + '.'
     }
 }
 
 module.exports = {
     get: news_resp,
     intent: _intent
-};
+}

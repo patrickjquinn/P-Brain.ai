@@ -51,6 +51,10 @@
         {
             "query": "set a timer for 3 minutes",
             "timestamp": 1485531393
+        },
+        {
+            "query": "whats the wather?",
+            "timestamp": 1485547698
         }
     ]
 }

@@ -51,7 +51,6 @@ recognition.lang = "en-GB";
 
 recognition.onresult = function(event) {
 
-
     var inputString = event.results['0']['0'].transcript;
 
     var yes_input = inputString.slice(0, 3);
