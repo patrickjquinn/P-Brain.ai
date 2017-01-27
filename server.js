@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 
 app.use(express.static('./src'))
 
+// TODO parse services in query
 app.get('/api/ask', wrap(function *(req, res) {
     const input = req.query.q.toLowerCase()
 
