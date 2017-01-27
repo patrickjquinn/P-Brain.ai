@@ -57,6 +57,13 @@ And bang, Brain will automatically import and enable your new skill!
 `http://localhost:4567/api/ask?q={query}`
 `http://localhost:4567/`
 
+### Raspberry Pi Client 
+
+The Raspberry Pi Client for this project is available here: https://github.com/patrickjquinn/P-Brain.ai-RasPi
+
+### MagicMirror+P-Brain
+
+Coming Soon!
 
 # Docker
 
