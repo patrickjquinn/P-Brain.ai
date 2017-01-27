@@ -1,5 +1,3 @@
-'use strict'
-
 const request = require('co-request')
 
 function * _intent() {
