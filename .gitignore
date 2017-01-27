@@ -3,3 +3,4 @@ node_modules/
 /log/log.json
 /config/index.js
 /log/responses.json
+/api/classifier.json
