@@ -1,5 +1,3 @@
-'use strict'
-
 const fs = require('co-fs')
 
 function * log_query(query) {
@@ -13,8 +11,6 @@ function * log_query(query) {
     queries_obj.queries = queries
 
     yield fs.writeFile('./log/log.json', JSON.stringify(queries_obj, null, 4))
-
-    return
 }
 
 function * log_response(query, response, skill) {
@@ -28,8 +24,6 @@ function * log_response(query, response, skill) {
     responses_obj.responses = responses
 
     yield fs.writeFile('./log/responses.json', JSON.stringify(responses_obj, null, 4))
-
-    return
 }
 
 function * get_last_query() {

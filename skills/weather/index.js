@@ -6,17 +6,14 @@ const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units
 const api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=' + keys.openweathermap.key + '&units=metric&q='
 const api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=' + keys.openweathermap.key + '&units=metric&q='
 
-function * _intent() {
-    return {
-        keywords: ['what is the weather', 'whats it like in qqqq', 'temperature'],
-        module: 'weather'
-    }
-}
+const intent = () => ({
+    keywords: ['what is the weather', 'whats it like in qqqq', 'temperature'],
+    module: 'weather'
+})
 
 function get_index_from_day() {
     const d = new Date()
-    const n = d.getDay()
-    return n
+    return d.getDay()
 }
 
 function * get_country() {
@@ -48,7 +45,7 @@ function get_new_day_index(forcasted_day) {
     }
 }
 
-function * weather_resp(query) {
+function * weatherResp(query) {
     let res
     let country
     let index
@@ -168,6 +165,6 @@ function * weather_resp(query) {
 }
 
 module.exports = {
-    get: weather_resp,
-    intent: _intent
+    get: weatherResp,
+    intent
 }
