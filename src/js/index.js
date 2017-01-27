@@ -51,7 +51,7 @@ function push_yt_response(id) {
 
 function push_timer_response(msg) {
     if (!msg) {
-        $(".chat").append('<div class="bubble you countdown"><span class="days"></span>:<span class="hours"></span>:<span class="minutes"></span>:<span class="seconds"></span></div>');
+        $(".chat").append('<div class="bubble you countdown"/>');
     } else {
         // $('.countdown').remove();
         var old = document.getElementsByClassName('countdown')[0];
