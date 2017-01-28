@@ -4,7 +4,7 @@
   "description": "NodeJS-powered AI assistant",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava"
   },
   "author": "Patrick Quinn",
   "license": "GPLv3",
@@ -35,5 +35,8 @@
     "words-to-num": "*",
     "x-ray": "*",
     "xml2json": "*"
+  },
+  "devDependencies": {
+    "ava": "^0.17.0"
   }
 }
