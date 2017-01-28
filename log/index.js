@@ -1,8 +1,8 @@
 const fs = require('co-fs')
 
 function * log_query(query) {
-    let queries_obj = require('./log.json'),
-        entry = {query, timestamp: Math.round(Number(new Date()) / 1000)}
+    const queries_obj = require('./log.json')
+    const entry = { query, timestamp: Math.round(Number(new Date()) / 1000) }
 
     const queries = queries_obj.queries
 
@@ -14,8 +14,8 @@ function * log_query(query) {
 }
 
 function * log_response(query, response, skill) {
-    let responses_obj = require('./responses.json'),
-        entry = {query, response, skill, timestamp: Math.round(Number(new Date()) / 1000)}
+    const responses_obj = require('./responses.json')
+    const entry = { query, response, skill, timestamp: Math.round(Number(new Date()) / 1000) }
 
     const responses = responses_obj.responses
 

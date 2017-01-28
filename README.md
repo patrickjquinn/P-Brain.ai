@@ -79,4 +79,5 @@ is done by running `docker start p-brain`.
 
 ### Ester eggs
 
-One can ask brain about 'trip to mordor'
+- One can ask brain about 'trip to mordor'
+- or 'what is love'
