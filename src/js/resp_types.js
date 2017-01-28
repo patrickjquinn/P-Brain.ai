@@ -28,9 +28,6 @@ function response_handler(response) {
         case "movie":
             response_funct = load_torrent;
             break;
-        case "joke":
-            response_funct = push_response;
-            break;
         case "fact":
             response_funct = push_response;
             break;
