@@ -1,8 +1,9 @@
 const request = require('co-request')
 
-function * _intent() {
-    return {keywords: ['start movie qqqq'], module: 'movie'}
-}
+const intent = () => ({
+    keywords: ['start movie qqqq'],
+    module: 'movie'
+})
 
 function * movie_resp(query) {
     const term = query.split(' movie ')[1]
@@ -18,5 +19,5 @@ function * movie_resp(query) {
 
 module.exports = {
     get: movie_resp,
-    intent: _intent
+    intent
 }

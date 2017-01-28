@@ -1,11 +1,9 @@
 const yt = require('./youtube')
 
-function * _intent() {
-    return {
-        keywords: ['play qqqq by qqqq', 'play qqqq'],
-        module: 'song'
-    }
-}
+const intent = () => ({
+    keywords: ['play qqqq by qqqq', 'play qqqq'],
+    module: 'song'
+})
 
 function * song_resp(query) {
     query = query.replace('play', '')
@@ -26,5 +24,5 @@ function * song_resp(query) {
 
 module.exports = {
     get: song_resp,
-    intent: _intent
+    intent
 }

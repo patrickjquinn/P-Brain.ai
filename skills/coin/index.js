@@ -4,11 +4,11 @@ function * coin_resp() {
     return 'It\'s ' + state
 }
 
-function * _intent() {
-    return {keywords: ['heads or tails', 'flip a coin', 'toss a coin'], module: 'coin'}
-}
+const intent = () => ({
+    keywords: ['heads or tails', 'flip a coin', 'toss a coin'], module: 'coin'
+})
 
 module.exports = {
     get: coin_resp,
-    intent: _intent
+    intent
 }

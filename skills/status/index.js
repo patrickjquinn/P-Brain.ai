@@ -10,8 +10,6 @@ const intent = () => ({
 // web copy
 
 function * get(query) {
-    console.log(query)
-
     const serviceUrl = 'https://web-api.migros.ch/isalive'
 
     let data = yield request(serviceUrl)

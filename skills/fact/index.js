@@ -9,12 +9,10 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'), (ignore ? 'gi' : 'g')), (typeof (str2) === 'string') ? str2.replace(/\$/g, '$$$$') : str2)
 }
 
-function * _intent() {
-    return {
-        keywords: ['who is qqqq', 'where is qqqq', 'when did qqqq', 'what is qqqq', '√ ', '-', '+', '%'],
-        module: 'fact'
-    }
-}
+const intent = () => ({
+    keywords: ['who is qqqq', 'where is qqqq', 'when did qqqq', 'what is qqqq', '√ ', '-', '+', '%'],
+    module: 'fact'
+})
 
 function * fact_resp(query) {
     let fact = null
@@ -37,5 +35,5 @@ function * fact_resp(query) {
 
 module.exports = {
     get: fact_resp,
-    intent: _intent
+    intent
 }
