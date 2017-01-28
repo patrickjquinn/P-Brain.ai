@@ -16,11 +16,10 @@ const getDirectories = srcpath =>
         fs.statSync(path.join(srcpath, file)).isDirectory())
 
 function * train_recognizer() {
-    let skills_dir = path.join(__dirname, '/skills/')
-    skills_dir = skills_dir.replace('/api', '')
-
     classifier = yield natural.BayesClassifier.load('./api/classifier.json', null)
 
+    let skills_dir = path.join(__dirname, '/skills/')
+    skills_dir = skills_dir.replace('/api', '')
     const dirs = getDirectories(skills_dir)
 
     dirs.map(dir => {
