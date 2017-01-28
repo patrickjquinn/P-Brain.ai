@@ -76,3 +76,7 @@ called _p-brain_ and a container called _p-brain_.
 
 After doing this you can stop the container by running `docker stop p-brain`. Starting it again
 is done by running `docker start p-brain`.
+
+### Ester eggs
+
+One can ask brain about 'trip to mordor'
