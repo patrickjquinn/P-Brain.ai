@@ -1,13 +1,15 @@
 const yt = require('./youtube')
 
-function * _intent() {
-    return {
-        keywords: ['play qqqq by qqqq', 'play qqqq'],
-        module: 'song'
-    }
-}
+const intent = () => ({
+    keywords: ['play qqqq by qqqq', 'play qqqq', 'what is love'],
+    module: 'song'
+})
 
 function * song_resp(query) {
+    if (query.includes('what is love')) {
+        return yield yt.get('what is love', 'Haddaway')
+    }
+
     query = query.replace('play', '')
 
     const track = query.split('by')[0].trim()
@@ -26,5 +28,5 @@ function * song_resp(query) {
 
 module.exports = {
     get: song_resp,
-    intent: _intent
+    intent
 }

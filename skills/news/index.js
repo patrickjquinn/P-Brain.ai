@@ -2,12 +2,10 @@ const request = require('co-request')
 const config = require('../../config')
 const keys = config.get
 
-function * _intent() {
-    return {
-        keywords: ['news'],
-        module: 'news'
-    }
-}
+const intent = () => ({
+    keywords: ['news', 'bbc news'],
+    module: 'news'
+})
 
 function * news_resp(query) {
     let source = 'bbc-news'
@@ -45,5 +43,5 @@ function * news_resp(query) {
 
 module.exports = {
     get: news_resp,
-    intent: _intent
+    intent
 }

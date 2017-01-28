@@ -4,10 +4,18 @@
   "description": "NodeJS-powered AI assistant",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava"
   },
   "author": "Patrick Quinn",
   "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickjquinn/P-Brain.ai"
+  },
+  "bugs": {
+    "url": "https://github.com/patrickjquinn/P-Brain.ai/issues",
+    "email": "noreply@github.com"
+  },
   "dependencies": {
     "cheerio": "*",
     "co": "*",
@@ -27,5 +35,8 @@
     "words-to-num": "*",
     "x-ray": "*",
     "xml2json": "*"
+  },
+  "devDependencies": {
+    "ava": "^0.17.0"
   }
 }

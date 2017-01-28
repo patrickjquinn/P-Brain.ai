@@ -4,3 +4,4 @@ node_modules/
 /config/index.js
 /log/responses.json
 /api/classifier.json
+/src/js/ip.js

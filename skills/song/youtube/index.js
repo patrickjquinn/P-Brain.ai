@@ -16,11 +16,9 @@ function * yt(title, artist) {
             return 'https://www.youtube.com/watch?v=' + data.items[0].id.videoId
         }
     } catch (e) {
-        console.log(e)
+        console.error(e)
         return null
     }
-
-    return null
 }
 
 module.exports = {
