@@ -8,6 +8,14 @@
   },
   "author": "Patrick Quinn",
   "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickjquinn/P-Brain.ai"
+  },
+  "bugs": {
+    "url": "https://github.com/patrickjquinn/P-Brain.ai/issues",
+    "email": "noreply@github.com"
+  },
   "dependencies": {
     "cheerio": "*",
     "co": "*",
