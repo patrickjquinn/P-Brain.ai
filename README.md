@@ -72,7 +72,7 @@ and cloned this repository locally. Then execute the following command to create
 called _p-brain_ and a container called _p-brain_.
 
     docker build -t p-brain .
-    docker run --name=p-brain -v `pwd`:/home/app -v /home/app/node_modules -p4567:4567  p-brain npm start
+    docker run --name=p-brain --net=host -v `pwd`:/home/app -v /home/app/node_modules -p 4567:4567  p-brain npm start
 
 After doing this you can stop the container by running `docker stop p-brain`. Starting it again
 is done by running `docker start p-brain`.
