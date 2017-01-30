@@ -38,16 +38,16 @@
 
         if (annyang) {
             var commands = {
-                'hey brain': observe_speech,
-                'brain': observe_speech,
-                'okay brain': observe_speech,
-                'hey brain *tag': log_speech,
-                'brain *tag': log_speech,
-                'okay brain *tag': log_speech,
-                '(hey) brain': observe_speech,
-                '(okay) brain': observe_speech,
-                '(hey) brain *tag': log_speech,
-                '(okay) brain *tag': log_speech
+                'hey piper': observe_speech,
+                'piper': observe_speech,
+                'okay piper': observe_speech,
+                'hey piper *tag': log_speech,
+                'piper *tag': log_speech,
+                'okay piper *tag': log_speech,
+                '(hey) piper': observe_speech,
+                '(okay) piper': observe_speech,
+                '(hey) piper *tag': log_speech,
+                '(okay) piper *tag': log_speech
             };
 
             annyang.addCommands(commands);
@@ -66,7 +66,7 @@
 
             SpeechKITT.annyang();
             SpeechKITT.setStylesheet('themes/flat.css');
-            SpeechKITT.setInstructionsText('Say "Brain" followed by…');
+            SpeechKITT.setInstructionsText('Say "Piper" followed by…');
             SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
             SpeechKITT.vroom();
         }

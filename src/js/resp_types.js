@@ -217,7 +217,6 @@ function set_timer(timer) {
 
     var message = 'Okay, timer set for ' + formatTime(remaining);
 
-    speak_response(message);
     push_response(message);
     push_timer_response();
     initializeClock(sec_num);
