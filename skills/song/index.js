@@ -1,31 +1,32 @@
-var yt = require('./youtube');
+const yt = require('./youtube')
 
-function* _intent() {
-    return {
-        keywords: ['play qqqq by qqqq', 'play qqqq'],
-        module: 'song'
-    };
-}
+const intent = () => ({
+    keywords: ['play qqqq by qqqq', 'play qqqq', 'what is love'],
+    module: 'song'
+})
 
-function* song_resp(query) {
-
-    query = query.replace('play', '');
-
-    var track = query.split('by')[0].trim();
-    var artist = query.split('by')[1];
-
-    if (!artist || artist === '') {
-        artist = '';
-    } else {
-        artist = artist.trim();
+function * song_resp(query) {
+    if (query.includes('what is love')) {
+        return yield yt.get('what is love', 'Haddaway')
     }
 
-    var url = yield yt.get(track, artist);
+    query = query.replace('play', '')
 
-    return url;
+    const track = query.split('by')[0].trim()
+    let artist = query.split('by')[1]
+
+    if (!artist || artist === '') {
+        artist = ''
+    } else {
+        artist = artist.trim()
+    }
+
+    const url = yield yt.get(track, artist)
+
+    return url
 }
 
 module.exports = {
     get: song_resp,
-    intent: _intent
-};
+    intent
+}

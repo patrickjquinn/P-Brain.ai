@@ -1,1 +1,7 @@
 node_modules/
+.python-version
+/log/log.json
+/config/index.js
+/log/responses.json
+/api/classifier.json
+/src/js/ip.js

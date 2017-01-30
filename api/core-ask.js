@@ -1,86 +1,72 @@
-var natural = require('natural'),
-    classifier = new natural.BayesClassifier(),
-    co = require('co'),
-    speakeasy = require('speakeasy-nlp'),
-    fs = require('fs'),
-    genify = require('thunkify-wrap').genify,
-    path = require('path');
+const fs = require('fs')
+const path = require('path')
+const co = require('co')
+const natural = require('natural')
+const speakeasy = require('speakeasy-nlp')
+const genify = require('thunkify-wrap').genify
+const response = require('../response')
+const log = require('../log')
 
-var response = require('../response'),
-    log = require('../log');
+let classifier = new natural.BayesClassifier()
 
-natural.BayesClassifier.load = genify(natural.BayesClassifier.load);
+natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
-function getDirectories(srcpath) {
-  return fs.readdirSync(srcpath).filter(function(file) {
-    return fs.statSync(path.join(srcpath, file)).isDirectory();
-  });
-}
+const getDirectories = srcpath =>
+    fs.readdirSync(srcpath).filter(file =>
+        fs.statSync(path.join(srcpath, file)).isDirectory())
 
 function * train_recognizer() {
-  'use strict';
+    classifier = yield natural.BayesClassifier.load('./api/classifier.json', null)
 
-  var skills_dir = __dirname+'/skills/';
-  skills_dir = skills_dir.replace('/api','');
+    let skills_dir = path.join(__dirname, '/skills/')
+    skills_dir = skills_dir.replace('/api', '')
+    const dirs = getDirectories(skills_dir)
 
-  var dirs = getDirectories(skills_dir);
+    dirs.map(dir => {
+        const intent_funct = require(`../skills/${dir}`).intent
+        const intent = intent_funct()
 
-  classifier = yield natural.BayesClassifier.load('./api/classifier.json',null);
+        intent.keywords
+            .map(keyword => classifier.addDocument(keyword, intent.module))
+    })
 
-  for (var i = 0; i<dirs.length;i++){
-      var dir = dirs[i];
-      var intent_funct = require('../skills/'+dir).intent;
-
-      var intent = yield intent_funct();
-
-      for (var j=0; j<intent.keywords.length;j++){
-          classifier.addDocument(intent.keywords[j], intent.module);  
-      }
-  }
-
-  classifier.train();
-  classifier.save('./api/classifier.json');
+    classifier.train()
+    classifier.save('./api/classifier.json')
 }
 
-function * _query(q) {
+function * query(q) {
+    const result = classifier.getClassifications(q)[0]
+    const confidence = result.value
 
-  var result = classifier.getClassifications(q)[0];
-  var confidence = result.value;
+    if (confidence > 0.25) {
+        throw new Error('error')
+    }
 
-  var resp;
+    yield log.add(q)
 
-  if (confidence > 0.25) {
-    throw 'error';
-    return;
-  }
+    const intent_breakdown = speakeasy.classify(q)
 
-  yield log.add(q);
+    intent_breakdown.responseType = result.label
+    intent_breakdown.originalQuery = q
 
-  var intent_breakdown = speakeasy.classify(q);
+    const resp = yield response.get(intent_breakdown)
 
-  intent_breakdown.responseType = result.label;
-  intent_breakdown.originalQuery = q;
+    yield log.response(q, resp, result.label)
 
-  var resp = yield response.get(intent_breakdown);
-
-  yield log.response(q,resp,result.label);
-
-  var response_obj = {
-    msg: resp,
-    type: result.label,
-    question: q
-  }
-
-  return response_obj;
+    return {
+        msg: resp,
+        type: result.label,
+        question: q
+    }
 }
 
-co(function*() {
-    yield train_recognizer();
-}).catch(function(err) {
-    console.log(err);
-    throw err;
-});
+co(function * () {
+    yield train_recognizer()
+}).catch(err => {
+    console.log(err)
+    throw err
+})
 
 module.exports = {
-      query: _query
+    query
 }

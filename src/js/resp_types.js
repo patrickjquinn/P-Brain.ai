@@ -28,9 +28,6 @@ function response_handler(response) {
         case "movie":
             response_funct = load_torrent;
             break;
-        case "joke":
-            response_funct = push_response;
-            break;
         case "fact":
             response_funct = push_response;
             break;
@@ -50,7 +47,6 @@ recognition.continuous = true;
 recognition.lang = "en-GB";
 
 recognition.onresult = function(event) {
-
 
     var inputString = event.results['0']['0'].transcript;
 

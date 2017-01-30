@@ -1,49 +1,50 @@
-var express = require('express');
-var app = express();
-var wrap = require('co-express');
-var compression = require('compression');
-var fs = require('fs');
-var ip = require("ip");
+const express = require('express')
+const app = express()
+const wrap = require('co-express')
+const compression = require('compression')
+const fs = require('fs')
+const ip = require('ip')
 
-var search = require('./api/core-ask.js');
+const search = require('./api/core-ask.js')
 
-var address = 'var ip_addr ="' + ip.address() + '";';
+const address = 'var ip_addr ="' + ip.address() + '";'
 
-fs.writeFile("./src/js/ip.js", address, function(err) {
+fs.writeFile('./src/js/ip.js', address, err => {
     if (err) {
-        return console.log(err);
+        return console.log(err)
     }
-    console.log(ip.address());
-});
+    console.log(ip.address())
+})
 
 app.use(compression({
     threshold: 0,
     level: 9,
     memLevel: 9
-}));
+}))
 
-app.use(function(req, res, next) {
-  req.connection.setNoDelay(true);
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  next();
-});
+app.use((req, res, next) => {
+    req.connection.setNoDelay(true)
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With')
+    next()
+})
 
-app.use(express.static('./src'));
+app.use(express.static('./src'))
 
-app.get('/api/ask', wrap(function*(req, res) {
-    var input = req.query['q'].toLowerCase();
+// TODO parse services in query
+app.get('/api/ask', wrap(function *(req, res) {
+    const input = req.query.q.toLowerCase()
 
-    res.header("Content-Type", "application/json");
+    res.header('Content-Type', 'application/json')
 
     try {
-      var result = yield search.query(input);
-      res.send(result);
+        const result = yield search.query(input)
+        res.send(result)
     } catch (e) {
-      console.log(e);
-      res.send({msg:"Sorry, I didnt understand "+input, type:"error",msg:input});
+        console.log(e)
+        res.send({ msg: 'Sorry, I didnt understand ' + input, type: 'error' })
     }
-}));
+}))
 
-app.listen(4567);
-console.log('P-Brain is listening on port 4567');
+app.listen(4567)
+console.log('http://localhost:4567')

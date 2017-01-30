@@ -1,8 +1,9 @@
-var WtoN = require('words-to-num');
+const WtoN = require('words-to-num')
 
-function * _intent(){
-	return {keywords:['set timer','set timer for qqqq'], module:'timer'};
-}
+const intent = () => ({
+    keywords: ['set timer', 'set timer for qqqq'],
+    module: 'timer'
+})
 
 const timeUnits = [
   { name: "week", mult: 1000 * 60 * 60 * 24 * 7 },
@@ -13,7 +14,7 @@ const timeUnits = [
 ];
 
 function getUnit(word) {
-  for (var i = 0; i < timeUnits.length; i++) {
+  for (let i = 0; i < timeUnits.length; i++) {
     if (word.includes(timeUnits[i].name)) {
       return timeUnits[i];
     }
@@ -22,7 +23,7 @@ function getUnit(word) {
 }
 
 function wordsToSentence(arr, start, end) {
-  var sentence = "";
+  let sentence = "";
   for (var i = start; i < end; i++) {
     sentence += arr[i] + " ";
   }
@@ -30,13 +31,13 @@ function wordsToSentence(arr, start, end) {
 }
 
 function parseTime(time) {
-  var previousUnit = 0;
-  var timeInMillis = 0;
+  let previousUnit = 0;
+  let timeInMillis = 0;
   var words = time.split(' ');
-  for (var i = 1; i < words.length; i++) {
-    var unit = getUnit(words[i]);
+  for (let i = 1; i < words.length; i++) {
+    const unit = getUnit(words[i]);
     if (unit != null) {
-      var num = WtoN.convert(wordsToSentence(words, previousUnit, i));
+      const num = WtoN.convert(wordsToSentence(words, previousUnit, i));
       previousUnit = i + 1;
       if (isNaN(num)) {
         return num;
@@ -48,8 +49,8 @@ function parseTime(time) {
 }
 
 function * timer_resp(query){
-	var time_to_set = query.split('for ')[1];
-  var time = parseTime(time_to_set);
+	const time_to_set = query.split('for ')[1];
+  const time = parseTime(time_to_set);
 
   if (isNaN(time)) {
     return 'Sorry, I dont understand ' + query;
