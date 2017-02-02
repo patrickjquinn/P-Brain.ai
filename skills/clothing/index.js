@@ -12,12 +12,6 @@ const type_wardrobe = {
     'mist': 'a hat'
 };
 
-
-const intent = () => ({
-    keywords: ['wear today', 'clothes'],
-    module: 'clothing'
-})
-
 function contains_key(string, keyword) {
     if (string.toUpperCase().includes(keyword.toUpperCase())) {
         return true
@@ -26,7 +20,8 @@ function contains_key(string, keyword) {
 }
 
 function * clothing_resp() {
-	let response = 'Looks like <condition>, better wear <clothes>'
+    let response = 'Looks like <condition>, better wear <clothes>'
+    let clothes = 'a jacket'
     let data = yield request(api_opnw, {
         headers: {
             'Content-type': 'application/json'
@@ -35,8 +30,7 @@ function * clothing_resp() {
 
     data = JSON.parse(data.body);
 
-    let condition = data.weather[0].main
-    let clothes = 'a jacket'
+    const condition = data.weather[0].main
 
     if (contains_key(condition, 'rain') || contains_key(condition, 'shower')) {
         clothes = type_wardrobe.rain
@@ -56,7 +50,11 @@ function * clothing_resp() {
     return response
 }
 
+const intent = () => ({
+    keywords: ['wear today', 'clothes'], module: 'clothing'
+})
+
 module.exports = {
-	get: clothing_resp,
-	intent
+    get: clothing_resp,
+    intent
 }
