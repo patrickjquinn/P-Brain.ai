@@ -3,6 +3,8 @@ var player;
 var client = new WebTorrent();
 var recognition = new webkitSpeechRecognition();
 
+var timerEndTime = 0;
+
 function response_handler(response) {
     var intent = response.type;
     var msg = response.msg;
@@ -246,7 +248,12 @@ function formatTime(time) {
     return message;
 }
 
+var timeinterval = null;
 function initializeClock(time) {
+    if (timeinterval != null) {
+        clearInterval(timeinterval);
+        timeinterval = null;
+    }
 
     var deadline = new Date(Date.parse(new Date()) + time * 1000);
 
@@ -258,13 +265,14 @@ function initializeClock(time) {
 
         if (t.total <= 0) {
             clearInterval(timeinterval);
+            timeinterval = null;
             speak_response('Hey there! Your timer is finished!');
             push_timer_response('Hey there! Your timer is finished!');
         }
     }
 
     updateClock();
-    var timeinterval = setInterval(updateClock, 1000);
+    timeinterval = setInterval(updateClock, 1000);
 }
 
 
