@@ -66,16 +66,16 @@
 
                 if (annyang) {
                     var commands = {};
-                    commands["hey " + name] = observe_speech();
-                    commands[name] = observe_speech();
-                    commands["okay " + name] = observe_speech();
-                    commands["hey " + name + " *tag"] = observe_speech();
-                    commands[name + " *tag"] = observe_speech();
-                    commands["okay " + name + " *tag"] = observe_speech();
-                    commands["(hey) " + name] = observe_speech();
-                    commands["(okay) " + name] = observe_speech();
-                    commands["(hey) " + name + " *tag"] = observe_speech();
-                    commands["(okay) " + name + " *tag"] = observe_speech();
+                    commands["hey " + name] = observe_speech;
+                    commands[name] = observe_speech;
+                    commands["okay " + name] = observe_speech;
+                    commands["hey " + name + " *tag"] = observe_speech;
+                    commands[name + " *tag"] = observe_speech;
+                    commands["okay " + name + " *tag"] = observe_speech;
+                    commands["(hey) " + name] = observe_speech;
+                    commands["(okay) " + name] = observe_speech;
+                    commands["(hey) " + name + " *tag"] = observe_speech;
+                    commands["(okay) " + name + " *tag"] = observe_speech;
 
                     annyang.addCommands(commands);
 
