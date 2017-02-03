@@ -3,29 +3,24 @@ const fs = require('fs');
 const NAME_FILE = 'config/name.json';
 
 const intent = () => ({
-    keywords: ["your new name is qqqq", "i'm going to call you qqqq",
-        "set name to qqqq", "what is your name", "what's your name"],
+    keywords: ["your new name is q", "i'm going to call you q", "set name to q"],
     module: 'name'
 });
 
 let name = 'Brain';
 
 function * name_resp(query) {
-    if (query.includes("what")) {
-        return { text: `My name is ${name}.`};
-    } else {
-        const words = query.split(' ');
-        name = words[words.length - 1];
-        name = name.charAt(0).toUpperCase() + name.slice(1);
+    const words = query.split(' ');
+    name = words[words.length - 1];
+    name = name.charAt(0).toUpperCase() + name.slice(1);
 
-        fs.writeFile(NAME_FILE, JSON.stringify({name: name}, null, 2), function (err) {
-            if (err) {
-                return console.log(err);
-            }
-        });
+    fs.writeFile(NAME_FILE, JSON.stringify({name: name}, null, 2), function (err) {
+        if (err) {
+            return console.log(err);
+        }
+    });
 
-        return { text: `You can now call me ${name}.`, name: name};
-    }
+    return { text: `You can now call me ${name}.`, name: name};
 }
 
 function register(app) {
