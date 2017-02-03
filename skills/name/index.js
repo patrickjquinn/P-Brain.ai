@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const NAME_FILE = 'config/name.json';
+
 const intent = () => ({
     keywords: ["your new name is qqqq", "i'm going to call you", "set name",
         "what is your name", "what's your name"],
@@ -16,7 +18,7 @@ function * name_resp(query) {
         name = words[words.length - 1];
         name = name.charAt(0).toUpperCase() + name.slice(1);
 
-        fs.writeFile('name.json', JSON.stringify({name: name}, null, 2), function (err) {
+        fs.writeFile(NAME_FILE, JSON.stringify({name: name}, null, 2), function (err) {
             if (err) {
                 return console.log(err);
             }
@@ -28,11 +30,11 @@ function * name_resp(query) {
 
 function register(app) {
     try {
-        const nameJson = JSON.parse(fs.readFileSync('name.json'));
+        const nameJson = JSON.parse(fs.readFileSync(NAME_FILE));
         name = nameJson.name;
         console.log(`Name loaded from file: ${name}`);
     } catch (err) {
-        console.log(`Could not load names file, using name: ${name}`);
+        // Ignore and use the default name.
     }
     app.get('/', function(req, res) {
         res.json({name: name});

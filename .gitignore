@@ -1,6 +1,5 @@
 node_modules/*
 .python-version
 log/*.json
-config/index.js
+config/*
 .idea/*
-name.json
