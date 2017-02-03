@@ -47,7 +47,7 @@ function * clothing_resp() {
     response = response.replace('<condition>', condition)
     response = response.replace('<clothes>', clothes)
 
-    return response
+    return {'text':response}
 }
 
 const intent = () => ({

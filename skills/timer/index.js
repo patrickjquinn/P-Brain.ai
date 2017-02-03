@@ -16,50 +16,50 @@ const timeUnits = [
 function getUnit(word) {
   for (let i = 0; i < timeUnits.length; i++) {
     if (word.includes(timeUnits[i].name)) {
-      return timeUnits[i];
+      return timeUnits[i]
     }
   }
-  return null;
+  return null
 }
 
 function wordsToSentence(arr, start, end) {
-  let sentence = "";
+  let sentence = ""
   for (var i = start; i < end; i++) {
-    sentence += arr[i] + " ";
+    sentence += arr[i] + " "
   }
   return sentence;
 }
 
 function parseTime(time) {
-  let previousUnit = 0;
-  let timeInMillis = 0;
-  var words = time.split(' ');
+  let previousUnit = 0
+  let timeInMillis = 0
+  var words = time.split(' ')
   for (let i = 1; i < words.length; i++) {
-    const unit = getUnit(words[i]);
+    const unit = getUnit(words[i])
     if (unit != null) {
-      const num = WtoN.convert(wordsToSentence(words, previousUnit, i));
-      previousUnit = i + 1;
+      const num = WtoN.convert(wordsToSentence(words, previousUnit, i))
+      previousUnit = i + 1
       if (isNaN(num)) {
         return num;
       }
-      timeInMillis += unit.mult * num;
+      timeInMillis += unit.mult * num
     }
   }
-  return timeInMillis;
+  return timeInMillis
 }
 
 function * timer_resp(query){
-	const time_to_set = query.split('for ')[1];
-  const time = parseTime(time_to_set);
+	const time_to_set = query.split('for ')[1]
+  const time = parseTime(time_to_set)
 
   if (isNaN(time)) {
-    return 'Sorry, I dont understand ' + query;
+    return {'text':'Sorry, I dont understand ' + query}
   }
   if (time == 0) {
-    return 'Sorry, the query seems to be missing units.';
+    return {'text':'Sorry, the query seems to be missing units.'}
   }
 
-  return ':timer: ' + time;
+  return ':timer: ' + time
 }
 
 module.exports = {

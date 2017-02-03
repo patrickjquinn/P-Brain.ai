@@ -7,7 +7,7 @@ var timerEndTime = 0;
 
 function response_handler(response) {
     var intent = response.type;
-    var msg = response.msg;
+    var msg = response.msg.text;
 
     var response_funct;
 
@@ -294,7 +294,7 @@ function get_resp(api, q) {
             $(".loading").remove();
 
             json_resp = JSON.parse(xmlhttp.responseText);
-            display_response(json_resp.msg);
+            display_response(json_resp.msg.text);
         }
     };
 

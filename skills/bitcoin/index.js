@@ -15,7 +15,7 @@ function * bitcoin_resp(query) {
     	key = 'GBP'
     }
 
-    return 'The current Bitcoin price is '+data[key].symbol+data[key].last;
+    return {'text':'The current Bitcoin price is '+data[key].symbol+data[key].last};
 }
 
 const intent = () => ({

@@ -14,7 +14,7 @@ function * movie_resp(query) {
 
     data = JSON.parse(data.body)
 
-    return data.data.movies[0].torrents[0].url
+    return {'text':data.data.movies[0].torrents[0].url}
 }
 
 module.exports = {

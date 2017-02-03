@@ -161,7 +161,7 @@ function * weatherResp(query) {
         weather = weather.replace(con_string, '')
     }
 
-    return weather
+    return {'text':weather}
 }
 
 module.exports = {

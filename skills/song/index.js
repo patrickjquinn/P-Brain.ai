@@ -23,7 +23,7 @@ function * song_resp(query) {
 
     const url = yield yt.get(track, artist)
 
-    return url
+    return {'text':url}
 }
 
 module.exports = {

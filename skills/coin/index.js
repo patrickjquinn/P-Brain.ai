@@ -1,7 +1,7 @@
 function * coin_resp() {
     const state = (Math.floor(Math.random() * 2) == 0) ? 'heads' : 'tails'
 
-    return 'It\'s ' + state
+    return {'text':'It\'s ' + state};
 }
 
 const intent = () => ({

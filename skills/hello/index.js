@@ -1,5 +1,5 @@
 function * hello_resp() {
-    return 'Hello World'
+    return {'text':'Hello World'};
 }
 
 const intent = () => ({

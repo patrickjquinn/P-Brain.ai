@@ -20,7 +20,7 @@ function * name_resp(query) {
         }
     });
 
-    return { text: `You can now call me ${name}.`, name: name};
+    return {text:`You can now call me ${name}.`,name:name};
 }
 
 function register(app) {
@@ -32,7 +32,7 @@ function register(app) {
         // Ignore and use the default name.
     }
     app.get('/', function(req, res) {
-        res.json({name: name});
+        res.json({name: name})
     });
 }
 
