@@ -1,6 +1,6 @@
 const WtoN = require('words-to-num')
 
-const _intent = () => ({
+const intent = () => ({
     keywords: ['set timer', 'set timer for qqqq'],
     module: 'timer'
 })
@@ -64,5 +64,5 @@ function * timer_resp(query){
 
 module.exports = {
 	get: timer_resp,
-	intent: _intent
+	intent
 }
