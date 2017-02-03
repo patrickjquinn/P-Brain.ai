@@ -248,31 +248,26 @@ function formatTime(time) {
     return message;
 }
 
-var timeinterval = null;
 function initializeClock(time) {
-    if (timeinterval != null) {
-        clearInterval(timeinterval);
-        timeinterval = null;
-    }
-
-    var deadline = new Date(Date.parse(new Date()) + time * 1000);
-
-    var clock = document.getElementsByClassName('countdown')[0];
+    var clocks = document.getElementsByClassName('countdown');
+    var clock = clocks[clocks.length - 1];
+    clock.deadline = new Date(Date.parse(new Date()) + time * 1000);
 
     function updateClock() {
-        var t = getTimeRemaining(Date.parse(deadline) - Date.parse(new Date()));
+        var t = getTimeRemaining(Date.parse(clock.deadline) - Date.parse(new Date()));
         clock.innerHTML = formatTime(t);
 
         if (t.total <= 0) {
             clearInterval(timeinterval);
             timeinterval = null;
             speak_response('Hey there! Your timer is finished!');
-            push_timer_response('Hey there! Your timer is finished!');
+            push_response('Hey there! Your timer is finished!');
+            clock.remove();
         }
     }
 
     updateClock();
-    timeinterval = setInterval(updateClock, 1000);
+    var timeinterval = setInterval(updateClock, 1000);
 }
 
 
