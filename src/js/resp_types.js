@@ -22,9 +22,7 @@ function response_handler(response) {
             response_funct = load_torrent;
             break;
         case "name":
-            // Re-setup the app with the new name.
-            setup();
-            response_funct = push_response;
+            response_funct = on_name;
             break;
         default:
             response_funct = push_response;
@@ -137,6 +135,14 @@ function speak_response(msg) {
 
 function display_response(msg) {
     push_response(msg);
+}
+
+function on_name(msg) {
+    if (msg.name) {
+        // Setup the interface with the new name.
+        setup();
+    }
+    push_response(msg.text);
 }
 
 function display_greeting() {

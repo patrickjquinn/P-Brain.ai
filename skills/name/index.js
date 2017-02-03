@@ -12,7 +12,7 @@ let name = 'Brain';
 
 function * name_resp(query) {
     if (query.includes("what")) {
-        return `My name is ${name}.`;
+        return { text: `My name is ${name}.`};
     } else {
         const words = query.split(' ');
         name = words[words.length - 1];
@@ -24,7 +24,7 @@ function * name_resp(query) {
             }
         });
 
-        return `You can now call me ${name}.`;
+        return { text: `You can now call me ${name}.`, name: name};
     }
 }
 
