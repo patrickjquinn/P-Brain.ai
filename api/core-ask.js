@@ -12,8 +12,6 @@ const skills = [];
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
 function * train_recognizer(skills) {
-    classifier = yield natural.BayesClassifier.load('./api/classifier.json', null)
-
     skills.map(skill => {
         const intent_funct = skill.intent
         const intent = intent_funct()
@@ -23,7 +21,6 @@ function * train_recognizer(skills) {
     })
 
     classifier.train()
-    classifier.save('./api/classifier.json')
 }
 
 function * query(q) {
