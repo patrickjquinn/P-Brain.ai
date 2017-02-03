@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const co = require('co')
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
@@ -8,22 +7,15 @@ const response = require('../response')
 const log = require('../log')
 
 let classifier = new natural.BayesClassifier()
+const skills = [];
 
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
-const getDirectories = srcpath =>
-    fs.readdirSync(srcpath).filter(file =>
-        fs.statSync(path.join(srcpath, file)).isDirectory())
-
-function * train_recognizer() {
+function * train_recognizer(skills) {
     classifier = yield natural.BayesClassifier.load('./api/classifier.json', null)
 
-    let skills_dir = path.join(__dirname, '/skills/')
-    skills_dir = skills_dir.replace('/api', '')
-    const dirs = getDirectories(skills_dir)
-
-    dirs.map(dir => {
-        const intent_funct = require(`../skills/${dir}`).intent
+    skills.map(skill => {
+        const intent_funct = skill.intent
         const intent = intent_funct()
 
         intent.keywords
@@ -60,13 +52,7 @@ function * query(q) {
     }
 }
 
-co(function * () {
-    yield train_recognizer()
-}).catch(err => {
-    console.log(err)
-    throw err
-})
-
 module.exports = {
-    query
+    query,
+    train_recognizer
 }

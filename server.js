@@ -4,8 +4,10 @@ const wrap = require('co-express')
 const compression = require('compression')
 const fs = require('fs')
 const ip = require('ip')
+const co = require('co')
 
 const search = require('./api/core-ask.js')
+const skills = require('./skills/skills.js')
 
 const address = 'var ip_addr ="' + ip.address() + '";'
 
@@ -45,6 +47,17 @@ app.get('/api/ask', wrap(function *(req, res) {
         res.send({ msg: 'Sorry, I didnt understand ' + input, type: 'error' })
     }
 }))
+
+const skillsApi = express();
+app.use('/api/skills', skillsApi);
+
+co(function * () {
+    yield skills.loadSkills(skillsApi);
+    yield search.train_recognizer(skills.getSkills());
+}).catch(err => {
+    console.log(err);
+    throw err;
+});
 
 app.listen(4567)
 console.log('http://localhost:4567')
