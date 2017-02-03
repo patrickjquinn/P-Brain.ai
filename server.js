@@ -11,13 +11,6 @@ const skills = require('./skills/skills.js')
 
 const address = 'var ip_addr ="' + ip.address() + '";'
 
-fs.writeFile('./src/js/ip.js', address, err => {
-    if (err) {
-        return console.log(err)
-    }
-    console.log(ip.address())
-})
-
 app.use(compression({
     threshold: 0,
     level: 9,
@@ -32,6 +25,10 @@ app.use((req, res, next) => {
 })
 
 app.use(express.static('./src'))
+
+app.get('/api/ip.js', function(req, res) {
+    res.send(address);
+});
 
 // TODO parse services in query
 app.get('/api/ask', wrap(function *(req, res) {
