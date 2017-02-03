@@ -13,7 +13,7 @@
     <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <script src="js/ip.js"></script>
+    <script src="api/ip.js"></script>
     <script type="text/javascript">
         function detectmob() {
             if (typeof window.orientation !== 'undefined') {
@@ -33,45 +33,6 @@
 <body>
     <script src="js/resp_types.js"></script>
     <script src="js/iframe.js"></script>
-    <script>
-        display_greeting();
-
-        if (annyang) {
-            var commands = {
-                'hey brain': observe_speech,
-                'brain': observe_speech,
-                'okay brain': observe_speech,
-                'hey brain *tag': log_speech,
-                'brain *tag': log_speech,
-                'okay brain *tag': log_speech,
-                '(hey) brain': observe_speech,
-                '(okay) brain': observe_speech,
-                '(hey) brain *tag': log_speech,
-                '(okay) brain *tag': log_speech
-            };
-
-            annyang.addCommands(commands);
-
-            if (detectmob()){
-                annyang.start({
-                    autoRestart: true,
-                    continuous: true
-                });
-            } else {
-                annyang.start({
-                    autoRestart: true,
-                    continuous: false
-                });
-            }
-
-            SpeechKITT.annyang();
-            SpeechKITT.setStylesheet('themes/flat.css');
-            SpeechKITT.setInstructionsText('Say "Brain" followed by…');
-            SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
-            SpeechKITT.vroom();
-        }
-    </script>
-
     <div class="container">
         <div class="right">
             <div class="chat" data-chat="person2">
@@ -89,6 +50,59 @@
         }
     </script>
     <script src="js/index.js"></script>
+    <script>
+        function setup() {
+            var name = "Brain";
+            xmlhttp = new XMLHttpRequest();
+            display_response('Just a second...');
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    json_resp = JSON.parse(xmlhttp.responseText);
+                    name = json_resp.name;
+                }
+                $(".loading").remove();
+
+                display_greeting();
+
+                if (annyang) {
+                    var commands = {};
+                    commands["hey " + name] = observe_speech;
+                    commands[name] = observe_speech;
+                    commands["okay " + name] = observe_speech;
+                    commands["hey " + name + " *tag"] = observe_speech;
+                    commands[name + " *tag"] = observe_speech;
+                    commands["okay " + name + " *tag"] = observe_speech;
+                    commands["(hey) " + name] = observe_speech;
+                    commands["(okay) " + name] = observe_speech;
+                    commands["(hey) " + name + " *tag"] = observe_speech;
+                    commands["(okay) " + name + " *tag"] = observe_speech;
+
+                    annyang.addCommands(commands);
+
+                    if (detectmob()) {
+                        annyang.start({
+                            autoRestart: true,
+                            continuous: true
+                        });
+                    } else {
+                        annyang.start({
+                            autoRestart: true,
+                            continuous: false
+                        });
+                    }
+
+                    SpeechKITT.annyang();
+                    SpeechKITT.setStylesheet('themes/flat.css');
+                    SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
+                    SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
+                    SpeechKITT.vroom();
+                }
+            };
+            xmlhttp.open("GET", "http://" + ip_addr + ":4567/api/skills/name", true);
+            xmlhttp.send();
+        }
+        setup();
+    </script>
 </body>
 
 </html>

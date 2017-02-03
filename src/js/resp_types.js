@@ -3,6 +3,8 @@ var player;
 var client = new WebTorrent();
 var recognition = new webkitSpeechRecognition();
 
+var timerEndTime = 0;
+
 function response_handler(response) {
     var intent = response.type;
     var msg = response.msg;
@@ -10,17 +12,8 @@ function response_handler(response) {
     var response_funct;
 
     switch (intent) {
-        case "time":
-            response_funct = push_response;
-            break;
         case "timer":
             response_funct = set_timer;
-            break;
-        case "weather":
-            response_funct = push_response;
-            break;
-        case "joke":
-            response_funct = push_response;
             break;
         case "song":
             response_funct = play_yt;
@@ -28,8 +21,8 @@ function response_handler(response) {
         case "movie":
             response_funct = load_torrent;
             break;
-        case "fact":
-            response_funct = push_response;
+        case "name":
+            response_funct = on_name;
             break;
         default:
             response_funct = push_response;
@@ -144,6 +137,14 @@ function display_response(msg) {
     push_response(msg);
 }
 
+function on_name(msg) {
+    if (msg.name) {
+        // Setup the interface with the new name.
+        setup();
+    }
+    push_response(msg.text);
+}
+
 function display_greeting() {
     var dt = new Date().getHours();
 
@@ -205,44 +206,20 @@ function isURL(str) {
 }
 
 function set_timer(timer) {
-
-    push_timer_response();
-
-
     timer = timer.replace(':timer:', '');
 
-    var countdown, time;
+    var sec_num = parseInt(timer, 10) / 1000; // Convert the time to seconds.
+    var remaining = getTimeRemaining(parseInt(timer, 10));
+    console.log(remaining);
 
-    if (timer.indexOf('DAY') != -1) {
-        time = timer.toUpperCase().split('DAY')[0].trim();
+    var message = 'Okay, timer set for ' + formatTime(remaining);
 
-
-        countdown = parseInt(time) * 86400;
-
-        message = time + " Days";
-    } else if (timer.indexOf('HOUR') != -1) {
-        time = timer.toUpperCase().split('HOUR')[0].trim();
-        countdown = parseInt(time) * 3600;
-        message = time + " Hours";
-    } else if (timer.toUpperCase().indexOf('MINUTE') != -1) {
-        time = timer.toUpperCase().split('MINUTE')[0].trim();
-        countdown = parseInt(time) * 60;
-        message = time + " Minutes";
-    } else {
-        time = timer.toUpperCase().split('SECOND')[0].trim();
-        countdown = parseInt(time);
-
-        message = time + " Seconds";
-    }
-
-    initializeClock(countdown);
-
-    speak_response('Okay, timer set for ' + message);
-
+    push_response(message);
+    push_timer_response();
+    initializeClock(sec_num);
 }
 
-function getTimeRemaining(endtime) {
-    var t = Date.parse(endtime) - Date.parse(new Date());
+function getTimeRemaining(t) {
     var seconds = Math.floor((t / 1000) % 60);
     var minutes = Math.floor((t / 1000 / 60) % 60);
     var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
@@ -256,29 +233,42 @@ function getTimeRemaining(endtime) {
     };
 }
 
+function formatTime(time) {
+    var message = "";
+    var units = [];
+    function pushUnit(num, unit) {
+        if (num > 0) {
+            units.push(num + " " + unit + (num > 1 ? "s" : ""));
+        }
+    }
+    pushUnit(time.days, "day");
+    pushUnit(time.hours, "hour");
+    pushUnit(time.minutes, "minute");
+    pushUnit(time.seconds, "second");
+    if (units.length > 1) {
+        units.splice(units.length - 1, 0, "and");
+    }
+    for (var  i = 0; i < units.length; i++) {
+        message += ((i > 0) ? " " : "") + units[i];
+    }
+    return message;
+}
+
 function initializeClock(time) {
-
-    var deadline = new Date(Date.parse(new Date()) + time * 1000);
-
-    var clock = document.getElementsByClassName('countdown')[0];
-    var daysSpan = clock.querySelector('.days');
-    var hoursSpan = clock.querySelector('.hours');
-    var minutesSpan = clock.querySelector('.minutes');
-    var secondsSpan = clock.querySelector('.seconds');
-
+    var clocks = document.getElementsByClassName('countdown');
+    var clock = clocks[clocks.length - 1];
+    clock.deadline = new Date(Date.parse(new Date()) + time * 1000);
 
     function updateClock() {
-        var t = getTimeRemaining(deadline);
-
-        daysSpan.innerHTML = t.days;
-        hoursSpan.innerHTML = ('0' + t.hours).slice(-2);
-        minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
-        secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+        var t = getTimeRemaining(Date.parse(clock.deadline) - Date.parse(new Date()));
+        clock.innerHTML = formatTime(t);
 
         if (t.total <= 0) {
             clearInterval(timeinterval);
+            timeinterval = null;
             speak_response('Hey there! Your timer is finished!');
-            push_timer_response('Hey there! Your timer is finished!');
+            push_response('Hey there! Your timer is finished!');
+            clock.remove();
         }
     }
 
