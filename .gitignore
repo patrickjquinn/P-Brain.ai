@@ -1,8 +1,7 @@
 node_modules/
 .python-version
-/log/*
-/config/index.js
-/api/classifier.json
-/src/js/ip.js
+log/*
+config/index.js
+api/classifier.json
 .idea/*
 name.json
