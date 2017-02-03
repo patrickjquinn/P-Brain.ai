@@ -10,17 +10,8 @@ function response_handler(response) {
     var response_funct;
 
     switch (intent) {
-        case "time":
-            response_funct = push_response;
-            break;
         case "timer":
             response_funct = set_timer;
-            break;
-        case "weather":
-            response_funct = push_response;
-            break;
-        case "joke":
-            response_funct = push_response;
             break;
         case "song":
             response_funct = play_yt;
@@ -28,7 +19,9 @@ function response_handler(response) {
         case "movie":
             response_funct = load_torrent;
             break;
-        case "fact":
+        case "name":
+            // Re-setup the app with the new name.
+            setup();
             response_funct = push_response;
             break;
         default:
