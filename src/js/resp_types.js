@@ -1,4 +1,3 @@
-var api = "http://" + ip_addr + ":4567/api/ask?q=";
 var player;
 var client = new WebTorrent();
 var recognition = new webkitSpeechRecognition();
@@ -9,18 +8,12 @@ function response_handler(response) {
     var response_funct;
 
     switch (intent) {
-        case "timer":
-            response_funct = set_timer;
-            break;
         case "song":
         case "rick":
             response_funct = play_yt;
             break;
         case "movie":
             response_funct = load_torrent;
-            break;
-        case "name":
-            response_funct = on_name;
             break;
         default:
             response_funct = display_response;
@@ -57,7 +50,7 @@ recognition.onresult = function(event) {
         } else if (player && inputString.indexOf('stop') != -1) {
             stop_song();
         } else {
-            get_resp(api + inputString, inputString);
+            get_resp(inputString);
         }
     } else {
         console.log('testing');
@@ -140,14 +133,6 @@ function display_response(msg) {
     push_response(output);
 }
 
-function on_name(msg) {
-    if (msg.name) {
-        // Setup the interface with the new name.
-        setup();
-    }
-    display_response(msg.text);
-}
-
 function display_greeting() {
     var dt = new Date().getHours();
 
@@ -193,7 +178,7 @@ function log_speech(speech) {
     } else if (player && speech.indexOf('stop') != -1) {
         stop_song();
     } else {
-        get_resp(api + speech, speech);
+        get_resp(speech);
     }
 
 }
@@ -208,109 +193,19 @@ function isURL(str) {
     return pattern.test(str);
 }
 
-function set_timer(timer) {
-    if (timer.time) {
-        var remaining = getTimeRemaining(timer.time);
-        console.log(remaining);
-
-        var message = 'Okay, timer set for ' + formatTime(remaining);
-
-        display_response(message);
-        push_timer_response();
-        initializeClock(timer.time);
-    } else {
-        display_response(timer.text);
-    }
-}
-
-function getTimeRemaining(t) {
-    var seconds = Math.floor((t / 1000) % 60);
-    var minutes = Math.floor((t / 1000 / 60) % 60);
-    var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
-    var days = Math.floor(t / (1000 * 60 * 60 * 24));
-    return {
-        'total': t,
-        'days': days,
-        'hours': hours,
-        'minutes': minutes,
-        'seconds': seconds
-    };
-}
-
-function formatTime(time) {
-    var message = "";
-    var units = [];
-    function pushUnit(num, unit) {
-        if (num > 0) {
-            units.push(num + " " + unit + (num > 1 ? "s" : ""));
-        }
-    }
-    pushUnit(time.days, "day");
-    pushUnit(time.hours, "hour");
-    pushUnit(time.minutes, "minute");
-    pushUnit(time.seconds, "second");
-    if (units.length > 1) {
-        units.splice(units.length - 1, 0, "and");
-    }
-    for (var  i = 0; i < units.length; i++) {
-        message += ((i > 0) ? " " : "") + units[i];
-    }
-    return message;
-}
-
-function initializeClock(time) {
-    var clocks = document.getElementsByClassName('countdown');
-    var clock = clocks[clocks.length - 1];
-    clock.deadline = new Date(Date.parse(new Date()) + time);
-
-    function updateClock() {
-        var t = getTimeRemaining(Date.parse(clock.deadline) - Date.parse(new Date()));
-        clock.innerHTML = formatTime(t);
-
-        if (t.total <= 0) {
-            clearInterval(timeinterval);
-            timeinterval = null;
-            display_response('Hey there! Your timer is finished!');
-            clock.remove();
-        }
-    }
-
-    updateClock();
-    var timeinterval = setInterval(updateClock, 1000);
-}
-
-
-function get_resp(api, q) {
-    var xmlhttp,json_resp;
-
+function get_resp(q) {
     push_response('Just a second...');
 
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            $(".loading").remove();
-
-            json_resp = JSON.parse(xmlhttp.responseText);
-
-            response_handler(json_resp);
-        } else if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
-            $(".loading").remove();
-
-            json_resp = JSON.parse(xmlhttp.responseText);
-            display_response(json_resp.msg);
-        }
-    };
-
-    if (api.indexOf('+') != -1) {
-        api = api.replace('+', 'plus');
-    } else if (api.indexOf('÷') != -1) {
-        api = api.replace('÷', 'divided by');
-    } else if (api.indexOf('√') != -1) {
-        api = api.replace('√', 'square root of');
+    var query = q;
+    if (query.indexOf('+') != -1) {
+        query = query.replace('+', 'plus');
+    } else if (query.indexOf('÷') != -1) {
+        query = query.replace('÷', 'divided by');
+    } else if (query.indexOf('√') != -1) {
+        query = query.replace('√', 'square root of');
     }
 
-    xmlhttp.open("GET", api, true);
-    xmlhttp.send();
+    socket.emit('ask', { text: query});
 }
 
 function pause_song() {

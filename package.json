@@ -28,6 +28,7 @@
     "ip": "*",
     "json2csv": "*",
     "natural": "*",
+    "socket.io": "^1.7.2",
     "speakeasy-nlp": "^0.2.2",
     "striptags": "*",
     "tabletojson": "*",

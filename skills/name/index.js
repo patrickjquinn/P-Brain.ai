@@ -8,6 +8,7 @@ const intent = () => ({
 });
 
 let name = 'Brain';
+let socket_io = null;
 
 function * name_resp(query) {
     const words = query.split(' ');
@@ -20,10 +21,12 @@ function * name_resp(query) {
         }
     });
 
+    socket_io.emit('set_name', {name: name});
+
     return {text:`You can now call me ${name}.`,name:name};
 }
 
-function register(app) {
+function register(app, io) {
     try {
         const nameJson = JSON.parse(fs.readFileSync(NAME_FILE));
         name = nameJson.name;
@@ -34,10 +37,19 @@ function register(app) {
     app.get('/', function(req, res) {
         res.json({name: name})
     });
+    socket_io = io;
+}
+
+function registerClient(socket) {
+    socket.on('get_name', function(msg) {
+        socket.emit('get_name', {name: name})
+    })
+    socket.emit('set_name', {name: name})
 }
 
 module.exports = {
     get: name_resp,
     register: register,
+    registerClient: registerClient,
     intent: intent
 };
