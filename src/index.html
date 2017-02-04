@@ -13,7 +13,6 @@
     <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <script src="api/ip.js"></script>
     <script type="text/javascript">
         function detectmob() {
             if (typeof window.orientation !== 'undefined') {
@@ -24,7 +23,7 @@
         }
     </script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
     <script src="https://cdn.jsdelivr.net/webtorrent/latest/webtorrent.min.js"></script>
 
     <script src="js/speechkitt.min.js"></script>
@@ -95,6 +94,11 @@
                 SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
                 SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
             }
+        });
+
+        socket.on('response', function(msg) {
+            $(".loading").remove();
+            response_handler(msg);
         });
     </script>
 

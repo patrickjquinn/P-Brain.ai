@@ -1,4 +1,3 @@
-var api = "http://" + ip_addr + ":4567/api/ask?q=";
 var player;
 var client = new WebTorrent();
 var recognition = new webkitSpeechRecognition();
@@ -57,7 +56,7 @@ recognition.onresult = function(event) {
         } else if (player && inputString.indexOf('stop') != -1) {
             stop_song();
         } else {
-            get_resp(api + inputString, inputString);
+            get_resp(inputString);
         }
     } else {
         console.log('testing');
@@ -193,7 +192,7 @@ function log_speech(speech) {
     } else if (player && speech.indexOf('stop') != -1) {
         stop_song();
     } else {
-        get_resp(api + speech, speech);
+        get_resp(speech);
     }
 
 }
@@ -279,38 +278,19 @@ function initializeClock(time) {
     var timeinterval = setInterval(updateClock, 1000);
 }
 
-
-function get_resp(api, q) {
-    var xmlhttp,json_resp;
-
+function get_resp(q) {
     push_response('Just a second...');
 
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            $(".loading").remove();
-
-            json_resp = JSON.parse(xmlhttp.responseText);
-
-            response_handler(json_resp);
-        } else if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
-            $(".loading").remove();
-
-            json_resp = JSON.parse(xmlhttp.responseText);
-            display_response(json_resp.msg);
-        }
-    };
-
-    if (api.indexOf('+') != -1) {
-        api = api.replace('+', 'plus');
-    } else if (api.indexOf('÷') != -1) {
-        api = api.replace('÷', 'divided by');
-    } else if (api.indexOf('√') != -1) {
-        api = api.replace('√', 'square root of');
+    var query = q;
+    if (query.indexOf('+') != -1) {
+        query = query.replace('+', 'plus');
+    } else if (query.indexOf('÷') != -1) {
+        query = query.replace('÷', 'divided by');
+    } else if (query.indexOf('√') != -1) {
+        query = query.replace('√', 'square root of');
     }
 
-    xmlhttp.open("GET", api, true);
-    xmlhttp.send();
+    socket.emit('ask', { text: query});
 }
 
 function pause_song() {
