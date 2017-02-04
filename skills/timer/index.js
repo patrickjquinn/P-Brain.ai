@@ -49,7 +49,7 @@ function parseTime(time) {
 }
 
 function * timer_resp(query){
-	const time_to_set = query.split('for ')[1]
+  const time_to_set = query.split('for ')[1]
   const time = parseTime(time_to_set)
 
   if (isNaN(time)) {
@@ -59,7 +59,7 @@ function * timer_resp(query){
     return {'text':'Sorry, the query seems to be missing units.'}
   }
 
-  return ':timer: ' + time
+  return { time: time }
 }
 
 module.exports = {
