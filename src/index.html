@@ -72,25 +72,24 @@
         push_response('Just a second...');
         socket.on('set_name', function(msg) {
             var name = msg.name;
+
+            if (!name){
+                name = "Brain";
+            }   
+
             $(".loading").remove();
 
             display_greeting();
 
             if (annyang) {
                 var commands = {};
-                commands["hey " + name] = observe_speech;
+                commands[name + " *tag"] = log_speech;
+                commands["(hey) " + name + " *tag"] = log_speech;
+                commands["(okay) " + name + " *tag"] = log_speech;
                 commands[name] = observe_speech;
-                commands["okay " + name] = observe_speech;
-                commands["hey " + name + " *tag"] = observe_speech;
-                commands[name + " *tag"] = observe_speech;
-                commands["okay " + name + " *tag"] = observe_speech;
-                commands["(hey) " + name] = observe_speech;
-                commands["(okay) " + name] = observe_speech;
-                commands["(hey) " + name + " *tag"] = observe_speech;
-                commands["(okay) " + name + " *tag"] = observe_speech;
 
+                
                 annyang.addCommands(commands);
-
                 SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
                 SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
             }

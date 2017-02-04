@@ -1,13 +1,10 @@
-const fs = require('fs')
-const path = require('path')
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
 const response = require('../response')
 const log = require('../log')
 
-let classifier = new natural.BayesClassifier()
-const skills = [];
+const classifier = new natural.BayesClassifier()
 
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 

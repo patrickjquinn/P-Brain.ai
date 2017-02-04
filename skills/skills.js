@@ -9,7 +9,7 @@ const getDirectories = srcpath =>
 const skills = []
 
 function * loadSkills(skillsApi, io) {
-    skillsApi.get('/', function(req, res) {
+    skillsApi.get('/', (req, res) => {
         const skillIntents = []
         skills.map(skill => {
             skillIntents.push(skill.intent())
@@ -24,7 +24,7 @@ function * loadSkills(skillsApi, io) {
         const skill = require(`./${dir}`)
         skills.push(skill)
 
-        if (typeof(skill.register) == 'function') {
+        if (typeof (skill.register) === 'function') {
             const localSkillApi = express()
             skillsApi.use('/' + skill.intent().module, localSkillApi)
             skill.register(localSkillApi, io)
@@ -34,7 +34,7 @@ function * loadSkills(skillsApi, io) {
 
 function registerClient(socket) {
     skills.map(skill => {
-        if (typeof(skill.registerClient) == 'function') {
+        if (typeof (skill.registerClient) === 'function') {
             skill.registerClient(socket)
         }
     })

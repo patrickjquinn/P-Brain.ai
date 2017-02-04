@@ -56,13 +56,6 @@ recognition.onresult = function(event) {
         console.log('testing');
     }
 
-    if (player) {
-        if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() === 0) {
-            // document.getElementById("resp_text").className = "top";
-            console.log('added top');
-        }
-    }
-
     annyang.start({
         autoRestart: true,
         continuous: false
@@ -166,9 +159,6 @@ function observe_speech() {
 }
 
 function log_speech(speech) {
-
-    console.log(speech);
-
     push_statment(speech);
 
     if (player && speech.indexOf('pause') != -1) {
@@ -180,7 +170,6 @@ function log_speech(speech) {
     } else {
         get_resp(speech);
     }
-
 }
 
 function isURL(str) {
