@@ -12,7 +12,7 @@ function * joke_resp(query) {
 
     data = JSON.parse(data.body)
 
-    return {'text':data.value}
+    return {text: data.value}
 }
 
 module.exports = {

@@ -9,7 +9,7 @@ function * time_resp(query) {
         minute: 'numeric'
     })
 
-    return {'text':'It is ' + time}
+    return {text: 'It is ' + time}
 }
 
 module.exports = {

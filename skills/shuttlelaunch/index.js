@@ -16,7 +16,7 @@ function * shuttle_resp(query) {
     let data = yield request(options)
     data = JSON.parse(data.body)
     const resp = data.launches[0]
-    return {'text':'The next launch will be the ' + resp.name + ' on ' + resp.net.split(',')[0] + '.'}
+    return {text: 'The next launch will be the ' + resp.name + ' on ' + resp.net.split(',')[0] + '.'}
 }
 
 module.exports = {

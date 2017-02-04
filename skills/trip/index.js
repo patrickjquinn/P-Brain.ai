@@ -9,9 +9,9 @@ const isHobbit = query =>
     query.includes('mordor') || query.includes('tomorrow')
 
 function * tripResponse(query) {
-    return {'text':isHobbit(query)
-        ? 'One does not simply walk into Mordor.'
-        : `Sorry, I dont understand ${query}`}
+    return {text: isHobbit(query) ?
+        'One does not simply walk into Mordor.' :
+        `Sorry, I dont understand ${query}`}
 }
 
 module.exports = {

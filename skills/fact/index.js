@@ -30,7 +30,7 @@ function * fact_resp(query) {
         return not_found_responses[Math.floor(Math.random() * not_found_responses.length)] + query
     }
 
-    return {'text':fact}
+    return {text: fact}
 }
 
 module.exports = {
