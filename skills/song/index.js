@@ -6,14 +6,14 @@ const intent = () => ({
 })
 
 function * song_resp(query) {
-    if (query.includes('what is love')) {
-        return yield yt.get('what is love', 'Haddaway')
-    }
-
     query = query.replace('play', '')
-
-    const track = query.split('by')[0].trim()
+    let track = query.split('by')[0].trim()
     let artist = query.split('by')[1]
+
+    if (query.includes('what is love')) {
+        track = 'what is love'
+        artist = 'Haddaway'
+    }
 
     if (!artist || artist === '') {
         artist = ''
