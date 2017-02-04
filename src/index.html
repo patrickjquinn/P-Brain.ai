@@ -54,7 +54,7 @@
         function setup() {
             var name = "Brain";
             xmlhttp = new XMLHttpRequest();
-            display_response('Just a second...');
+            push_response('Just a second...');
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     json_resp = JSON.parse(xmlhttp.responseText);

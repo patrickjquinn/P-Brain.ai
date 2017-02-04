@@ -3,11 +3,8 @@ var player;
 var client = new WebTorrent();
 var recognition = new webkitSpeechRecognition();
 
-var timerEndTime = 0;
-
 function response_handler(response) {
     var intent = response.type;
-    var msg = response.msg.text;
 
     var response_funct;
 
@@ -16,6 +13,7 @@ function response_handler(response) {
             response_funct = set_timer;
             break;
         case "song":
+        case "rick":
             response_funct = play_yt;
             break;
         case "movie":
@@ -25,10 +23,10 @@ function response_handler(response) {
             response_funct = on_name;
             break;
         default:
-            response_funct = push_response;
+            response_funct = display_response;
     }
 
-    response_funct(msg);
+    response_funct(response.msg);
 }
 
 client.on('error', function(err) {
@@ -99,7 +97,8 @@ function hasExtension(inputID, exts) {
     return (new RegExp('(' + exts.join('|').replace(/\./g, '\\.') + ')$')).test(fileName);
 }
 
-function load_torrent(url) {
+function load_torrent(msg) {
+    var url = msg.url;
     push_movie_response();
 
     console.log('torrent working');
@@ -134,7 +133,11 @@ function speak_response(msg) {
 }
 
 function display_response(msg) {
-    push_response(msg);
+    var output = msg;
+    if (msg.text) {
+        output = msg.text;
+    }
+    push_response(output);
 }
 
 function on_name(msg) {
@@ -142,7 +145,7 @@ function on_name(msg) {
         // Setup the interface with the new name.
         setup();
     }
-    push_response(msg.text);
+    display_response(msg.text);
 }
 
 function display_greeting() {
@@ -206,17 +209,18 @@ function isURL(str) {
 }
 
 function set_timer(timer) {
-    timer = timer.replace(':timer:', '');
+    if (timer.time) {
+        var remaining = getTimeRemaining(timer.time);
+        console.log(remaining);
 
-    var sec_num = parseInt(timer, 10) / 1000; // Convert the time to seconds.
-    var remaining = getTimeRemaining(parseInt(timer, 10));
-    console.log(remaining);
+        var message = 'Okay, timer set for ' + formatTime(remaining);
 
-    var message = 'Okay, timer set for ' + formatTime(remaining);
-
-    push_response(message);
-    push_timer_response();
-    initializeClock(sec_num);
+        display_response(message);
+        push_timer_response();
+        initializeClock(timer.time);
+    } else {
+        display_response(timer.text);
+    }
 }
 
 function getTimeRemaining(t) {
@@ -257,7 +261,7 @@ function formatTime(time) {
 function initializeClock(time) {
     var clocks = document.getElementsByClassName('countdown');
     var clock = clocks[clocks.length - 1];
-    clock.deadline = new Date(Date.parse(new Date()) + time * 1000);
+    clock.deadline = new Date(Date.parse(new Date()) + time);
 
     function updateClock() {
         var t = getTimeRemaining(Date.parse(clock.deadline) - Date.parse(new Date()));
@@ -266,8 +270,7 @@ function initializeClock(time) {
         if (t.total <= 0) {
             clearInterval(timeinterval);
             timeinterval = null;
-            speak_response('Hey there! Your timer is finished!');
-            push_response('Hey there! Your timer is finished!');
+            display_response('Hey there! Your timer is finished!');
             clock.remove();
         }
     }
@@ -280,7 +283,7 @@ function initializeClock(time) {
 function get_resp(api, q) {
     var xmlhttp,json_resp;
 
-    display_response('Just a second...');
+    push_response('Just a second...');
 
     xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -294,7 +297,7 @@ function get_resp(api, q) {
             $(".loading").remove();
 
             json_resp = JSON.parse(xmlhttp.responseText);
-            display_response(json_resp.msg.text);
+            display_response(json_resp.msg);
         }
     };
 
@@ -337,29 +340,31 @@ function onPlayerStateChange(event) {
 }
 
 
-function play_yt(id) {
+function play_yt(msg) {
+    if (msg.id) {
+        push_yt_response(msg.id);
+        push_silent_response(msg.text);
 
-    id = id.replace('https://www.youtube.com/watch?v=', '');
+        stop_song();
 
-    push_yt_response(id);
-
-    stop_song();
-
-    if (player) {
-        player.stopVideo();
-        var frame = document.getElementById("player_container");
-        frame.innerHTML = '<div id="player"></div>';
-    }
-
-    player = new YT.Player('player' + id, {
-        height: '300',
-        width: '600',
-        videoId: id,
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+        if (player) {
+            player.stopVideo();
+            var frame = document.getElementById("player_container");
+            frame.innerHTML = '<div id="player"></div>';
         }
-    });
+
+        player = new YT.Player('player' + msg.id, {
+            height: '300',
+            width: '600',
+            videoId: msg.id,
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    } else {
+        display_response(msg);
+    }
 }
 
 function onPlayerReady(event) {

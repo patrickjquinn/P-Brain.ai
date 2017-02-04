@@ -13,7 +13,11 @@ function * yt(title, artist) {
         if (!data || !data.items || !data.items.length || !data.items[0]) {
             return null
         } else {
-            return 'https://www.youtube.com/watch?v=' + data.items[0].id.videoId
+            const video = {
+                title: data.items[0].snippet.title,
+                id: data.items[0].id.videoId
+            }
+            return video
         }
     } catch (e) {
         console.error(e)
