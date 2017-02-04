@@ -1,5 +1,6 @@
-const express = require('express')
-const app = express()
+const app = require('express')()
+const http = require('http').Server(app)
+const io = require('socket.io')(http)
 const wrap = require('co-express')
 const compression = require('compression')
 const fs = require('fs')
@@ -45,16 +46,29 @@ app.get('/api/ask', wrap(function *(req, res) {
     }
 }))
 
+io.on('connect', function(socket){
+    socket.on('ask', function(msg){
+        const input = msg.text.toLowerCase()
+        try {
+            const result = yield search.query(input)
+            socket.emit('response', result);
+        } catch (e) {
+            socket.emit('response', { msg: 'Sorry, I didnt understand ' + input, type: 'error' });
+        }
+        skills.registerClient(socket);
+    });
+});
+
 const skillsApi = express();
 app.use('/api/skills', skillsApi);
 
 co(function * () {
-    yield skills.loadSkills(skillsApi);
+    yield skills.loadSkills(skillsApi, io);
     yield search.train_recognizer(skills.getSkills());
 }).catch(err => {
     console.log(err);
     throw err;
 });
 
-app.listen(4567)
+http.listen(4567)
 console.log('http://localhost:4567')
