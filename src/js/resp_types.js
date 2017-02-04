@@ -18,9 +18,6 @@ function response_handler(response) {
         case "movie":
             response_funct = load_torrent;
             break;
-        case "name":
-            response_funct = on_name;
-            break;
         default:
             response_funct = display_response;
     }
@@ -137,14 +134,6 @@ function display_response(msg) {
         output = msg.text;
     }
     push_response(output);
-}
-
-function on_name(msg) {
-    if (msg.name) {
-        // Setup the interface with the new name.
-        setup();
-    }
-    display_response(msg.text);
 }
 
 function display_greeting() {
