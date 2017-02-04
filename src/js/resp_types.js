@@ -13,6 +13,7 @@ function response_handler(response) {
             response_funct = set_timer;
             break;
         case "song":
+        case "rick":
             response_funct = play_yt;
             break;
         case "movie":

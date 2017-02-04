@@ -1,5 +1,5 @@
 function * rick_resp() {
-    return {'text':'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
+    return {'id':'dQw4w9WgXcQ', 'text': "I just wanna tell you how I'm feeling."}
 }
 
 const intent = () => ({
