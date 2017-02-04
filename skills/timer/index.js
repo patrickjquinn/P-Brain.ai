@@ -109,7 +109,7 @@ function parseTime(time) {
 
 function * timer_resp(query){
   if (query.includes('show')) {
-      let timersString = `You have ${timers.length == 1 ? "a ":""} timer${timers.length > 1 ? "s" : ""} for: `;
+      let timersString = `You have ${timers.length == 1 ? "a ":""}timer${timers.length > 1 ? "s" : ""} for: `;
       for (let i = 0; i < timers.length; i++) {
         const formatted = formatTime(getTimeRemaining(timers[i].deadline.getTime() - Date.now()))
         timersString += `${i > 0 ? ", " : ""}${(i > 0 && i == timers.length - 1) ? "and ":""}${formatted}`

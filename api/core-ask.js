@@ -6,8 +6,8 @@ const genify = require('thunkify-wrap').genify
 const response = require('../response')
 const log = require('../log')
 
-let classifier = new natural.BayesClassifier()
-const skills = [];
+const classifier = new natural.BayesClassifier()
+const skills = []
 
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
