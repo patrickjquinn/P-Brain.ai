@@ -44,6 +44,7 @@ function registerClient(socket) {
     socket.on('get_name', function(msg) {
         socket.emit('get_name', {name: name})
     })
+    socket.emit('set_name', {name: name})
 }
 
 module.exports = {

@@ -1,4 +1,5 @@
-const app = require('express')()
+const express = require('express')
+const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 const wrap = require('co-express')
@@ -50,13 +51,14 @@ io.on('connect', function(socket){
     socket.on('ask', function(msg){
         const input = msg.text.toLowerCase()
         try {
-            const result = yield search.query(input)
+            const result = search.query(input)
             socket.emit('response', result);
         } catch (e) {
             socket.emit('response', { msg: 'Sorry, I didnt understand ' + input, type: 'error' });
         }
-        skills.registerClient(socket);
     });
+    console.log("client connected");
+    skills.registerClient(socket);
 });
 
 const skillsApi = express();
