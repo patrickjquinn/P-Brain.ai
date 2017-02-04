@@ -8,9 +8,6 @@ function response_handler(response) {
     var response_funct;
 
     switch (intent) {
-        case "timer":
-            response_funct = set_timer;
-            break;
         case "song":
         case "rick":
             response_funct = play_yt;
@@ -194,77 +191,6 @@ function isURL(str) {
         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
         '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
     return pattern.test(str);
-}
-
-function set_timer(timer) {
-    if (timer.time) {
-        var remaining = getTimeRemaining(timer.time);
-        console.log(remaining);
-
-        var message = 'Okay, timer set for ' + formatTime(remaining);
-
-        display_response(message);
-        push_timer_response();
-        initializeClock(timer.time);
-    } else {
-        display_response(timer.text);
-    }
-}
-
-function getTimeRemaining(t) {
-    var seconds = Math.floor((t / 1000) % 60);
-    var minutes = Math.floor((t / 1000 / 60) % 60);
-    var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
-    var days = Math.floor(t / (1000 * 60 * 60 * 24));
-    return {
-        'total': t,
-        'days': days,
-        'hours': hours,
-        'minutes': minutes,
-        'seconds': seconds
-    };
-}
-
-function formatTime(time) {
-    var message = "";
-    var units = [];
-    function pushUnit(num, unit) {
-        if (num > 0) {
-            units.push(num + " " + unit + (num > 1 ? "s" : ""));
-        }
-    }
-    pushUnit(time.days, "day");
-    pushUnit(time.hours, "hour");
-    pushUnit(time.minutes, "minute");
-    pushUnit(time.seconds, "second");
-    if (units.length > 1) {
-        units.splice(units.length - 1, 0, "and");
-    }
-    for (var  i = 0; i < units.length; i++) {
-        message += ((i > 0) ? " " : "") + units[i];
-    }
-    return message;
-}
-
-function initializeClock(time) {
-    var clocks = document.getElementsByClassName('countdown');
-    var clock = clocks[clocks.length - 1];
-    clock.deadline = new Date(Date.parse(new Date()) + time);
-
-    function updateClock() {
-        var t = getTimeRemaining(Date.parse(clock.deadline) - Date.parse(new Date()));
-        clock.innerHTML = formatTime(t);
-
-        if (t.total <= 0) {
-            clearInterval(timeinterval);
-            timeinterval = null;
-            display_response('Hey there! Your timer is finished!');
-            clock.remove();
-        }
-    }
-
-    updateClock();
-    var timeinterval = setInterval(updateClock, 1000);
 }
 
 function get_resp(q) {
