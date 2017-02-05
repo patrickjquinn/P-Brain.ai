@@ -3,7 +3,7 @@ const fs = require('fs')
 const NAME_FILE = 'config/name.json'
 
 const intent = () => ({
-    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q'],
+    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', 'call you qqqq'],
     module: 'name'
 })
 

@@ -3,7 +3,7 @@ const fs = require('fs');
 const DETAILS_FILE = 'config/personal_details.json';
 
 const intent = () => ({
-    keywords: ["you can call me qqqq", "i'm called qqqq"],
+    keywords: ["you can call me qqqq", "i'm called qqqq", "my name is qqqq"],
     module: 'personal_details'
 });
 
@@ -17,10 +17,12 @@ function * name_resp(query) {
         nameIndex = words.indexOf("me") + 1;
     } else if (words.indexOf("called") >= 0) {
         nameIndex = words.indexOf("called") + 1;
+    } else if (words.indexOf("name is") >= 0) {
+        nameIndex = words.indexOf("is") + 1;
     }
     const names = words.splice(nameIndex, words.length - nameIndex)
     if (names.length == 0) {
-        return {text: "I'm sorry, I couldn't understand your name."}
+        return {text: "I'm sorry, I did't quite catch your name..."}
     }
 
     let name = ""
