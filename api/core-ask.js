@@ -4,12 +4,13 @@ const genify = require('thunkify-wrap').genify
 const response = require('../response')
 const log = require.main.require('./log')
 const fs = require('fs')
+const config = require.main.require('./config/index.js').get
 
 const classifier = new natural.BayesClassifier()
 
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
-const MAX_RETRAINS = 10
+const MAX_RETRAINS = 20
 
 function * train_recognizer(skills) {
     // train a classifier
@@ -29,11 +30,13 @@ function * train_recognizer(skills) {
         }
     })
 
-    const responses = yield log.get_responses()
-    if (responses) {
-        responses.map(response => {
-            classifier.addDocument(response.query, response.skill)
-        })
+    if (config.trains_from_responses) {
+        const responses = yield log.get_responses()
+        if (responses) {
+            responses.map(response => {
+                classifier.addDocument(response.query, response.skill)
+            })
+        }
     }
 
     classifier.train()
@@ -46,7 +49,6 @@ function * train_recognizer(skills) {
                 skill.examples().map(keyword => {
                     const recognised = classifier.getClassifications(keyword)[0].label
                     if (recognised != skill.name) {
-                        console.log(`Query '${keyword}' failed. Classed as ${recognised}. Attempting re-education.`)
                         classifier.addDocument(keyword, skill.name)
                         failedCount++
                     }
@@ -61,6 +63,9 @@ function * train_recognizer(skills) {
 
     let retrainCount = 0
     let failedCount = validate()
+    if (failedCount > 0) {
+        console.log(`${failedCount} queries were not routed correctly, attempting re-education.`)
+    }
     while (failedCount > 0) {
         if (retrainCount > MAX_RETRAINS) {
             console.log(`Maximum number of re-trainings reached with ${failedCount} failures.`)
@@ -70,7 +75,7 @@ function * train_recognizer(skills) {
         retrainCount++
     }
     if (failedCount == 0) {
-        console.log('Re-education successful.')
+        console.log(`Re-education successful after ${retrainCount + 1} iterations.`)
     }
 }
 
@@ -97,8 +102,6 @@ function * query(q) {
     yield log.add(q)
 
     const intent_breakdown = speakeasy.classify(q)
-    console.log('classifications')
-    console.log(classifier.getClassifications(q))
 
     intent_breakdown.responseType = result.label
     intent_breakdown.originalQuery = q
