@@ -12,6 +12,11 @@ natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
 const MAX_RETRAINS = 20
 
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
 function * train_recognizer(skills) {
     // train a classifier
     skills.map(skill => {
@@ -20,12 +25,12 @@ function * train_recognizer(skills) {
             const intent = intent_funct()
 
             intent.keywords.map(keyword => {
-                classifier.addDocument(keyword, skill.name)
+                classifier.addDocument(keyword.replaceAll("'", ""), skill.name)
             })
         }
         if (skill.examples) {
             skill.examples().map(keyword => {
-                classifier.addDocument(keyword, skill.name)
+                classifier.addDocument(keyword.replaceAll("'", ""), skill.name)
             })
         }
     })
@@ -34,7 +39,7 @@ function * train_recognizer(skills) {
         const responses = yield log.get_responses()
         if (responses) {
             responses.map(response => {
-                classifier.addDocument(response.query, response.skill)
+                classifier.addDocument(response.query.replaceAll("'", ""), response.skill)
             })
         }
     }
@@ -43,38 +48,40 @@ function * train_recognizer(skills) {
 
     // Now verify all the responses.
     function validate() {
-        let failedCount = 0
+        let failed = []
         skills.map(skill => {
             if (skill.examples) {
                 skill.examples().map(keyword => {
+                    keyword = keyword.replaceAll("'", "")
                     const recognised = classifier.getClassifications(keyword)[0].label
                     if (recognised != skill.name) {
                         classifier.addDocument(keyword, skill.name)
-                        failedCount++
+                        failed.push({keyword, skill: recognised})
                     }
                 })
             }
         })
-        if (failedCount > 0) {
+        if (failed.length > 0) {
             classifier.retrain()
         }
-        return failedCount
+        return failed
     }
 
     let retrainCount = 0
-    let failedCount = validate()
-    if (failedCount > 0) {
-        console.log(`${failedCount} queries were not routed correctly, attempting re-education.`)
+    let failed = validate()
+    if (failed.length > 0) {
+        console.log(`${failed.length} queries were not routed correctly, attempting re-education.`)
     }
-    while (failedCount > 0) {
+    while (failed.length > 0) {
         if (retrainCount > MAX_RETRAINS) {
-            console.log(`Maximum number of re-trainings reached with ${failedCount} failures.`)
+            console.log(`Maximum number of re-trainings reached with ${failed.length} failures.`)
+            console.log(failed)
             break
         }
-        failedCount = validate()
+        failed = validate()
         retrainCount++
     }
-    if (failedCount == 0) {
+    if (failed.length == 0) {
         console.log(`Re-education successful after ${retrainCount + 1} iterations.`)
     }
 }
