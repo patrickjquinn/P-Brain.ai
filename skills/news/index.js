@@ -35,10 +35,9 @@ function * news_resp(query) {
     const item = resp[Math.floor(Math.random() * resp.length)]
 
     if (item.title.toUpperCase() != item.description.toUpperCase()) {
-        return {'text':item.title + '. ' + item.description}
-    } else {
-        return {'text':item.title + '.'}
+        return {text: item.title + '. ' + item.description}
     }
+    return {text: item.title + '.'}
 }
 
 module.exports = {

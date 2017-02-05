@@ -1,5 +1,3 @@
-const fs = require('fs')
-const path = require('path')
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify

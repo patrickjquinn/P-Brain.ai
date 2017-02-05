@@ -38,7 +38,7 @@ app.get('/api/ask', wrap(function *(req, res) {
         res.send(result)
     } catch (e) {
         console.log(e)
-        res.send({ msg: 'Sorry, I didnt understand ' + input, type: 'error' })
+        res.send({ 'msg': {'text':'Sorry, I didnt understand ' + input}, type: 'error' })
     }
 }))
 
@@ -49,7 +49,7 @@ io.on('connect', function(socket){
             const result = yield search.query(input)
             socket.emit('response', result);
         } catch (e) {
-            socket.emit('response', { msg: 'Sorry, I didnt understand ' + input, type: 'error' });
+            socket.emit('response', { 'msg': {'text':'Sorry, I didnt understand ' + input}, type: 'error' });
         }
     }));
     co(function * () {

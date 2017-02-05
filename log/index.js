@@ -39,7 +39,7 @@ function * log_response(query, response, skill) {
 function * get_last_query() {
     try {
         const queries = require('./log.json').queries
-        if (queries && queries.length) {
+        if (queries && queries.length > 0) {
             return queries[0]
         }
         return null
@@ -51,7 +51,7 @@ function * get_last_query() {
 function * get_last_response() {
     try {
         const responses = require('./responses.json').responses
-        if (responses && responses.length) {
+        if (responses && responses.length > 0) {
             return responses[0]
         }
         return null

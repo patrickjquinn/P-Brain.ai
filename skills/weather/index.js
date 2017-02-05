@@ -40,9 +40,8 @@ function get_new_day_index(forcasted_day) {
         return 5
     } else if (forcasted_day.toUpperCase().trim() == 'SATURDAY') {
         return 6
-    } else {
-        return 7
     }
+    return 7
 }
 
 function * weatherResp(query) {
@@ -161,7 +160,7 @@ function * weatherResp(query) {
         weather = weather.replace(con_string, '')
     }
 
-    return {'text':weather}
+    return {text: weather}
 }
 
 module.exports = {

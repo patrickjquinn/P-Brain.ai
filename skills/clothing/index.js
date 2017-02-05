@@ -4,13 +4,13 @@ const config = require('../../config')
 const keys = config.get
 const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=dublin,ireland&units=metric&appid=' + keys.openweathermap.key
 const type_wardrobe = {
-    'rain': 'a jacket',
-    'snow': 'a scarf and gloves',
-    'sun': 'some sun glasses',
-    'clear': 'a t-shirt and shorts',
-    'wind': 'a jumper',
-    'mist': 'a hat'
-};
+    rain: 'a jacket',
+    snow: 'a scarf and gloves',
+    sun: 'some sun glasses',
+    clear: 'a t-shirt and shorts',
+    wind: 'a jumper',
+    mist: 'a hat'
+}
 
 function contains_key(string, keyword) {
     if (string.toUpperCase().includes(keyword.toUpperCase())) {
@@ -28,7 +28,7 @@ function * clothing_resp() {
         }
     })
 
-    data = JSON.parse(data.body);
+    data = JSON.parse(data.body)
 
     const condition = data.weather[0].main
 
@@ -47,7 +47,7 @@ function * clothing_resp() {
     response = response.replace('<condition>', condition)
     response = response.replace('<clothes>', clothes)
 
-    return {'text':response}
+    return {text: response}
 }
 
 const intent = () => ({

@@ -23,10 +23,9 @@ function * song_resp(query) {
 
     const data = yield yt.get(track, artist)
     if (data) {
-        return {'id': data.id, 'text': `Playing ${data.title}.`}
-    } else {
-        return {'text': 'Could not play song.'}
+        return {id: data.id, text: `Playing ${data.title}.`}
     }
+    return {text: 'Could not play song.'}
 }
 
 module.exports = {
