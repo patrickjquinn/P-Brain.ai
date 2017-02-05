@@ -132,7 +132,7 @@ function * timer_resp(query){
   }
 }
 
-function register(app, io) {
+function * register(app, io) {
     socket_io = io;
 }
 

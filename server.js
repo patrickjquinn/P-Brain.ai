@@ -10,8 +10,7 @@ const co = require('co')
 
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
-
-const address = 'var ip_addr ="' + ip.address() + '";'
+const config = require('./config/index.js').get
 
 app.use(compression({
     threshold: 0,
@@ -53,7 +52,13 @@ io.on('connect', function(socket){
             socket.emit('response', { msg: 'Sorry, I didnt understand ' + input, type: 'error' });
         }
     }));
-    skills.registerClient(socket);
+    co(function * () {
+        yield skills.registerClient(socket)
+    }).catch(err => {
+        console.log(err)
+        throw err
+    })
+
 })
 
 const skillsApi = express();
@@ -67,5 +72,5 @@ co(function * () {
     throw err;
 })
 
-http.listen(4567)
-console.log('http://localhost:4567')
+http.listen(config.port)
+console.log(`Server started on http://localhost:${config.port}`)

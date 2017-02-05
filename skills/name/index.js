@@ -1,6 +1,6 @@
-const fs = require('fs');
+const fs = require('fs')
 
-const NAME_FILE = 'config/name.json';
+const NAME_FILE = 'config/name.json'
 
 const intent = () => ({
     keywords: ["your new name is q", "i'm going to call you q", "set name to q"],
@@ -26,7 +26,7 @@ function * name_resp(query) {
     return {text:`You can now call me ${name}.`,name:name};
 }
 
-function register(app, io) {
+function * register(app, io) {
     try {
         const nameJson = JSON.parse(fs.readFileSync(NAME_FILE));
         name = nameJson.name;
@@ -40,7 +40,7 @@ function register(app, io) {
     socket_io = io;
 }
 
-function registerClient(socket) {
+function * registerClient(socket) {
     socket.on('get_name', function(msg) {
         socket.emit('get_name', {name: name})
     })
