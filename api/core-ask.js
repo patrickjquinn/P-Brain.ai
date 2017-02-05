@@ -63,7 +63,7 @@ function * train_recognizer(skills) {
     let failedCount = validate()
     while (failedCount > 0) {
         if (retrainCount > MAX_RETRAINS) {
-            console.log(`Maximum number of re-trainings reached with ${failedCount}.`)
+            console.log(`Maximum number of re-trainings reached with ${failedCount} failures.`)
             break
         }
         failedCount = validate()
