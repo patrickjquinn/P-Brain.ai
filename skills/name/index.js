@@ -15,7 +15,7 @@ function * name_resp(query) {
     query = query.toLowerCase()
     if (query.includes('who') || query.includes('what')) {
         if (query.toLowerCase().includes('what') && query.toLowerCase().includes('are')) {
-            return {text: `I'm name ${name}, your Brain.`, name}
+            return {text: `I'm called ${name}, your Brain.`, name}
         } else {
             return {text: `I'm called ${name}.`, name}
         }
