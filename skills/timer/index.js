@@ -4,9 +4,14 @@ const timers = []
 let socket_io = null
 
 const intent = () => ({
-    keywords: ['set timer', 'set timer for qqqq', 'show timers', 'show timer'],
+    keywords: ['set timer qqqq', 'set a timer for qqqq', 'show timers', 'show timer', 'in qqqq'],
     module: 'timer'
 })
+
+const examples = () => (
+    ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.',
+    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.']
+)
 
 const timeUnits = [
   {name: 'week', mult: 1000 * 60 * 60 * 24 * 7},
@@ -108,6 +113,7 @@ function parseTime(time) {
 }
 
 function * timer_resp(query) {
+    // Parse showing timers.
     if (query.includes('show')) {
         let timersString = `You have ${timers.length == 1 ? "a ":""}timer${timers.length > 1 ? "s" : ""} for: `
         for (let i = 0; i < timers.length; i++) {
@@ -116,8 +122,13 @@ function * timer_resp(query) {
         }
         return {text: timersString}
     }
-    const time_to_set = query.split('for ')[1]
-    const time = parseTime(time_to_set)
+
+    if (query.includes('for')) {
+        query = query.split('for')[1]
+    } else if (query.includes('in')) {
+        query = query.split('in')[1]
+    }
+    const time = parseTime(query)
 
     if (isNaN(time)) {
         return {text: 'Sorry, I dont understand ' + query}
@@ -138,5 +149,6 @@ function * register(app, io) {
 module.exports = {
     get: timer_resp,
     intent,
-    register
+    register,
+    examples
 }

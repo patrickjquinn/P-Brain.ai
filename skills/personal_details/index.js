@@ -50,8 +50,13 @@ function * register(app, io) {
     });
 }
 
+const examples = () => (
+    ['You can call me Patrick', "I'm called Marco."]
+)
+
 module.exports = {
     get: name_resp,
     register: register,
-    intent: intent
+    intent: intent,
+    examples
 };

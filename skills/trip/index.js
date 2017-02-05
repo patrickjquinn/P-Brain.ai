@@ -5,6 +5,10 @@ const intent = () => ({
     module: 'trip'
 })
 
+const examples = () => (
+    ["Let's go on a trip.", "Let's go to Mordor."]
+)
+
 const isHobbit = query =>
     query.includes('mordor') || query.includes('tomorrow')
 
@@ -16,5 +20,6 @@ function * tripResponse(query) {
 
 module.exports = {
     get: tripResponse,
-    intent
+    intent,
+    examples
 }

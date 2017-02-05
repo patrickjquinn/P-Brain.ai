@@ -15,7 +15,12 @@ function * joke_resp(query) {
     return {text: data.value}
 }
 
+const examples = () => (
+    ['Tell me a joke.', 'Make me laugh.', 'Say something funny.']
+)
+
 module.exports = {
     get: joke_resp,
-    intent
+    intent,
+    examples
 }

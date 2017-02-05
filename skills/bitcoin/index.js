@@ -22,7 +22,12 @@ const intent = () => ({
     keywords: ['bitcoin'], module: 'bitcoin'
 })
 
+const examples = () => (
+    ['Show me the current bitcoin value.', "What's the bitcoin value?", "Bitcoin value."]
+)
+
 module.exports = {
     get: bitcoin_resp,
-    intent
+    intent,
+    examples
 }

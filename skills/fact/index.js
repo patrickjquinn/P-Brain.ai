@@ -33,7 +33,12 @@ function * fact_resp(query) {
     return {text: fact}
 }
 
+const examples = () => (
+    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?']
+)
+
 module.exports = {
     get: fact_resp,
-    intent
+    intent,
+    examples
 }

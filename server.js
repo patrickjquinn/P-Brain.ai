@@ -42,6 +42,12 @@ app.get('/api/ask', wrap(function *(req, res) {
     }
 }))
 
+app.get('/api/correct_last/:skill', wrap(function *(req, res) {
+    const input = req.params.skill.toLowerCase();
+    yield search.correct_last(input)
+    res.json({text: "Successfully re-trained."})
+}))
+
 io.on('connect', function(socket){
     socket.on('ask', co.wrap(function *(msg){
         const input = msg.text.toLowerCase()

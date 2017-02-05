@@ -47,9 +47,14 @@ function * registerClient(socket) {
     socket.emit('set_name', {name})
 }
 
+const examples = () => (
+    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob."]
+)
+
 module.exports = {
     get: name_resp,
     register,
     registerClient,
-    intent
+    intent,
+    examples
 }

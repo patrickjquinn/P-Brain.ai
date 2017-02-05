@@ -28,7 +28,12 @@ function * song_resp(query) {
     return {text: 'Could not play song.'}
 }
 
+const examples = () => (
+    ['Play Everybody Knows by Leonard Cohen', 'Play Lady Gaga', 'Play Year 3000']
+)
+
 module.exports = {
     get: song_resp,
-    intent
+    intent,
+    examples
 }

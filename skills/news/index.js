@@ -40,7 +40,12 @@ function * news_resp(query) {
     return {text: item.title + '.'}
 }
 
+const examples = () => (
+    ['Tell me the current news.']
+)
+
 module.exports = {
     get: news_resp,
-    intent
+    intent,
+    examples
 }
