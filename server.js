@@ -55,7 +55,7 @@ io.on('connect', function(socket){
             const result = yield search.query(input)
             socket.emit('response', result);
         } catch (e) {
-            socket.emit('response', { 'msg': {'text':'Sorry, I didnt understand ' + input}, type: 'error' });
+            socket.emit('response', { 'msg': {'text':'Sorry, I didn\'t understand ' + input}, type: 'error' });
         }
     }));
     co(function * () {
