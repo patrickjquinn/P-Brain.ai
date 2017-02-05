@@ -1,4 +1,7 @@
 const WtoN = require('words-to-num')
+const config = require.main.require('./config/index.js').get
+const request = require('co-request')
+const co = require('co')
 
 const timers = []
 let socket_io = null
@@ -10,7 +13,7 @@ const intent = () => ({
 
 const examples = () => (
     ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.',
-    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.']
+    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.']
 )
 
 const timeUnits = [
@@ -70,23 +73,41 @@ function formatTime(time) {
     for (var i = 0; i < units.length; i++) {
         message += ((i > 0) ? ' ' : '') + units[i]
     }
+
+    if (message.length == 0) {
+        message = 'now'
+    }
+
     return message
 }
 
-function initializeClock(time) {
+function initializeClock(time, command) {
     const timer = {deadline: new Date(Date.parse(new Date()) + time), time, timerInterval: null}
+    if (command) {
+        timer.command = command
+    }
     timers.push(timer)
 
     function updateClock() {
         if (Date.now() >= timer.deadline) {
             clearInterval(timer.timerInterval)
             const formattedTime = formatTime(getTimeRemaining(time))
+            timers.splice(timers.indexOf(timer, 1))
+
             const response = {
                 type: 'timer',
                 msg: {text: `Hey there! Your timer for ${formattedTime} is finished.`}
             }
             socket_io.emit('response', response)
-            timers.splice(timers.indexOf(timer, 1))
+            if (timer.command) {
+                co(function * () {
+                    const ask_url = `http://localhost:${config.port}/api/ask?q=${timer.command}`
+                    let data = yield request(ask_url)
+                    socket_io.emit('response', JSON.parse(data.body));
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
         }
     }
 
@@ -112,21 +133,42 @@ function parseTime(time) {
     return timeInMillis
 }
 
+function getLastUnit(words) {
+    let unit = null;
+    for (let i = 0; i < words.length; i++) {
+        if (getUnit(words[i])) {
+            unit = i;
+        }
+    }
+    return unit;
+}
+
 function * timer_resp(query) {
     // Parse showing timers.
-    if (query.includes('show')) {
-        let timersString = `You have ${timers.length == 1 ? "a ":""}timer${timers.length > 1 ? "s" : ""} for: `
-        for (let i = 0; i < timers.length; i++) {
-            const formatted = formatTime(getTimeRemaining(timers[i].deadline.getTime() - Date.now()))
-            timersString += `${i > 0 ? ", " : ""}${(i > 0 && i == timers.length - 1) ? "and ":""}${formatted}`
+    if (query.startsWith('show') || query.startsWith('what')) {
+        let timersString = "You have no active timers."
+        if (timers.length > 0) {
+            timersString = `You have ${timers.length == 1 ? "a " : ""}timer${timers.length > 1 ? "s" : ""} for: `
+            for (let i = 0; i < timers.length; i++) {
+                const formatted = formatTime(getTimeRemaining(timers[i].deadline.getTime() - Date.now()))
+                const command = (timers[i].command) ? ` which will run '${timers[i].command}'` : ""
+                timersString += `${i > 0 ? ", " : ""}${(i > 0 && i == timers.length - 1) ? "and " : ""}${formatted}${command}`
+            }
         }
         return {text: timersString}
     }
 
+    let commandIndex = null
+    let command = null
+    let words = query.split(" ")
     if (query.includes('for')) {
         query = query.split('for')[1]
+        if (query.includes('then')) {
+            commandIndex = query.indexOf('then') + 1
+        }
     } else if (query.includes('in')) {
         query = query.split('in')[1]
+        commandIndex = getLastUnit(words) + 1
     }
     const time = parseTime(query)
 
@@ -137,9 +179,19 @@ function * timer_resp(query) {
         return {text: 'Sorry, the query seems to be missing units.'}
     }
 
-    initializeClock(time)
+    if (commandIndex) {
+        command = words.slice(commandIndex, words.length)
+        command = wordsToSentence(command, 0, command.length)
+    }
 
-    return {time, text: 'Okay, timer set for ' + formatTime(getTimeRemaining(time))}
+    initializeClock(time, command)
+
+    if (commandIndex) {
+        return {time, text: 'Okay, task scheduled for ' + formatTime(getTimeRemaining(time))}
+    } else {
+        return {time, text: 'Okay, timer set for ' + formatTime(getTimeRemaining(time))}
+    }
+
 }
 
 function * register(app, io) {
