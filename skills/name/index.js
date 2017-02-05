@@ -3,7 +3,8 @@ const fs = require('fs')
 const NAME_FILE = 'config/name.json'
 
 const intent = () => ({
-    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q'],
+    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', "you're now called q",
+    "you're called q", "What are you called?", "What's your name?"],
     module: 'name'
 })
 
@@ -11,19 +12,28 @@ let name = 'Brain'
 let socket_io = null
 
 function * name_resp(query) {
-    const words = query.split(' ')
-    name = words[words.length - 1]
-    name = name.charAt(0).toUpperCase() + name.slice(1)
-
-    fs.writeFile(NAME_FILE, JSON.stringify({name}, null, 2), err => {
-        if (err) {
-            return console.log(err)
+    query = query.toLowerCase()
+    if (query.includes('who') || query.includes('what')) {
+        if (query.toLowerCase().includes('what') && query.toLowerCase().includes('are')) {
+            return {text: `I'm name ${name}, your Brain.`, name}
+        } else {
+            return {text: `I'm called ${name}.`, name}
         }
-    })
+    } else {
+        const words = query.split(' ')
+        name = words[words.length - 1]
+        name = name.charAt(0).toUpperCase() + name.slice(1)
 
-    socket_io.emit('set_name', {name})
+        fs.writeFile(NAME_FILE, JSON.stringify({name}, null, 2), err => {
+            if (err) {
+                return console.log(err)
+            }
+        })
 
-    return {text: `You can now call me ${name}.`, name}
+        socket_io.emit('set_name', {name})
+
+        return {text: `You can now call me ${name}.`, name}
+    }
 }
 
 function * register(app, io) {
@@ -48,7 +58,8 @@ function * registerClient(socket) {
 }
 
 const examples = () => (
-    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob."]
+    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob.", "You're now called Computer.",
+    "What's your name?", "What are you called?", "You're called Strange.", "I'm going to call you David"]
 )
 
 module.exports = {
