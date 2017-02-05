@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const express = require('express')
+const co = require('co')
 
 const getDirectories = srcpath =>
     fs.readdirSync(srcpath).filter(file =>
@@ -10,34 +11,39 @@ const skills = []
 
 function * loadSkills(skillsApi, io) {
     skillsApi.get('/', (req, res) => {
-        const skillIntents = []
+        const skillNames = []
         skills.map(skill => {
-            skillIntents.push(skill.intent())
+            if (skill.intent) {
+                skillNames.push(skill.name)
+            }
         })
-        res.json(skillIntents)
+        res.json(skillNames)
     })
 
     const skills_dir = __dirname.replace('/api', '')
     const dirs = getDirectories(skills_dir)
 
-    dirs.map(dir => {
+    for (let i = 0; i < dirs.length; i++) {
+        const dir = dirs[i]
         const skill = require(`./${dir}`)
+        skill.name = dir
         skills.push(skill)
 
         if (typeof (skill.register) === 'function') {
             const localSkillApi = express()
-            skillsApi.use('/' + skill.intent().module, localSkillApi)
-            skill.register(localSkillApi, io)
+            skillsApi.use('/' + skill.name, localSkillApi)
+            yield skill.register(localSkillApi, io)
         }
-    })
+    }
 }
 
-function registerClient(socket) {
-    skills.map(skill => {
+function * registerClient(socket) {
+    for (let i = 0; i < skills.length; i++) {
+        const skill = skills[i]
         if (typeof (skill.registerClient) === 'function') {
-            skill.registerClient(socket)
+            yield skill.registerClient(socket)
         }
-    })
+    }
 }
 
 function getSkills() {

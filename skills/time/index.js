@@ -12,7 +12,12 @@ function * time_resp(query) {
     return {text: 'It is ' + time}
 }
 
+const examples = () => (
+    ['What time is it?', "What's the current time?", 'Tell me the time.']
+)
+
 module.exports = {
     get: time_resp,
-    intent
+    intent,
+    examples
 }

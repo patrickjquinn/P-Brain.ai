@@ -8,7 +8,12 @@ const intent = () => ({
     keywords: ['heads or tails', 'flip a coin', 'toss a coin'], module: 'coin'
 })
 
+const examples = () => (
+    ['toss a coin', 'flip a coin', 'heads or tails?']
+)
+
 module.exports = {
     get: coin_resp,
-    intent
+    intent,
+    examples
 }

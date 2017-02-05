@@ -27,13 +27,18 @@ function * fact_resp(query) {
     }
 
     if (!fact) {
-        return not_found_responses[Math.floor(Math.random() * not_found_responses.length)] + query
+        return {'text': not_found_responses[Math.floor(Math.random() * not_found_responses.length)] + query}
     }
 
     return {text: fact}
 }
 
+const examples = () => (
+    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?']
+)
+
 module.exports = {
     get: fact_resp,
-    intent
+    intent,
+    examples
 }

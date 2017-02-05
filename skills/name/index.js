@@ -26,7 +26,7 @@ function * name_resp(query) {
     return {text: `You can now call me ${name}.`, name}
 }
 
-function register(app, io) {
+function * register(app, io) {
     try {
         const nameJson = JSON.parse(fs.readFileSync(NAME_FILE))
         name = nameJson.name
@@ -40,16 +40,21 @@ function register(app, io) {
     socket_io = io
 }
 
-function registerClient(socket) {
+function * registerClient(socket) {
     socket.on('get_name', msg => {
-        socket.emit('get_name', {name})
+        socket.emit('get_name', {name: name})
     })
     socket.emit('set_name', {name})
 }
+
+const examples = () => (
+    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob."]
+)
 
 module.exports = {
     get: name_resp,
     register,
     registerClient,
-    intent
+    intent,
+    examples
 }

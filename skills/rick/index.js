@@ -6,7 +6,12 @@ const intent = () => ({
     keywords: ['Rick Astley'], module: 'rick'
 })
 
+const examples = () => (
+    ["Who's Rick Astley?", "Never gonna give you up."]
+)
+
 module.exports = {
     get: rick_resp,
-    intent
+    intent,
+    examples
 }

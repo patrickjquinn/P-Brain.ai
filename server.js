@@ -10,8 +10,7 @@ const co = require('co')
 
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
-
-const address = 'var ip_addr ="' + ip.address() + '";'
+const config = require('./config/index.js').get
 
 app.use(compression({
     threshold: 0,
@@ -43,6 +42,12 @@ app.get('/api/ask', wrap(function *(req, res) {
     }
 }))
 
+app.get('/api/correct_last/:skill', wrap(function *(req, res) {
+    const input = req.params.skill.toLowerCase();
+    yield search.correct_last(input)
+    res.json({text: "Successfully re-trained."})
+}))
+
 io.on('connect', function(socket){
     socket.on('ask', co.wrap(function *(msg){
         const input = msg.text.toLowerCase()
@@ -50,10 +55,16 @@ io.on('connect', function(socket){
             const result = yield search.query(input)
             socket.emit('response', result);
         } catch (e) {
-            socket.emit('response', { 'msg': {'text':'Sorry, I didnt understand ' + input}, type: 'error' });
+            socket.emit('response', { 'msg': {'text':'Sorry, I didn\'t understand ' + input}, type: 'error' });
         }
     }));
-    skills.registerClient(socket);
+    co(function * () {
+        yield skills.registerClient(socket)
+    }).catch(err => {
+        console.log(err)
+        throw err
+    })
+
 })
 
 const skillsApi = express();
@@ -67,5 +78,5 @@ co(function * () {
     throw err;
 })
 
-http.listen(4567)
-console.log('http://localhost:4567')
+http.listen(config.port)
+console.log(`Server started on http://localhost:${config.port}`)

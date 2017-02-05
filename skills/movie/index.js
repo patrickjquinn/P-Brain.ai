@@ -17,7 +17,12 @@ function * movie_resp(query) {
     return {url: data.data.movies[0].torrents[0].url}
 }
 
+const examples = () => (
+    ['Start movie Avatar.']
+)
+
 module.exports = {
     get: movie_resp,
-    intent
+    intent,
+    examples
 }

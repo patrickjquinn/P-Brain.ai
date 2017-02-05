@@ -121,25 +121,11 @@ function display_response(msg) {
     if (msg.text) {
         output = msg.text
     }
-    push_response(output)
-}
-
-function display_greeting() {
-    const dt = new Date().getHours()
-
-    let response
-
-    if (dt >= 0 && dt <= 11) {
-        response = 'Good Morning!'
-    } else if (dt >= 12 && dt <= 17) {
-        response = 'Good Afternoon!'
+    if (msg.silent) {
+        push_silent_response(output);
     } else {
-        response = 'Good Evening!'
+        push_response(output);
     }
-
-    delay(() => {
-        push_silent_response(response)
-    }, 600)
 }
 
 function observe_speech() {

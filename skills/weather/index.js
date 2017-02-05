@@ -11,6 +11,10 @@ const intent = () => ({
     module: 'weather'
 })
 
+const examples = () => (
+    ["What's the weather like?", "What's it like in France?", "What's the temperature?", "Tell me what the weather is."]
+)
+
 function get_index_from_day() {
     const d = new Date()
     return d.getDay()
@@ -165,5 +169,6 @@ function * weatherResp(query) {
 
 module.exports = {
     get: weatherResp,
-    intent
+    intent,
+    examples
 }

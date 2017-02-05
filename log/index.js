@@ -1,9 +1,9 @@
 const fs = require('co-fs')
 
 function * log_query(query) {
-    const queries_obj = {queries: []}
+    let queries_obj = {queries: []}
     try {
-        const queries_obj = require('./log.json')
+        queries_obj = require('./log.json')
     } catch (err) {
         console.log('Generating new log.json.')
     }
@@ -19,9 +19,9 @@ function * log_query(query) {
 }
 
 function * log_response(query, response, skill) {
-    const responses_obj = {responses: []}
+    let responses_obj = {responses: []}
     try {
-        const responses_obj = require('./responses.json')
+        responses_obj = require('./responses.json')
     } catch (err) {
         console.log('Generating new responses.json.')
     }
@@ -36,11 +36,34 @@ function * log_response(query, response, skill) {
     yield fs.writeFile('./log/responses.json', JSON.stringify(responses_obj, null, 4))
 }
 
+function * get_responses() {
+    try {
+        return require('./responses.json').responses
+    } catch (err) {
+        return null
+    }
+}
+
 function * get_last_query() {
     try {
         const queries = require('./log.json').queries
         if (queries && queries.length > 0) {
-            return queries[0]
+            return queries[queries.length - 1]
+        }
+        return null
+    } catch (err) {
+        return null
+    }
+}
+
+function * remove_last_response() {
+    try {
+        const responses_obj = require('./responses.json')
+        const responses = responses_obj.responses
+        if (responses && responses.length > 0) {
+            const popped = responses.pop()
+            yield fs.writeFile('./log/responses.json', JSON.stringify(responses_obj, null, 4))
+            return popped
         }
         return null
     } catch (err) {
@@ -50,9 +73,10 @@ function * get_last_query() {
 
 function * get_last_response() {
     try {
-        const responses = require('./responses.json').responses
+        const responses_obj = require('./responses.json')
+        const responses = responses_obj.responses
         if (responses && responses.length > 0) {
-            return responses[0]
+            return responses[responses.length - 1]
         }
         return null
     } catch (err) {
@@ -64,5 +88,7 @@ module.exports = {
     add: log_query,
     get_last: get_last_query,
     response: log_response,
-    get_last_response
+    get_last_response,
+    get_responses,
+    remove_last_response
 }
