@@ -29,7 +29,7 @@ function * song_resp(query) {
 }
 
 const examples = () => (
-    ['Play Everybody Knows by Leonard Cohen', 'Play Lady Gaga', 'Play Year 3000']
+    ['Play Everybody Knows by Leonard Cohen', 'Play Lady Gaga', 'Play Year 3000', 'Play David Bowie', 'Play']
 )
 
 module.exports = {
