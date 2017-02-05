@@ -13,11 +13,13 @@ natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
 function * train_recognizer(skills) {
     skills.map(skill => {
-        const intent_funct = skill.intent
-        const intent = intent_funct()
+        if (skill.intent) {
+            const intent_funct = skill.intent
+            const intent = intent_funct()
 
-        intent.keywords
-            .map(keyword => classifier.addDocument(keyword, intent.module))
+            intent.keywords
+                .map(keyword => classifier.addDocument(keyword, intent.module))
+        }
     })
 
     classifier.train()

@@ -10,11 +10,13 @@ const skills = []
 
 function * loadSkills(skillsApi, io) {
     skillsApi.get('/', (req, res) => {
-        const skillIntents = []
+        const skillNames = []
         skills.map(skill => {
-            skillIntents.push(skill.intent())
+            if (skill.intent) {
+                skillNames.push(skill.name)
+            }
         })
-        res.json(skillIntents)
+        res.json(skillNames)
     })
 
     const skills_dir = __dirname.replace('/api', '')
@@ -22,6 +24,7 @@ function * loadSkills(skillsApi, io) {
 
     dirs.map(dir => {
         const skill = require(`./${dir}`)
+        skill.name = dir
         skills.push(skill)
 
         if (typeof (skill.register) === 'function') {
