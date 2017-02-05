@@ -13,7 +13,8 @@ const intent = () => ({
 
 const examples = () => (
     ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.',
-    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.']
+    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.',
+    'In 20 seconds play everybody knows.', 'Set a timer for 12 weeks then show me the weather']
 )
 
 const timeUnits = [
@@ -164,7 +165,7 @@ function * timer_resp(query) {
     if (query.includes('for')) {
         query = query.split('for')[1]
         if (query.includes('then')) {
-            commandIndex = query.indexOf('then') + 1
+            commandIndex = words.indexOf('then') + 1
         }
     } else if (query.includes('in')) {
         query = query.split('in')[1]
