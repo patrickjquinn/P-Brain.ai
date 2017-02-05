@@ -7,7 +7,6 @@ const response = require('../response')
 const log = require('../log')
 
 const classifier = new natural.BayesClassifier()
-const skills = []
 
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
