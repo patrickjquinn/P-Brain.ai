@@ -7,7 +7,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ["Who's Rick Astley?", "Never gonna give you up."]
+    ['Who\'s Rick Astley?', 'Never gonna give you up.']
 )
 
 module.exports = {

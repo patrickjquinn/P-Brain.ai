@@ -42,13 +42,13 @@ function * register(app, io) {
 
 function * registerClient(socket) {
     socket.on('get_name', msg => {
-        socket.emit('get_name', {name: name})
+        socket.emit('get_name', {name})
     })
     socket.emit('set_name', {name})
 }
 
 const examples = () => (
-    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob."]
+    ['I\'m going to call you Boba Fet', 'Your new name is Dave.', 'Set mame to Bob.']
 )
 
 module.exports = {

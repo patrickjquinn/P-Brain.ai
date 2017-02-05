@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 app.use(express.static('./src'))
 
 // TODO parse services in query
-app.get('/api/ask', wrap(function *(req, res) {
+app.get('/api/ask', wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     res.header('Content-Type', 'application/json')
@@ -38,44 +38,43 @@ app.get('/api/ask', wrap(function *(req, res) {
         res.send(result)
     } catch (e) {
         console.log(e)
-        res.send({ 'msg': {'text':'Sorry, I didnt understand ' + input}, type: 'error' })
+        res.send({msg: {text: 'Sorry, I didnt understand ' + input}, type: 'error'})
     }
 }))
 
-app.get('/api/correct_last/:skill', wrap(function *(req, res) {
-    const input = req.params.skill.toLowerCase();
+app.get('/api/correct_last/:skill', wrap(function * (req, res) {
+    const input = req.params.skill.toLowerCase()
     yield search.correct_last(input)
-    res.json({text: "Successfully re-trained."})
+    res.json({text: 'Successfully re-trained.'})
 }))
 
-io.on('connect', function(socket){
-    socket.on('ask', co.wrap(function *(msg){
+io.on('connect', socket => {
+    socket.on('ask', co.wrap(function * (msg) {
         const input = msg.text.toLowerCase()
         try {
             const result = yield search.query(input)
-            socket.emit('response', result);
+            socket.emit('response', result)
         } catch (e) {
-            socket.emit('response', { 'msg': {'text':'Sorry, I didn\'t understand ' + input}, type: 'error' });
+            socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
         }
-    }));
+    }))
     co(function * () {
         yield skills.registerClient(socket)
     }).catch(err => {
         console.log(err)
         throw err
     })
-
 })
 
-const skillsApi = express();
-app.use('/api/skills', skillsApi);
+const skillsApi = express()
+app.use('/api/skills', skillsApi)
 
 co(function * () {
-    yield skills.loadSkills(skillsApi, io);
-    yield search.train_recognizer(skills.getSkills());
+    yield skills.loadSkills(skillsApi, io)
+    yield search.train_recognizer(skills.getSkills())
 }).catch(err => {
-    console.log(err);
-    throw err;
+    console.log(err)
+    throw err
 })
 
 http.listen(config.port)

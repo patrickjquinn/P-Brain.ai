@@ -122,9 +122,9 @@ function display_response(msg) {
         output = msg.text
     }
     if (msg.silent) {
-        push_silent_response(output);
+        push_silent_response(output)
     } else {
-        push_response(output);
+        push_response(output)
     }
 }
 
