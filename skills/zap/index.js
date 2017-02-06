@@ -1,8 +1,8 @@
 const http = require('http')
-
 const config = require('../../config')
-const keys = config.get
 const services = require('./services.json')
+
+const keys = config.get
 
 const intent = () => ({
     keywords: ['switch to', 'switch to qqqq'],
@@ -16,9 +16,12 @@ function * zap_resp(query) {
     const isZapped = zap(ref)
 
     if (isZapped) {
-        return {'text':'Zapped'}
-    } else {
-        return {'text':'Sorry, I couldnt Zap that!'}
+        return {
+            text: 'Zapped'
+        }
+    }
+    return {
+        text: 'Sorry, I couldnt Zap that!'
     }
 }
 
@@ -30,20 +33,18 @@ function zap(ref) {
         path: '/api/zap?sRef=' + ref
     }
 
-    callback = function (response) {
-    let str = ''
-    response.on('data', chunk => {
-        str += chunk
-    })
-    response.on('end', () => {
-        const parsed = JSON.parse(str)
-        state = parsed.result
-    })
-}
+    const callback = function (response) {
+        let str = ''
+        response.on('data', chunk => {
+            str += chunk
+        })
+        response.on('end', () => {
+            const parsed = JSON.parse(str)
+            state = parsed.result
+        })
+    }
 
     http.request(options, callback).end()
-
-    console.log(state)
     return state
 }
 
