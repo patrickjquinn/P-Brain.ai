@@ -13,7 +13,7 @@ function * time_resp(query) {
 }
 
 const examples = () => (
-    ['What time is it?', "What's the current time?", 'Tell me the time.']
+    ['What time is it?', 'What\'s the current time?', 'Tell me the time.']
 )
 
 module.exports = {

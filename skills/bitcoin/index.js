@@ -23,7 +23,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['Show me the current bitcoin value.', "What's the bitcoin value?", "Bitcoin value."]
+    ['Show me the current bitcoin value.', 'What\'s the bitcoin value?', 'Bitcoin value.']
 )
 
 module.exports = {

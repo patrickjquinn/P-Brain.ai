@@ -13,8 +13,8 @@ const intent = () => ({
 
 const examples = () => (
     ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.',
-    'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.',
-    'In 20 seconds play everybody knows.', 'Set a timer for 12 weeks then show me the weather']
+        'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.',
+        'In 20 seconds play everybody knows.', 'Set a timer for 12 weeks then show me the weather']
 )
 
 const timeUnits = [
@@ -103,8 +103,8 @@ function initializeClock(time, command) {
             if (timer.command) {
                 co(function * () {
                     const ask_url = `http://localhost:${config.port}/api/ask?q=${timer.command}`
-                    let data = yield request(ask_url)
-                    socket_io.emit('response', JSON.parse(data.body));
+                    const data = yield request(ask_url)
+                    socket_io.emit('response', JSON.parse(data.body))
                 }).catch(err => {
                     console.log(err)
                 })
@@ -135,25 +135,25 @@ function parseTime(time) {
 }
 
 function getLastUnit(words) {
-    let unit = null;
+    let unit = null
     for (let i = 0; i < words.length; i++) {
         if (getUnit(words[i])) {
-            unit = i;
+            unit = i
         }
     }
-    return unit;
+    return unit
 }
 
 function * timer_resp(query) {
     // Parse showing timers.
     if (query.startsWith('show') || query.startsWith('what')) {
-        let timersString = "You have no active timers."
+        let timersString = 'You have no active timers.'
         if (timers.length > 0) {
-            timersString = `You have ${timers.length == 1 ? "a " : ""}timer${timers.length > 1 ? "s" : ""} for: `
+            timersString = `You have ${timers.length == 1 ? 'a ' : ''}timer${timers.length > 1 ? 's' : ''} for: `
             for (let i = 0; i < timers.length; i++) {
                 const formatted = formatTime(getTimeRemaining(timers[i].deadline.getTime() - Date.now()))
-                const command = (timers[i].command) ? ` which will run '${timers[i].command}'` : ""
-                timersString += `${i > 0 ? ", " : ""}${(i > 0 && i == timers.length - 1) ? "and " : ""}${formatted}${command}`
+                const command = (timers[i].command) ? ` which will run '${timers[i].command}'` : ''
+                timersString += `${i > 0 ? ', ' : ''}${(i > 0 && i == timers.length - 1) ? 'and ' : ''}${formatted}${command}`
             }
         }
         return {text: timersString}
@@ -161,7 +161,7 @@ function * timer_resp(query) {
 
     let commandIndex = null
     let command = null
-    let words = query.split(" ")
+    const words = query.split(' ')
     if (query.includes('for')) {
         query = query.split('for')[1]
         if (query.includes('then')) {
@@ -189,10 +189,8 @@ function * timer_resp(query) {
 
     if (commandIndex) {
         return {time, text: 'Okay, task scheduled for ' + formatTime(getTimeRemaining(time))}
-    } else {
-        return {time, text: 'Okay, timer set for ' + formatTime(getTimeRemaining(time))}
     }
-
+    return {time, text: 'Okay, timer set for ' + formatTime(getTimeRemaining(time))}
 }
 
 function * register(app, io) {

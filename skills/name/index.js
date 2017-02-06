@@ -3,8 +3,7 @@ const fs = require('fs')
 const NAME_FILE = 'config/name.json'
 
 const intent = () => ({
-    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', "you're now called q",
-    "you're called q", "What are you called?", "What's your name?"],
+    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', 'call you qqqq'],
     module: 'name'
 })
 
@@ -52,7 +51,7 @@ function * register(app, io) {
 
 function * registerClient(socket) {
     socket.on('get_name', msg => {
-        socket.emit('get_name', {name: name})
+        socket.emit('get_name', {name})
     })
     socket.emit('set_name', {name})
 }
