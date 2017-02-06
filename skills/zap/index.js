@@ -16,7 +16,9 @@ function * zap_resp(query) {
     const isZapped = zap(ref)
 
     if (isZapped) {
-        return 'Zapped'
+        return {'text':'Zapped'}
+    } else {
+        return {'text':'Sorry, I couldnt Zap that!'}
     }
 }
 
@@ -28,8 +30,7 @@ function zap(ref) {
         path: '/api/zap?sRef=' + ref
     }
 
-    callback =
-	function (response) {
+    callback = function (response) {
     let str = ''
     response.on('data', chunk => {
         str += chunk
