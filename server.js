@@ -38,7 +38,7 @@ app.get('/api/ask', wrap(function * (req, res) {
         res.send(result)
     } catch (e) {
         console.log(e)
-        res.send({msg: {text: 'Sorry, I didnt understand ' + input}, type: 'error'})
+        res.send({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
     }
 }))
 
