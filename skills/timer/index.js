@@ -12,9 +12,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.',
-        'Whats are the current timers?', 'Show me the current timers.', 'In 5 weeks play Radiohead.', 'In 10 seconds tell me the time.',
-        'In 20 seconds play everybody knows.', 'Set a timer for 12 weeks then show me the weather']
+    []
 )
 
 const timeUnits = [
