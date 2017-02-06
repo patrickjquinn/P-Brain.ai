@@ -12,7 +12,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['What\'s the weather like?', 'What\'s it like in France?', 'What\'s the temperature?', 'Tell me what the weather is.']
+    ['What\'s the weather like?', 'What\'s it like in France?', 'What\'s the temperature?']
 )
 
 function get_index_from_day() {

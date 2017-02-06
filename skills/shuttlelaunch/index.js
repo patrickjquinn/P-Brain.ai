@@ -20,7 +20,7 @@ function * shuttle_resp(query) {
 }
 
 const examples = () => (
-    ['Whens the next launch?', 'When\'s the next shuttle launch?']
+    ['When next launch?', 'When\'s next shuttle launch?']
 )
 
 module.exports = {

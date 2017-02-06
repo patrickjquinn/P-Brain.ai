@@ -6,7 +6,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['Let\'s go on a trip.', 'Let\'s go to Mordor.']
+    ['Let\'s go to Mordor.']
 )
 
 const isHobbit = query =>

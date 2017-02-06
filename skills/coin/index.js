@@ -9,7 +9,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['toss a coin', 'flip a coin', 'heads or tails?']
+    ['toss coin', 'flip coin', 'heads or tails?']
 )
 
 module.exports = {
