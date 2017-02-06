@@ -1,7 +1,7 @@
 const yt = require('./youtube')
 
 const intent = () => ({
-    keywords: ['play qqqq by qqqq', 'play qqqq', 'what is love'],
+    keywords: ['play qqqq by qqqq', 'play qqqq'],
     module: 'song'
 })
 
