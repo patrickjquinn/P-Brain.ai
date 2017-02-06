@@ -3,7 +3,7 @@ const fs = require('fs')
 const DETAILS_FILE = 'config/personal_details.json'
 
 const intent = () => ({
-    keywords: ['you can call me qqqq', 'i\'m called qqqq', 'my name is qqqq'],
+    keywords: ['my name is qqqq', 'call me qqqq'],
     module: 'personal_details'
 })
 
@@ -53,7 +53,7 @@ function * register(app, io) {
 }
 
 const examples = () => (
-    ['You call me Patrick', 'I\'m called Marco.']
+    ['Call me Patrick', 'My name is Marco.']
 )
 
 module.exports = {
