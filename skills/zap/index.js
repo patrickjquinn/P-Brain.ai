@@ -1,4 +1,8 @@
-const http = require('http')
+const http = require('http');
+
+const config = require('../../config');
+const keys = config.get;
+const services = require('./services.json');
 
 const intent = () => ({
     keywords: ['switch to', 'switch to qqqq'],
@@ -6,40 +10,43 @@ const intent = () => ({
 })
 
 function * zap_resp(query) {
-	const sky = "1:0:16:A:4:85:C00000:0:0:0:"
-
-    const channel = query.split('to ')[1]
-	
-	if(channel.toString == "sky cinema"){
-		console.log("In LOOP");
-	
-		if(zap(sky)){
-			return 'Zapped'
-		}
+    const channel = query.split('to ')[1];	
+	var ref = getReference(channel);
+		
+	var isZapped = zap(ref);	
+				
+	if(isZapped){
+		return 'Zapped';
 	}
+	
 }
 
-function * zap(channel) {
+function zap(ref) {
 	var state;
 
 	var options = {
-		host: '192.168.178.172',
-		path: '/web/zap?sRef='.concat(channel)
+		host: keys.zap.ip,
+		path: '/api/zap?sRef='+ref
 	};
 
 	callback = 
-	function(response) {
+	function (response) {
 		var str = '';
 		response.on('data', function (chunk) {str += chunk;});
-		response.on('end', function () {
+		response.on('end', function () {								
 								var parsed = JSON.parse(str);
-								state = parsed.e2state;
+								state = parsed.result;
 							});
 	}
 	
 	http.request(options, callback).end();
 	
-	return state
+	console.log(state);
+	return state;	
+}
+
+function getReference(channel){
+	return services[channel];
 }
 
 module.exports = {
