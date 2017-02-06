@@ -102,10 +102,10 @@ function * query(q) {
     const result = classifier.getClassifications(q)[0]
     const confidence = result.value
 
+    console.log(`Using module ${result.label} with confidence ${confidence}`)
     if (confidence > 0.25) {
         throw new Error('error')
     }
-
     yield log.add(q)
 
     const intent_breakdown = speakeasy.classify(q)
