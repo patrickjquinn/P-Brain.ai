@@ -3,11 +3,11 @@ function * hello_resp() {
 }
 
 const intent = () => ({
-    keywords: ['hello world'], module: 'hello'
+    keywords: [], module: 'hello'
 })
 
 const examples = () => (
-    ['Hello world!', 'Hello there world.']
+    []
 )
 
 module.exports = {

@@ -53,7 +53,7 @@ function * register(app, io) {
 }
 
 const examples = () => (
-    ['You can call me Patrick', 'I\'m called Marco.']
+    ['You call me Patrick', 'I\'m called Marco.']
 )
 
 module.exports = {

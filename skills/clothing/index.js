@@ -55,7 +55,7 @@ const intent = () => ({
 })
 
 const examples = () => (
-    ['What should I wear today?']
+    ['should I wear']
 )
 
 module.exports = {

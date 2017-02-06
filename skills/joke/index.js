@@ -16,7 +16,7 @@ function * joke_resp(query) {
 }
 
 const examples = () => (
-    ['Tell me a joke.', 'Make me laugh.', 'Say something funny.']
+    ['Tell a joke.', 'Make me laugh.', 'Say something funny.']
 )
 
 module.exports = {
