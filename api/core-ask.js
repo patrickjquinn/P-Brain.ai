@@ -17,6 +17,10 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.replace(new RegExp(search, 'g'), replacement);
 };
 
+function strip(word) {
+    return word.replaceAll("'", "").replace(/\?/g, '')
+}
+
 function * train_recognizer(skills) {
     loaded_skills = skills
     // train a classifier
@@ -26,12 +30,7 @@ function * train_recognizer(skills) {
             const intent = intent_funct()
 
             intent.keywords.map(keyword => {
-                classifier.addDocument(keyword.replaceAll("'", ""), skill.name)
-            })
-        }
-        if (skill.examples) {
-            skill.examples().map(keyword => {
-                classifier.addDocument(keyword.replaceAll("'", ""), skill.name)
+                classifier.addDocument(strip(keyword), skill.name)
             })
         }
     })
@@ -40,7 +39,7 @@ function * train_recognizer(skills) {
         const responses = yield log.get_responses()
         if (responses) {
             responses.map(response => {
-                classifier.addDocument(response.query.replaceAll("'", ""), response.skill)
+                classifier.addDocument(strip(response.query), response.skill)
             })
         }
     }
@@ -53,7 +52,7 @@ function * train_recognizer(skills) {
         skills.map(skill => {
             if (skill.examples) {
                 skill.examples().map(keyword => {
-                    keyword = keyword.replaceAll("'", "")
+                    keyword = strip(keyword)
                     const recognised = classify(keyword).skill.name
                     if (recognised != skill.name) {
                         if (skill.hard_rule) {
@@ -104,7 +103,7 @@ function * correct_last(new_skill) {
 
 function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
-    q = q.replaceAll("'", "")
+    q = strip(q)
     const hard_skills = []
     loaded_skills.map(skill => {
         if (skill.hard_rule) {

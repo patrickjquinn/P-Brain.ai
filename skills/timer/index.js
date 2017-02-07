@@ -17,12 +17,17 @@ function hard_rule(query, breakdown) {
     if (type1) {
       return true;
     }
+    const words = query.split(" ")
     if (query.startsWith('in')) {
-        const words = query.split(" ")
         for (let i = 0; i < words.length; i++) {
             if (getUnit(words[i])) {
                 return true
             }
+        }
+    }
+    if (query.startsWith('show') || query.startsWith('tell') || query.startsWith('what')) {
+        if (words.includes('timer') || words.includes('timers')) {
+            return true
         }
     }
     return false
