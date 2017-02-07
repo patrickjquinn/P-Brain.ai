@@ -1,7 +1,6 @@
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
-const response = require('../response')
 const log = require.main.require('./log')
 const fs = require('fs')
 const config = require.main.require('./config/index.js').get
@@ -11,6 +10,7 @@ const classifier = new natural.BayesClassifier()
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
 const MAX_RETRAINS = 20
+let loaded_skills = []
 
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
@@ -18,6 +18,7 @@ String.prototype.replaceAll = function(search, replacement) {
 };
 
 function * train_recognizer(skills) {
+    loaded_skills = skills
     // train a classifier
     skills.map(skill => {
         if (skill.intent) {
@@ -53,7 +54,7 @@ function * train_recognizer(skills) {
             if (skill.examples) {
                 skill.examples().map(keyword => {
                     keyword = keyword.replaceAll("'", "")
-                    const recognised = classifier.getClassifications(keyword)[0].label
+                    const recognised = classify(keyword).skill.name
                     if (recognised != skill.name) {
                         classifier.addDocument(keyword, skill.name)
                         failed.push({keyword, skill: recognised})
@@ -98,28 +99,61 @@ function * correct_last(new_skill) {
     }
 }
 
-function * query(q) {
-    const result = classifier.getClassifications(q)[0]
-    const confidence = result.value
-
-    console.log(`Using module ${result.label} with confidence ${confidence}`)
-    if (confidence > 0.25) {
-        throw new Error('error')
-    }
-    yield log.add(q)
-
+function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
+    const hard_skills = []
+    loaded_skills.map(skill => {
+        if (skill.hard_rule) {
+            if (skill.hard_rule(q, intent_breakdown)) {
+                hard_skills.push(skill)
+            }
+        }
+    })
 
-    intent_breakdown.responseType = result.label
-    intent_breakdown.originalQuery = q
+    let result_skill = null
+    if (hard_skills.length > 0) {
+        if (hard_skills.length > 1) {
+            console.log(`Multiple hard skills for query '${q}'`)
+            throw new Error('Multiple hard skills')
+        } else {
+            result_skill = hard_skills[0]
+        }
+    } else {
+        const result = classifier.getClassifications(q)[0]
+        const confidence = result.value
+        if (confidence > 0.25) {
+            throw new Error('error')
+        }
+        for (let i = 0; i < loaded_skills.length; i++) {
+            if (loaded_skills[i].name == result.label) {
+                result_skill = loaded_skills[i]
+                break
+            }
+        }
+    }
+    
+    if (result_skill) {
+        return {
+            skill: result_skill,
+            intent_breakdown
+        }
+    } else {
+        throw new Error('No skill found.')
+    }
+}
 
-    const resp = yield response.get(intent_breakdown)
+function * query(q) {
+    yield log.add(q)
+    const classification = classify(q)
+    
+    console.log(`Using skill ${skill.name}`)
+    const resp = yield classification.skill.get(q, classification.intent_breakdown)
 
     yield log.response(q, resp, result.label)
 
     return {
         msg: resp,
-        type: result.label,
+        type: classification.skill.name,
         question: q
     }
 }
