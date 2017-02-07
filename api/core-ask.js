@@ -149,11 +149,11 @@ function classify(q) {
 function * query(q) {
     yield log.add(q)
     const classification = classify(q)
-    
-    console.log(`Using skill ${skill.name}`)
+
+    console.log(`Using skill ${classification.skill.name} for ${q}`)
     const resp = yield classification.skill.get(q, classification.intent_breakdown)
 
-    yield log.response(q, resp, result.label)
+    yield log.response(q, resp, classification.skill.name)
 
     return {
         msg: resp,
