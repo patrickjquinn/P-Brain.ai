@@ -104,6 +104,7 @@ function * correct_last(new_skill) {
 
 function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
+    q = q.replaceAll("'", "")
     const hard_skills = []
     loaded_skills.map(skill => {
         if (skill.hard_rule) {
