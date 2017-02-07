@@ -6,14 +6,32 @@ const co = require('co')
 const timers = []
 let socket_io = null
 
-const intent = () => ({
-    keywords: ['set timer qqqq', 'set a timer for qqqq', 'show timers', 'show timer', 'in qqqq'],
-    module: 'timer'
-})
-
+// These act as unit tests rather than training data because the skill supplies no intent.
 const examples = () => (
-    []
+    ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.']
 )
+
+function hard_rule(query, breakdown) {
+    query = query.trim().toLowerCase()
+    const type1 = query.startsWith('set a timer for')
+    if (type1) {
+      return true;
+    }
+    const words = query.split(" ")
+    if (query.startsWith('in')) {
+        for (let i = 0; i < words.length; i++) {
+            if (getUnit(words[i])) {
+                return true
+            }
+        }
+    }
+    if (query.startsWith('show') || query.startsWith('tell') || query.startsWith('what')) {
+        if (words.includes('timer') || words.includes('timers')) {
+            return true
+        }
+    }
+    return false
+}
 
 const timeUnits = [
   {name: 'week', mult: 1000 * 60 * 60 * 24 * 7},
@@ -197,7 +215,7 @@ function * register(app, io) {
 
 module.exports = {
     get: timer_resp,
-    intent,
+    hard_rule,
     register,
     examples
 }

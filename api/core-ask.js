@@ -1,7 +1,6 @@
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
-const response = require('../response')
 const log = require.main.require('./log')
 const fs = require('fs')
 const config = require.main.require('./config/index.js').get
@@ -11,8 +10,19 @@ const classifier = new natural.BayesClassifier()
 natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 
 const MAX_RETRAINS = 20
+let loaded_skills = []
+
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+function strip(word) {
+    return word.replaceAll("'", "").replace(/\?/g, '')
+}
 
 function * train_recognizer(skills) {
+    loaded_skills = skills
     // train a classifier
     skills.map(skill => {
         if (skill.intent) {
@@ -20,12 +30,7 @@ function * train_recognizer(skills) {
             const intent = intent_funct()
 
             intent.keywords.map(keyword => {
-                classifier.addDocument(keyword, skill.name)
-            })
-        }
-        if (skill.examples) {
-            skill.examples().map(keyword => {
-                classifier.addDocument(keyword, skill.name)
+                classifier.addDocument(strip(keyword), skill.name)
             })
         }
     })
@@ -34,7 +39,7 @@ function * train_recognizer(skills) {
         const responses = yield log.get_responses()
         if (responses) {
             responses.map(response => {
-                classifier.addDocument(response.query, response.skill)
+                classifier.addDocument(strip(response.query), response.skill)
             })
         }
     }
@@ -43,38 +48,43 @@ function * train_recognizer(skills) {
 
     // Now verify all the responses.
     function validate() {
-        let failedCount = 0
+        let failed = []
         skills.map(skill => {
             if (skill.examples) {
                 skill.examples().map(keyword => {
-                    const recognised = classifier.getClassifications(keyword)[0].label
+                    keyword = strip(keyword)
+                    const recognised = classify(keyword).skill.name
                     if (recognised != skill.name) {
+                        if (skill.hard_rule) {
+                            throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
+                        }
                         classifier.addDocument(keyword, skill.name)
-                        failedCount++
+                        failed.push({keyword, skill: recognised})
                     }
                 })
             }
         })
-        if (failedCount > 0) {
+        if (failed.length > 0) {
             classifier.retrain()
         }
-        return failedCount
+        return failed
     }
 
     let retrainCount = 0
-    let failedCount = validate()
-    if (failedCount > 0) {
-        console.log(`${failedCount} queries were not routed correctly, attempting re-education.`)
+    let failed = validate()
+    if (failed.length > 0) {
+        console.log(`${failed.length} queries were not routed correctly, attempting re-education.`)
     }
-    while (failedCount > 0) {
+    while (failed.length > 0) {
         if (retrainCount > MAX_RETRAINS) {
-            console.log(`Maximum number of re-trainings reached with ${failedCount} failures.`)
+            console.log(`Maximum number of re-trainings reached with ${failed.length} failures.`)
+            console.log(failed)
             break
         }
-        failedCount = validate()
+        failed = validate()
         retrainCount++
     }
-    if (failedCount == 0) {
+    if (failed.length == 0) {
         console.log(`Re-education successful after ${retrainCount + 1} iterations.`)
     }
 }
@@ -91,28 +101,62 @@ function * correct_last(new_skill) {
     }
 }
 
-function * query(q) {
-    const result = classifier.getClassifications(q)[0]
-    const confidence = result.value
-
-    if (confidence > 0.25) {
-        throw new Error('error')
-    }
-
-    yield log.add(q)
-
+function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
+    q = strip(q)
+    const hard_skills = []
+    loaded_skills.map(skill => {
+        if (skill.hard_rule) {
+            if (skill.hard_rule(q, intent_breakdown)) {
+                hard_skills.push(skill)
+            }
+        }
+    })
 
-    intent_breakdown.responseType = result.label
-    intent_breakdown.originalQuery = q
+    let result_skill = null
+    if (hard_skills.length > 0) {
+        if (hard_skills.length > 1) {
+            console.log(`Multiple hard skills for query '${q}'`)
+            throw new Error('Multiple hard skills')
+        } else {
+            result_skill = hard_skills[0]
+        }
+    } else {
+        const result = classifier.getClassifications(q)[0]
+        const confidence = result.value
+        if (confidence > 0.25) {
+            throw new Error('error')
+        }
+        for (let i = 0; i < loaded_skills.length; i++) {
+            if (loaded_skills[i].name == result.label) {
+                result_skill = loaded_skills[i]
+                break
+            }
+        }
+    }
+    
+    if (result_skill) {
+        return {
+            skill: result_skill,
+            intent_breakdown
+        }
+    } else {
+        throw new Error('No skill found.')
+    }
+}
 
-    const resp = yield response.get(intent_breakdown)
+function * query(q) {
+    yield log.add(q)
+    const classification = classify(q)
 
-    yield log.response(q, resp, result.label)
+    console.log(`Using skill ${classification.skill.name} for ${q}`)
+    const resp = yield classification.skill.get(q, classification.intent_breakdown)
+
+    yield log.response(q, resp, classification.skill.name)
 
     return {
         msg: resp,
-        type: result.label,
+        type: classification.skill.name,
         question: q
     }
 }

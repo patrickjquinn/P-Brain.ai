@@ -1,9 +1,8 @@
 const yt = require('./youtube')
 
-const intent = () => ({
-    keywords: ['play qqqq by qqqq', 'play qqqq', 'what is love'],
-    module: 'song'
-})
+function hard_rule(query, breakdown) {
+    return query.trim().toLowerCase().startsWith('play')
+}
 
 function * song_resp(query) {
     query = query.replace('play', '')
@@ -23,17 +22,18 @@ function * song_resp(query) {
 
     const data = yield yt.get(track, artist)
     if (data) {
-        return {id: data.id, text: `Playing ${data.title}.`}
+        return {id: data.id, text: `Playing ${data.title}.`, url: `https://www.youtube.com/watch?v=${data.id}`}
     }
     return {text: 'Could not play song.'}
 }
 
+// These act as unit tests rather than training data because the skill supplies no intent.
 const examples = () => (
-    ['Play Everybody Knows by Leonard Cohen', 'Play Lady Gaga', 'Play Year 3000', 'Play David Bowie', 'Play']
+    ['Play Everybody Knows by Leonard Cohen']
 )
 
 module.exports = {
     get: song_resp,
-    intent,
+    hard_rule,
     examples
 }

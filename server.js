@@ -38,7 +38,7 @@ app.get('/api/ask', wrap(function * (req, res) {
         res.send(result)
     } catch (e) {
         console.log(e)
-        res.send({msg: {text: 'Sorry, I didnt understand ' + input}, type: 'error'})
+        res.send({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
     }
 }))
 
@@ -55,6 +55,7 @@ io.on('connect', socket => {
             const result = yield search.query(input)
             socket.emit('response', result)
         } catch (e) {
+            console.log(e)
             socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
         }
     }))
