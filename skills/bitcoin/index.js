@@ -9,9 +9,9 @@ function * bitcoin_resp(query) {
     data = JSON.parse(data.body)
     query = query.toUpperCase()
 
-    if (query.indexOf('EURO') != -1) {
+    if (query.includes('EURO')) {
     	key = 'EUR'
-    } else if (query.indexOf('POUNDS') != -1) {
+    } else if (query.includes('POUNDS')) {
     	key = 'GBP'
     }
 

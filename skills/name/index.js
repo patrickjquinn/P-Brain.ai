@@ -57,8 +57,7 @@ function * registerClient(socket) {
 }
 
 const examples = () => (
-    ["I'm going to call you Boba Fet", "Your new name is Dave.", "Set mame to Bob.", "You're now called Computer.",
-    "What's your name?", "What are you called?", "You're called Strange.", "I'm going to call you David"]
+    ['I\'ll call you Boba Fet', 'Your new name is Dave.', 'Set mame to Bob.']
 )
 
 module.exports = {
