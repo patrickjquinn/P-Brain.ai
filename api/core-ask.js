@@ -56,6 +56,9 @@ function * train_recognizer(skills) {
                     keyword = keyword.replaceAll("'", "")
                     const recognised = classify(keyword).skill.name
                     if (recognised != skill.name) {
+                        if (skill.hard_rule) {
+                            throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
+                        }
                         classifier.addDocument(keyword, skill.name)
                         failed.push({keyword, skill: recognised})
                     }
