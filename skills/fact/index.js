@@ -10,7 +10,7 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
 }
 
 const intent = () => ({
-    keywords: ['what qqqq', 'Who won qqqq', 'who is qqqq', 'where is qqqq', 'when did qqqq','what is qqqq','what is qqqq in qqqq', '√ ', '-', '+', '%'],
+    keywords: ['what qqqq', 'Who won qqqq', 'who is qqqq', 'where is qqqq', 'when did qqqq', 'what is qqqq', 'what is qqqq in qqqq', '√ ', '-', '+', '%'],
     module: 'fact'
 })
 
