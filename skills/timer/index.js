@@ -26,7 +26,7 @@ function hard_rule(query, breakdown) {
         }
     }
     if (query.startsWith('show') || query.startsWith('tell') || query.startsWith('what')) {
-        if (words.includes('timer') || words.includes('timers')) {
+        if (query.includes('timer')) {
             return true
         }
     }
@@ -113,7 +113,10 @@ function initializeClock(time, command) {
 
             const response = {
                 type: 'timer',
-                msg: {text: `Hey there! Your timer for ${formattedTime} is finished.`}
+                msg: {
+                  text: `Hey there! Your timer for ${formattedTime} is finished.`,
+                  silent: (timer.command) ? true : false
+                }
             }
             socket_io.emit('response', response)
             if (timer.command) {
