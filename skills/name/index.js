@@ -39,7 +39,6 @@ function * register(app, io) {
     try {
         const nameJson = JSON.parse(fs.readFileSync(NAME_FILE))
         name = nameJson.name
-        console.log(`Name loaded from file: ${name}`)
     } catch (err) {
         // Ignore and use the default name.
     }

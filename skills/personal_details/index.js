@@ -43,7 +43,6 @@ function * name_resp(query) {
 function * register(app, io) {
     try {
         details = JSON.parse(fs.readFileSync(DETAILS_FILE))
-        console.log('Loaded personal details from config.')
     } catch (err) {
         // Ignore and use the default name.
     }

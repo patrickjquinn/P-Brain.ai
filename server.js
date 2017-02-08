@@ -71,12 +71,15 @@ const skillsApi = express()
 app.use('/api/skills', skillsApi)
 
 co(function * () {
+    console.log("Loading skills.")
     yield skills.loadSkills(skillsApi, io)
+    console.log("Training recognizer.")
     yield search.train_recognizer(skills.getSkills())
+    console.log("Starting server.")
+    http.listen(config.port, () => {
+        console.log(`Server started on http://localhost:${config.port}`)
+    })
 }).catch(err => {
     console.log(err)
     throw err
 })
-
-http.listen(config.port)
-console.log(`Server started on http://localhost:${config.port}`)
