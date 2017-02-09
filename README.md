@@ -87,7 +87,7 @@ https://github.com/timstableford/P-BrainAndroid
 
 ### iOS Client
 
-Coming Soon!
+https://github.com/patrickjquinn/P-Brain.ai-iOS
 
 # Docker
 
