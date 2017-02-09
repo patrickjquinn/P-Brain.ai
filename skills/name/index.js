@@ -2,10 +2,9 @@ const fs = require('fs')
 
 const NAME_FILE = 'config/name.json'
 
-const intent = () => ({
-    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', 'call you qqqq'],
-    module: 'name'
-})
+function hard_rule(query, breakdown) {
+    return query.includes("your name") || query.includes("youre called");
+}
 
 let name = 'Brain'
 let socket_io = null
@@ -14,9 +13,9 @@ function * name_resp(query) {
     query = query.toLowerCase()
     if (query.includes('who') || query.includes('what')) {
         if (query.toLowerCase().includes('what') && query.toLowerCase().includes('are')) {
-            return {text: `I'm called ${name}, your Brain.`, name}
+            return {text: `I'm called ${name}, your Brain.`, name, silent: true}
         } else {
-            return {text: `I'm called ${name}.`, name}
+            return {text: `I'm called ${name}.`, name, silent: true}
         }
     } else {
         const words = query.split(' ')
@@ -31,7 +30,7 @@ function * name_resp(query) {
 
         socket_io.emit('set_name', {name})
 
-        return {text: `You can now call me ${name}.`, name}
+        return {text: `You can now call me ${name}.`, name, silent: true}
     }
 }
 
@@ -56,13 +55,13 @@ function * registerClient(socket) {
 }
 
 const examples = () => (
-    ['I\'ll call you Boba Fet', 'Your new name is Dave.', 'Set mame to Bob.']
+    ['Your name is Dave.']
 )
 
 module.exports = {
     get: name_resp,
     register,
     registerClient,
-    intent,
+    hard_rule,
     examples
 }

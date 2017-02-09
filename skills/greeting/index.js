@@ -2,27 +2,18 @@ const config = require.main.require('./config/index.js').get
 const request = require('co-request')
 const co = require('co')
 
-function * get_username() {
+function * get_name() {
     const details_url = `http://localhost:${config.port}/api/skills/personal_details`
     let data = yield request(details_url)
     data = JSON.parse(data.body)
     return data.name
 }
 
-function * get_name() {
-    const details_url = `http://localhost:${config.port}/api/skills/name`
-    let data = yield request(details_url)
-    data = JSON.parse(data.body)
-    return data.name
-}
-
-
 function * make_greeting(silent) {
-    const username = yield get_username()
     const name = yield get_name()
     let greeting_name = ''
     if (name) {
-        greeting_name = `, ${username.split(' ')[0]}`
+        greeting_name = `, ${name.split(' ')[0]}`
     }
     const dt = new Date().getHours()
 
@@ -34,7 +25,7 @@ function * make_greeting(silent) {
     } else {
         response = `Good Evening${greeting_name}!`
     }
-    return {text: response, silent, name}
+    return {text: response, silent}
 }
 
 function * registerClient(socket) {

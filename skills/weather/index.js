@@ -7,7 +7,7 @@ const api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=' + ke
 const api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=' + keys.openweathermap.key + '&units=metric&q='
 
 const intent = () => ({
-    keywords: ['what is the weather', 'whats it like in qqqq', 'temperature'],
+    keywords: ['what is the weather', 'whats it like in qqqq', 'temperature', 'whats the weather qqqq'],
     module: 'weather'
 })
 
