@@ -30,6 +30,8 @@ Add api info for http://openweathermap.org/api and https://newsapi.org/account t
 
 Open Chrome and enter http://localhost:4567/
 
+Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain, What is the weather in Paris`).
+
 ## Install - Extra Windows Instructions
 
 Install Python: https://www.python.org/downloads/windows/
@@ -38,8 +40,6 @@ Install Node.js v6: https://nodejs.org/en/download/
 
 Install Windows Build Tools: `npm install --global --production windows-build-tools`
 
-
-Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain, What is the weather in Paris`).
 
 # Skills
 
