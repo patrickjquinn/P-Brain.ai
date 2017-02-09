@@ -15,6 +15,8 @@ https://www.youtube.com/watch?v=4EF_qEYNNwU
 ## Dependencies
 
 - Node 6
+- Python >= 2
+- Yarn
 
 ## Install
 
@@ -25,6 +27,16 @@ Clone repo, cd into its directory and type `yarn` & `yarn start`
 Add api info for http://openweathermap.org/api and https://newsapi.org/account to `config/index.js`
 
 Open Chrome and enter http://localhost:4567/
+
+## Install - Extra Windows Instructions
+
+Install Python: https://www.python.org/downloads/windows/
+
+Install Node.js v6: https://nodejs.org/en/download/
+
+Install Windows Build Tools: `npm install --global --production windows-build-tools`
+
+
 
 Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain, What is the weather in Paris`).
 

@@ -34,7 +34,7 @@ function * fact_resp(query) {
 }
 
 const examples = () => (
-    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?', 'What is 200 Pounds in Euro']
+    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?', 'What is 200 Pounds in Euro?']
 )
 
 module.exports = {
