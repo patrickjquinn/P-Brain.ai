@@ -1,6 +1,6 @@
 # P-Brain.ai - Voice Controlled Personal Assistant
 
-[![Join the chat at https://gitter.im/P-Brain/Lobby](https://badges.gitter.im/P-Brain/Lobby.svg)](https://gitter.im/P-Brain/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pat64%2eai%40gmail%2ecom&lc=IE&item_name=P%2dBrain%2eai&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
+[![Join the chat at https://gitter.im/P-Brain/Lobby](https://badges.gitter.im/P-Brain/Lobby.svg)](https://gitter.im/P-Brain/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pat64%2eai%40gmail%2ecom&lc=IE&item_name=P%2dBrain%2eai&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
 
 Natural language virtual assistant using Node + Bootstrap
 
@@ -12,11 +12,13 @@ Natural language virtual assistant using Node + Bootstrap
 
 https://www.youtube.com/watch?v=4EF_qEYNNwU
 
-## Dependencies
+# Dependencies
 
 - Node 6
 - Python >= 2
 - Yarn
+
+# Setup
 
 ## Install
 
@@ -37,8 +39,9 @@ Install Node.js v6: https://nodejs.org/en/download/
 Install Windows Build Tools: `npm install --global --production windows-build-tools`
 
 
-
 Say `Hey Brain`, `Brain` or `Okay Brain` followed by your query (i.e `Hey Brain, What is the weather in Paris`).
+
+# Skills
 
 ## Adding Skills
 
@@ -64,8 +67,9 @@ Add that new folder to the `skills` directory in the project.
 
 And bang, Brain will automatically import and enable your new skill!
 
+# Clients
 
-### End Points
+### Web Client
 `http://localhost:4567/api/ask?q={query}`
 `http://localhost:4567/`
 
