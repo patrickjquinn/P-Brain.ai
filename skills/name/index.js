@@ -13,9 +13,9 @@ function * name_resp(query) {
     query = query.toLowerCase()
     if (query.includes('who') || query.includes('what')) {
         if (query.toLowerCase().includes('what') && query.toLowerCase().includes('are')) {
-            return {text: `I'm called ${name}, your Brain.`, name, silent: true}
+            return {text: `I'm called ${name}, your Brain.`, name}
         } else {
-            return {text: `I'm called ${name}.`, name, silent: true}
+            return {text: `I'm called ${name}.`, name}
         }
     } else {
         const words = query.split(' ')
@@ -30,7 +30,7 @@ function * name_resp(query) {
 
         socket_io.emit('set_name', {name})
 
-        return {text: `You can now call me ${name}.`, name, silent: true}
+        return {text: `You can now call me ${name}.`, name}
     }
 }
 
