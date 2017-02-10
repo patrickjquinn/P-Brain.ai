@@ -1,4 +1,5 @@
 const fs = require('co-fs')
+const db = require('../db/index.js')
 
 function * log_query(query) {
     let queries_obj = {queries: []}

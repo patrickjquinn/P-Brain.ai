@@ -17,12 +17,14 @@
     "email": "noreply@github.com"
   },
   "dependencies": {
+    "body-parser": "^1.16.0",
     "cheerio": "*",
     "co": "*",
     "co-express": "*",
     "co-fs": "^1.2.0",
     "co-request": "*",
     "compression": "*",
+    "diskdb": "^0.1.17",
     "express": "*",
     "html-entities": "*",
     "ip": "*",
