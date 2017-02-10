@@ -5,9 +5,31 @@ const basicAuth = require('basic-auth')
 const config = require.main.require('./config/index.js').get
 
 const USERS_FILE = "config/users.json"
+const TOKENS_FILE = "config/tokens.json"
 
-let users = []
-const authenticated = []
+let users = null
+let authenticated = null
+
+function getTokens() {
+    if (!authenticated) {
+        try {
+            authenticated = JSON.parse(fs.readFileSync(TOKENS_FILE))
+        } catch (err) {
+            // Ignore and use a default.
+            console.log("Failed to load tokens file. Using default.")
+            authenticated = []
+        } 
+    }
+    return authenticated
+}
+
+function saveTokens() {
+    fs.writeFile(TOKENS_FILE, JSON.stringify(authenticated, null, 2), err => {
+        if (err) {
+            return console.log(err)
+        }
+    })
+}
 
 function filter(req, res, next) {
     function unauthorized(res) {
@@ -28,7 +50,7 @@ function isUserValid(user, pass) {
         return null
     }
     pass = md5(pass + config.auth.static_salt).toUpperCase()
-    if (users.length <= 0) {
+    if (!users) {
         if (!loadUsers()) {
             return null
         }
@@ -49,15 +71,17 @@ function authenticate(username, pass) {
             id: user.id,
             token: token.trim()
         })
+        saveTokens()
         return {token: token.trim() }
     }
     return null
 }
 
 function getTokenId(token) {
-    for (let i = 0; i < authenticated.length; i++) {
-        if (authenticated[i].token == token) {
-            return authenticated[i].id
+    const tokens = getTokens()
+    for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i].token == token) {
+            return tokens[i].id
         }
     }
     return null
