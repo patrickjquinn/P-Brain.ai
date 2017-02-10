@@ -12,13 +12,13 @@ natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
 const MAX_RETRAINS = 20
 let loaded_skills = []
 
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.replace(new RegExp(search, 'g'), replacement);
-};
+String.prototype.replaceAll = function (search, replacement) {
+    const target = this
+    return target.replace(new RegExp(search, 'g'), replacement)
+}
 
 function strip(word) {
-    return word.replaceAll("'", "").replace(/\?/g, '')
+    return word.replaceAll('\'', '').replace(/\?/g, '')
 }
 
 function * train_recognizer(skills) {
@@ -48,7 +48,7 @@ function * train_recognizer(skills) {
 
     // Now verify all the responses.
     function validate() {
-        let failed = []
+        const failed = []
         skills.map(skill => {
             if (skill.examples) {
                 skill.examples().map(keyword => {
@@ -133,15 +133,14 @@ function classify(q) {
             }
         }
     }
-    
+
     if (result_skill) {
         return {
             skill: result_skill,
             intent_breakdown
         }
-    } else {
-        throw new Error('No skill found.')
     }
+    throw new Error('No skill found.')
 }
 
 function * query(q) {

@@ -14,24 +14,22 @@ function * name_resp(query) {
     if (query.includes('who') || query.includes('what')) {
         if (query.toLowerCase().includes('what') && query.toLowerCase().includes('are')) {
             return {text: `I'm called ${name}, your Brain.`, name}
-        } else {
-            return {text: `I'm called ${name}.`, name}
         }
-    } else {
-        const words = query.split(' ')
-        name = words[words.length - 1]
-        name = name.charAt(0).toUpperCase() + name.slice(1)
-
-        fs.writeFile(NAME_FILE, JSON.stringify({name}, null, 2), err => {
-            if (err) {
-                return console.log(err)
-            }
-        })
-
-        socket_io.emit('set_name', {name})
-
-        return {text: `You can now call me ${name}.`, name}
+        return {text: `I'm called ${name}.`, name}
     }
+    const words = query.split(' ')
+    name = words[words.length - 1]
+    name = name.charAt(0).toUpperCase() + name.slice(1)
+
+    fs.writeFile(NAME_FILE, JSON.stringify({name}, null, 2), err => {
+        if (err) {
+            return console.log(err)
+        }
+    })
+
+    socket_io.emit('set_name', {name})
+
+    return {text: `You can now call me ${name}.`, name}
 }
 
 function * register(app, io) {

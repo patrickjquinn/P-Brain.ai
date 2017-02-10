@@ -15,9 +15,9 @@ function hard_rule(query, breakdown) {
     query = query.trim().toLowerCase()
     const type1 = query.startsWith('set a timer for')
     if (type1) {
-      return true;
+        return true
     }
-    const words = query.split(" ")
+    const words = query.split(' ')
     if (query.startsWith('in')) {
         for (let i = 0; i < words.length; i++) {
             if (getUnit(words[i])) {
