@@ -68,35 +68,119 @@
         }
     </script>
     <script>
-        var socket = io();
-        push_response('Just a second...');
-        socket.on('set_name', function(msg) {
-            var name = msg.name;
-
-            if (!name){
-                name = "Brain";
-            }   
-
-            $(".loading").remove();
-
-            if (annyang) {
-                var commands = {};
-                commands[name + " *tag"] = log_speech;
-                commands["(hey) " + name + " *tag"] = log_speech;
-                commands["(okay) " + name + " *tag"] = log_speech;
-                commands[name] = observe_speech;
-
-                
-                annyang.addCommands(commands);
-                SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
-                SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
+        function setupSocket(token) {
+            var socket = io.connect('/', {query: 'token=' + token});
+            push_response('Just a second...');
+            socket.on('set_name', function(msg) {
+                var name = msg.name;
+    
+                if (!name){
+                    name = "Brain";
+                }   
+    
+                $(".loading").remove();
+    
+                if (annyang) {
+                    var commands = {};
+                    commands[name + " *tag"] = log_speech;
+                    commands["(hey) " + name + " *tag"] = log_speech;
+                    commands["(okay) " + name + " *tag"] = log_speech;
+                    commands[name] = observe_speech;
+    
+                    
+                    annyang.addCommands(commands);
+                    SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
+                    SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
+                }
+            });
+    
+            socket.on('response', function(msg) {
+                $(".loading").remove();
+                response_handler(msg);
+            });
+        }
+    </script>
+    
+    <script>
+        function setCookie(cname, cvalue) {
+            var d = new Date();
+            d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+            var expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+        
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
             }
-        });
-
-        socket.on('response', function(msg) {
-            $(".loading").remove();
-            response_handler(msg);
-        });
+            return null;
+        }
+    </script>
+    
+    <script>
+        function login(username, password, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) {
+                        callback(null, JSON.parse(xhr.responseText).token);
+                    } else {
+                        callback(xhr.responseText, null);
+                    }
+                }
+            }
+            xhr.open('GET', '/api/login', true);
+            xhr.setRequestHeader("Authorization", "Basic " + btoa("demo:demo"));
+            xhr.send();
+        }
+        function validate(token, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) {
+                        callback(null);
+                    } else {
+                        callback(xhr.responseText);
+                    }
+                }
+            }
+            xhr.open('GET', '/api/validate?token=' + token, true);
+            xhr.send();
+        }
+        
+        function presentLogin() {
+            var username = prompt("Enter username", "demo");
+            var password = prompt("Enter password", "demo");
+            login(username, password, function (err, token) {
+                if (!err) {
+                    setCookie("token", token);
+                    setupSocket(token);
+                } else {
+                    presentLogin();
+                }
+            });
+        }
+        
+        if (getCookie("token")) {
+            validate(getCookie("token"), function (err) {
+                if (err) {
+                    presentLogin();
+                } else {
+                    setupSocket(getCookie("token"));
+                }
+            });
+        } else {
+            presentLogin();
+        }
     </script>
 
 </body>
