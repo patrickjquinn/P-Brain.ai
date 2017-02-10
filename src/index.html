@@ -68,8 +68,9 @@
         }
     </script>
     <script>
+        var socket = null;
         function setupSocket(token) {
-            var socket = io.connect('/', {query: 'token=' + token});
+            socket = io.connect('/', {query: 'token=' + token});
             push_response('Just a second...');
             socket.on('set_name', function(msg) {
                 var name = msg.name;
