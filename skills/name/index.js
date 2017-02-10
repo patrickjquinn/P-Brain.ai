@@ -2,10 +2,9 @@ const fs = require('fs')
 
 const NAME_FILE = 'config/name.json'
 
-const intent = () => ({
-    keywords: ['your new name is q', 'i\'m going to call you q', 'set name to q', 'call you qqqq'],
-    module: 'name'
-})
+function hard_rule(query, breakdown) {
+    return query.includes("your name") || query.includes("youre called");
+}
 
 let name = 'Brain'
 let socket_io = null
@@ -37,7 +36,6 @@ function * register(app, io) {
     try {
         const nameJson = JSON.parse(fs.readFileSync(NAME_FILE))
         name = nameJson.name
-        console.log(`Name loaded from file: ${name}`)
     } catch (err) {
         // Ignore and use the default name.
     }
@@ -55,13 +53,13 @@ function * registerClient(socket) {
 }
 
 const examples = () => (
-    ['I\'ll call you Boba Fet', 'Your new name is Dave.', 'Set mame to Bob.']
+    ['Your name is Dave.']
 )
 
 module.exports = {
     get: name_resp,
     register,
     registerClient,
-    intent,
+    hard_rule,
     examples
 }

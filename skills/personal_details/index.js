@@ -2,10 +2,10 @@ const fs = require('fs')
 
 const DETAILS_FILE = 'config/personal_details.json'
 
-const intent = () => ({
-    keywords: ['my name is qqqq', 'call me qqqq'],
-    module: 'personal_details'
-})
+function hard_rule(query, breakdown) {
+    return (query.includes("my") && query.includes("name")) ||
+                (query.includes("im") && query.includes("called"));
+}
 
 let details = {}
 
@@ -43,7 +43,6 @@ function * name_resp(query) {
 function * register(app, io) {
     try {
         details = JSON.parse(fs.readFileSync(DETAILS_FILE))
-        console.log('Loaded personal details from config.')
     } catch (err) {
         // Ignore and use the default name.
     }
@@ -53,12 +52,12 @@ function * register(app, io) {
 }
 
 const examples = () => (
-    ['Call me Patrick', 'My name is Marco.']
+    ['My name is Patrick', 'My name is Marco']
 )
 
 module.exports = {
     get: name_resp,
     register,
-    intent,
+    hard_rule,
     examples
 }

@@ -52,13 +52,12 @@ function * train_recognizer(skills) {
         skills.map(skill => {
             if (skill.examples) {
                 skill.examples().map(keyword => {
-                    keyword = strip(keyword)
                     const recognised = classify(keyword).skill.name
                     if (recognised != skill.name) {
                         if (skill.hard_rule) {
                             throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
                         }
-                        classifier.addDocument(keyword, skill.name)
+                        classifier.addDocument(strip(keyword).toLowerCase(), skill.name)
                         failed.push({keyword, skill: recognised})
                     }
                 })
@@ -103,7 +102,7 @@ function * correct_last(new_skill) {
 
 function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
-    q = strip(q)
+    q = strip(q).toLowerCase()
     const hard_skills = []
     loaded_skills.map(skill => {
         if (skill.hard_rule) {
@@ -124,7 +123,7 @@ function classify(q) {
     } else {
         const result = classifier.getClassifications(q)[0]
         const confidence = result.value
-        if (confidence > 0.25) {
+        if (confidence > 0.5) {
             throw new Error('error')
         }
         for (let i = 0; i < loaded_skills.length; i++) {
