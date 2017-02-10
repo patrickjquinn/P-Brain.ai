@@ -186,8 +186,9 @@ function * timer_resp(query) {
         if (query.includes('then')) {
             commandIndex = words.indexOf('then') + 1
         }
-    } else if (query.includes('in')) {
-        query = query.split('in')[1]
+    } else if (query.startsWith('in')) {
+        query = query.replace('in', '')
+        console.log(query)
         commandIndex = getLastUnit(words) + 1
     }
     const time = parseTime(query)
