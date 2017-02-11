@@ -1,5 +1,10 @@
 const request = require('co-request')
 const util = require('util')
+
+// The first substitute is expected to by the device name, all lower case,
+// no punctuation and spaces replaced with underscores, such as 'bedroom_light'.
+// The second substitute is the command, this module assumes there is an 'on', 'off' and 'state' command.
+// On success the server returns { state: 'on' } and on failure error will be set { error: 'Failure' }.
 const IOT_URL = "http://192.168.2.4:42238/devices/%s/methods/%s"
 
 function * do_iot(device, state) {
