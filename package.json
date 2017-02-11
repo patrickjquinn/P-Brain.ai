@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "basic-auth": "^1.1.0",
-    "body-parser": "^1.16.0",
+    "body-parser": "^1.16.1",
     "cheerio": "*",
     "co": "*",
     "co-express": "*",

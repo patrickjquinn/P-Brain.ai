@@ -9,17 +9,11 @@ const basicAuth = require('basic-auth')
 const fs = require('fs')
 const ip = require('ip')
 const co = require('co')
-const basicAuth = require('basic-auth')
-
 const db = require('./db/index.js')
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
 const authenticator = require('./authentication')
 const config = require('./config/index.js').get
-const authenticator = require('./authentication')
-
-
-
 const jsonParser = bodyParser.urlencoded({ extended: false })
 
 app.use(compression({
