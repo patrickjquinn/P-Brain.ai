@@ -17,6 +17,7 @@
     "email": "noreply@github.com"
   },
   "dependencies": {
+    "basic-auth": "^1.1.0",
     "cheerio": "*",
     "co": "*",
     "co-express": "*",
@@ -27,6 +28,8 @@
     "html-entities": "*",
     "ip": "*",
     "json2csv": "*",
+    "jsonwebtoken": "^7.2.1",
+    "md5": "^2.2.1",
     "natural": "*",
     "socket.io": "^1.7.2",
     "speakeasy-nlp": "^0.2.2",
