@@ -40,16 +40,17 @@ function * iot_resp(query) {
     let device = null
 
     const words = query.split(" ")
+    // Parse the query with the form 'Turn on the light.'.
     if (query.startsWith('turn on the') || query.startsWith('turn off the')) {
         state = words[1];
         device = query.replace(`turn ${state} the`, "").trim()
-    } else if (query.startsWith('turn the')) {
+    } else if (query.startsWith('turn the')) { // Parse the query with the form 'Turn the light on.'.
         if (words.length > 3) {
             state = words[words.length - 1]
             const stateIndex = query.lastIndexOf(state)
             device = query.substring(0, stateIndex).replace('turn the', "").trim()
         }
-    } else if(query.startsWith('is the')) {
+    } else if(query.startsWith('is the')) { // Parse the form 'Is the light on?'.
         if (words.length > 3) {
             state = 'state'
             const stateIndex = query.lastIndexOf('on')
