@@ -18,7 +18,6 @@
             if (typeof window.orientation !== 'undefined') {
                 return true;
             }
-
             return false;
         }
     </script>
@@ -53,7 +52,6 @@
             SpeechKITT.annyang();
             SpeechKITT.setStylesheet('themes/flat.css');
             SpeechKITT.vroom();
-
             if (detectmob()) {
                 annyang.start({
                     autoRestart: true,

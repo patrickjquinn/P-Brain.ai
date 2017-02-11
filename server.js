@@ -4,15 +4,23 @@ const http = require('http').Server(app)
 const io = require('socket.io')(http)
 const wrap = require('co-express')
 const compression = require('compression')
+const bodyParser = require('body-parser')
+const basicAuth = require('basic-auth')
 const fs = require('fs')
 const ip = require('ip')
 const co = require('co')
 const basicAuth = require('basic-auth')
 
+const db = require('./db/index.js')
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
+const authenticator = require('./authentication')
 const config = require('./config/index.js').get
 const authenticator = require('./authentication')
+
+
+
+const jsonParser = bodyParser.urlencoded({ extended: false })
 
 app.use(compression({
     threshold: 0,
@@ -29,6 +37,22 @@ app.use((req, res, next) => {
 
 // Don't bother with authentication for this.
 app.use(express.static('./src'))
+
+app.get('/api/profile/get', wrap(function * (req, res) {
+    const token = req.query.token
+
+    res.header('Content-Type', 'application/json')
+    res.send(db.get_user(token));
+}))
+
+app.post('/api/profile/create', jsonParser, wrap(function * (req, res) {
+    const profile = req.body
+
+    console.log(profile)
+
+    res.header('Content-Type', 'application/json')
+    res.send(db.create_user(profile));
+}))
 
 // TODO parse services in query
 app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
@@ -78,7 +102,7 @@ app.get('/api/validate', function (req, res) {
     } else {
         res.sendStatus(401)
     }
-});
+})
 
 io.use(authenticator.verifyIO);
 
