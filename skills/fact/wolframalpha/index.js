@@ -1,65 +1,31 @@
 const request = require('co-request')
-const parser = require('xml2json')
+const config = require.main.require('./config').get
+const wolfram = require('wolfram-alpha').createClient(config.wolframalpha.key)
 
-let config = require('../../../config/'),
-    keys = config.get
+function * query_wrapper(query) {
+    return new Promise(function (resolve, reject) {
+        wolfram.query(query, function(err, result) {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
 
 function * wlfra_resp(query) {
-    const url = 'http://api.wolframalpha.com/v2/query?input=<query>&appid=' + keys.wolframalpha.key
-
-    let data = yield request(url.replace('<query>', query))
-
     try {
-        data = JSON.parse(parser.toJson(data.body))
-    } catch (e) {
-        if (e) {
-            console.log('error parsing wolframalpha body ' + e)
-        }
-        return null
-    }
-
-    const pods = data.queryresult.pod
-
-    let result = ''
-
-    try {
-        if (pods && pods.length && pods.length > 0) {
-            for (var i = 0; i < pods.length; i++) {
-                var index = pods[i]
-
-                if (index.primary === 'true') {
-                    result = index.subpod.plaintext
-                    break
-                }
-
-                if (index.id == 'Result') {
-                    result = index.subpod.plaintext
-                    break
-                }
+        const result = yield(query_wrapper(query))
+        for (let i = 0; i < result.length; i++) {
+            if (result[i].primary) {
+                return result[i].subpods[0].text
             }
-
-            if (result === '') {
-                for (var i = 0; i < pods.length; i++) {
-                    var index = pods[i]
-
-                    if (index.title == 'Basic information') {
-                        result = index.subpod.plaintext
-                        break
-                    }
-                }
-            }
-        } else {
-            return null
         }
-
-        if (result.indexOf('|') != -1) {
-            result = result.replaceAll(' |', ', ')
-        }
-
-        return result
-    } catch (e) {
-        console.log(e)
-        return null
+        return "I'm sorry, I didn't understand that."
+    } catch (err) {
+        console.log(err)
+        return "I'm sorry, I didn't understand that."
     }
 }
 
