@@ -67,7 +67,7 @@ function authenticate(username, pass) {
     const user = isUserValid(username, pass)
     if (user) {
         var token = jwt.sign(user, config.auth.jwtSecret)
-        authenticated.push({
+        getTokens().push({
             id: user.id,
             token: token.trim()
         })
