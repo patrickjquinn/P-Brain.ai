@@ -9,7 +9,11 @@ function * do_iot(device, state) {
         console.log(`IoT Error: ${data.error} - ${device} - ${state}`)
         return {text: `I'm sorry, I can't turn the ${device} ${state}.`}
     } else {
-        return {text: `Turning ${device} ${state}.`}
+        if (state == 'state') {
+            return {text: `The ${device} is ${data.state}.`}
+        } else {
+            return {text: `Turning the ${device} ${state}.`}
+        }
     }
 }
 
@@ -19,6 +23,9 @@ function hard_rule(query, breakdown) {
     }
     if (query.startsWith('turn the') && (query.includes('on') || query.includes('off'))) {
         return true
+    }
+    if (query.startsWith('is the') && query.endsWith('on')) {
+        return true;
     }
     return false
 }
@@ -37,12 +44,18 @@ function * iot_resp(query) {
             const stateIndex = query.lastIndexOf(state)
             device = query.substring(0, stateIndex).replace('turn the', "").trim()
         }
+    } else if(query.startsWith('is the')) {
+        if (words.length > 3) {
+            state = 'state'
+            const stateIndex = query.lastIndexOf('on')
+            device = query.substring(0, stateIndex).replace('is the', "").trim()
+        }
     }
 
     if (device.length == 0) {
         return {text: `I'm sorry, I couldn't find the device in your query.`}
     }
-    if (state != 'on' && state != 'off') {
+    if (state != 'on' && state != 'off' && state != 'state') {
         return {text: `I'm sorry, I don't understand your query.`}
     }
 
@@ -53,7 +66,7 @@ function * iot_resp(query) {
 }
 
 const examples = () => (
-    ['Turn on the light.', 'Turn the light off.']
+    ['Turn on the light.', 'Turn the light off.', 'Is the light on?']
 )
 
 module.exports = {
