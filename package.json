@@ -33,9 +33,9 @@
     "striptags": "*",
     "tabletojson": "*",
     "thunkify-wrap": "*",
+    "wolfram-alpha": "^0.5.0",
     "words-to-num": "*",
-    "x-ray": "*",
-    "xml2json": "*"
+    "x-ray": "*"
   },
   "devDependencies": {
     "ava": "^0.17.0"
