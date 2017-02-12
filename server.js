@@ -7,10 +7,12 @@ const compression = require('compression')
 const fs = require('fs')
 const ip = require('ip')
 const co = require('co')
+const basicAuth = require('basic-auth')
 
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
 const config = require('./config/index.js').get
+const authenticator = require('./authentication')
 
 app.use(compression({
     threshold: 0,
@@ -25,10 +27,11 @@ app.use((req, res, next) => {
     next()
 })
 
+// Don't bother with authentication for this.
 app.use(express.static('./src'))
 
 // TODO parse services in query
-app.get('/api/ask', wrap(function * (req, res) {
+app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     res.header('Content-Type', 'application/json')
@@ -42,11 +45,42 @@ app.get('/api/ask', wrap(function * (req, res) {
     }
 }))
 
-app.get('/api/correct_last/:skill', wrap(function * (req, res) {
+app.get('/api/correct_last/:skill', authenticator.filter, wrap(function * (req, res) {
     const input = req.params.skill.toLowerCase()
     yield search.correct_last(input)
     res.json({text: 'Successfully re-trained.'})
 }))
+
+app.get('/api/login', function (req, res) {
+    function unauthorized(res) {
+        res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+        return res.sendStatus(401);
+    };
+  
+    var user = basicAuth(req);
+  
+    const token = authenticator.authenticate(user.name, user.pass)
+    if (token) {
+        return res.json(token)
+    } else {
+        return unauthorized(res)
+    }
+});
+
+app.get('/api/validate', function (req, res) {
+    const token = req.query.token
+    if (token) {
+        if (authenticator.verifyToken(token.trim())) {
+            res.sendStatus(200)
+        } else {
+            res.sendStatus(401)
+        }
+    } else {
+        res.sendStatus(401)
+    }
+});
+
+io.use(authenticator.verifyIO);
 
 io.on('connect', socket => {
     socket.on('ask', co.wrap(function * (msg) {
@@ -68,6 +102,7 @@ io.on('connect', socket => {
 })
 
 const skillsApi = express()
+skillsApi.all('/', authenticator.filter)
 app.use('/api/skills', skillsApi)
 
 co(function * () {

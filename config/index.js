@@ -3,7 +3,11 @@ const config = {
     wolframalpha: {key: 'U7L4VR-K3WJPLK6Y2'},
     newsapi: {key: 'f4504df34ba9432f80ff040a41736518'},
     port: 4567,
-    zap: {ip: '192.168.178.172'}
+    zap: {ip: '192.168.178.172'},
+    auth: {
+        jwtSecret: 'random_secret_key',
+        static_salt: '_pbrain_auth'
+    }
 }
 
 module.exports = {
