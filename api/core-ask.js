@@ -159,6 +159,7 @@ function * query(q) {
     }
 }
 
+global.query = query;
 module.exports = {
     query,
     train_recognizer,

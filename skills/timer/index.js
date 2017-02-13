@@ -1,6 +1,5 @@
 const WtoN = require('words-to-num')
 const config = require.main.require('./config/index.js').get
-const request = require('co-request')
 const co = require('co')
 
 const timers = []
@@ -121,9 +120,8 @@ function initializeClock(time, command) {
             socket_io.emit('response', response)
             if (timer.command) {
                 co(function * () {
-                    const ask_url = `http://localhost:${config.port}/api/ask?q=${timer.command}`
-                    const data = yield request(ask_url)
-                    socket_io.emit('response', JSON.parse(data.body))
+                    const data = yield global.query(timer.command)
+                    socket_io.emit('response', data)
                 }).catch(err => {
                     console.log(err)
                 })
@@ -188,7 +186,6 @@ function * timer_resp(query) {
         }
     } else if (query.startsWith('in')) {
         query = query.replace('in', '')
-        console.log(query)
         commandIndex = getLastUnit(words) + 1
     }
     const time = parseTime(query)
