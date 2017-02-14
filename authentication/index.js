@@ -70,6 +70,17 @@ function login(req, res) {
     })
 }
 
+function * getUser(req) {
+    const basicUser = basicAuth(req);
+    co(function * () {
+        const encryptedPass = yield encryptPassword(basicUser.pass)
+        const user = yield global.db.getUser(basicUser.name, encryptedPass)
+        return user
+    }).catch(err => {
+        return null
+    })
+}
+
 function validate(req, res) {
     const token = req.query.token
     if (token) {
@@ -111,5 +122,6 @@ module.exports = {
     filter,
     login,
     validate,
-    encryptPassword
+    encryptPassword,
+    getUser
 }

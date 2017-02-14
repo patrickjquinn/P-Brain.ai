@@ -143,12 +143,12 @@ function classify(q) {
     throw new Error('No skill found.')
 }
 
-function * query(q) {
+function * query(q, user) {
     yield log.add(q)
     const classification = classify(q)
 
     console.log(`Using skill ${classification.skill.name} for ${q}`)
-    const resp = yield classification.skill.get(q, classification.intent_breakdown)
+    const resp = yield classification.skill.get(q, classification.intent_breakdown, user)
 
     yield log.response(q, resp, classification.skill.name)
 

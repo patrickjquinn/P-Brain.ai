@@ -38,7 +38,8 @@ app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
     res.header('Content-Type', 'application/json')
 
     try {
-        const result = yield search.query(input)
+        const user = yield authenticator.getUser(req)
+        const result = yield search.query(input, user)
         res.send(result)
     } catch (e) {
         console.log(e)
@@ -58,9 +59,10 @@ io.use(authenticator.verifyIO);
 
 io.on('connect', socket => {
     socket.on('ask', co.wrap(function * (msg) {
+        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
         const input = msg.text.toLowerCase()
         try {
-            const result = yield search.query(input)
+            const result = yield search.query(input, user)
             socket.emit('response', result)
         } catch (e) {
             console.log(e)
@@ -68,7 +70,8 @@ io.on('connect', socket => {
         }
     }))
     co(function * () {
-        yield skills.registerClient(socket)
+        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
+        yield skills.registerClient(socket, user)
     }).catch(err => {
         console.log(err)
         throw err
