@@ -34,52 +34,46 @@ function filter(req, res, next) {
         res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
         return res.sendStatus(401);
     }
-  
-    const basicUser = basicAuth(req);
+
     co(function * () {
-        const encryptedPass = yield encryptPassword(basicUser.pass)
-        const user = yield global.db.getUser(basicUser.name, encryptedPass)
-        if (user) {
-            next()
+        // If there's a token cookies then use that instead of username/password combo.
+        if (req.cookies.token) {
+            const user = yield global.db.getUserFromToken(req.cookies.token.trim())
+            if (user) {
+                req.user = user
+                req.token = req.cookies.token.trim()
+                return next()
+            }
+        }
+
+        const basicUser = basicAuth(req);
+        if (basicUser && basicUser.name && basicUser.pass) {
+            const encryptedPass = yield encryptPassword(basicUser.pass)
+            const user = yield global.db.getUser(basicUser.name, encryptedPass)
+            if (user) {
+                const secret = yield getSecret()
+                const token = jwt.sign(user, secret).trim()
+                yield global.db.addToken(user, token)
+
+                req.user = user
+                req.token = token
+                res.cookie('token', token, {maxAge: 900000})
+                next()
+            } else {
+                unauthorized(res)
+            }
         } else {
             unauthorized(res)
         }
     }).catch(err => {
+        console.log(err)
         res.status(503).json(err)
     })
 }
 
 function login(req, res) {
-    function unauthorized(res) {
-        res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-        return res.sendStatus(401);
-    }
-
-    const basicUser = basicAuth(req);
-    co(function * () {
-        const encryptedPass = yield encryptPassword(basicUser.pass)
-        const user = yield global.db.getUser(basicUser.name, encryptedPass)
-        if (user) {
-            const secret = yield getSecret()
-            const token = jwt.sign(user, secret).trim()
-            yield global.db.addToken(user, token)
-            return res.json({ token: token})
-        } else {
-            unauthorized(res)
-        }
-    }).catch(err => {
-        res.status(503).json(err)
-    })
-}
-
-function * getUser(req) {
-    const basicUser = basicAuth(req);
-    co(function * () {
-        const encryptedPass = yield encryptPassword(basicUser.pass)
-        const user = yield global.db.getUser(basicUser.name, encryptedPass)
-        return user
-    }).catch(err => {
-        return null
+    filter(req, res, function() {
+        res.json({token: req.token})
     })
 }
 
@@ -144,6 +138,5 @@ module.exports = {
     login,
     validate,
     encryptPassword,
-    getUser,
     getSocketsByUser
 }

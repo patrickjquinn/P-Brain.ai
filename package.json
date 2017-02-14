@@ -25,6 +25,7 @@
     "co-fs": "^1.2.0",
     "co-request": "*",
     "compression": "*",
+    "cookie-parser": "^1.4.3",
     "diskdb": "^0.1.17",
     "express": "*",
     "html-entities": "*",

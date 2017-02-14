@@ -213,6 +213,33 @@ function * getUserTokens(user) {
     })
 }
 
+function * addQuery(query, user) {
+    return new Promise(function (resolve, reject) {
+        query = JSON.stringify(query)
+        db.run("INSERT INTO queries(query, user_id) VALUES(?, ?)", query, user.user_id, function(err) {
+            if (err) {
+                reject(err)
+            } else {
+                // lastId +1 because row IDs start at 0 and SQL IDs start at 1.
+                resolve({ query_id: this.lastId + 1, query, user })
+            }
+        })
+    })
+}
+
+function * addResponse(query, skill, response) {
+    return new Promise(function (resolve, reject) {
+        response = JSON.stringify(response)
+        db.run("INSERT INTO responses(query_id, skill, response) VALUES(?, ?, ?)", query.query_id, skill, response, function(err) {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 /*co(function * () {
     const val = yield getUserFromName("demo")
     console.log(val)
@@ -248,5 +275,7 @@ module.exports = {
     getUserFromToken,
     getUser,
     saveUser,
-    getUserTokens
+    getUserTokens,
+    addQuery,
+    addResponse
 }

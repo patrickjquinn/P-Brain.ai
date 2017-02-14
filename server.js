@@ -13,6 +13,7 @@ const skills = require('./skills/skills.js')
 const authenticator = require('./authentication')
 const config = require('./config/index.js').get
 const jsonParser = bodyParser.urlencoded({ extended: false })
+const cookieParser = require('cookie-parser')
 global.db = require('./sqlite_db')
 
 app.use(compression({
@@ -28,29 +29,21 @@ app.use((req, res, next) => {
     next()
 })
 
-// Don't bother with authentication for this.
-app.use(express.static('./src'))
+app.use(cookieParser());
+
+app.use('/', [ authenticator.filter, express.static('./src') ])
 
 // TODO parse services in query
 app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
-    res.header('Content-Type', 'application/json')
-
     try {
-        const user = yield authenticator.getUser(req)
-        const result = yield search.query(input, user)
-        res.send(result)
+        const result = yield search.query(input, req.user)
+        res.json(result)
     } catch (e) {
         console.log(e)
-        res.send({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
+        res.json({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
     }
-}))
-
-app.get('/api/correct_last/:skill', authenticator.filter, wrap(function * (req, res) {
-    const input = req.params.skill.toLowerCase()
-    yield search.correct_last(input)
-    res.json({text: 'Successfully re-trained.'})
 }))
 
 app.get('/api/login', authenticator.login);
