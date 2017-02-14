@@ -37,11 +37,15 @@ function filter(req, res, next) {
 
     co(function * () {
         // If there's a token cookies then use that instead of username/password combo.
-        if (req.cookies.token) {
-            const user = yield global.db.getUserFromToken(req.cookies.token.trim())
+        let token = req.query.token
+        if (!token) {
+            token = req.cookies.token
+        }
+        if (token) {
+            const user = yield global.db.getUserFromToken(token.trim())
             if (user) {
                 req.user = user
-                req.token = req.cookies.token.trim()
+                req.token = token.trim()
                 return next()
             }
         }
@@ -78,21 +82,7 @@ function login(req, res) {
 }
 
 function validate(req, res) {
-    const token = req.query.token
-    if (token) {
-        co(function *() {
-            const user = yield global.db.getUserFromToken(token.trim())
-            if (user) {
-                res.sendStatus(200)
-            } else {
-                res.sendStatus(401)
-            }
-        }).catch(err => {
-            res.status(503).json(err)
-        })
-    } else {
-        res.sendStatus(401)
-    }
+    res.sendStatus(200)
 }
 
 function verifyIO(socket, next) {
