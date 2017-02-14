@@ -1,15 +1,9 @@
-const fs = require('fs')
-
-const DETAILS_FILE = 'config/personal_details.json'
-
 function hard_rule(query, breakdown) {
     return (query.includes("my") && query.includes("name")) ||
                 (query.includes("im") && query.includes("called"));
 }
 
-let details = {}
-
-function * name_resp(query) {
+function * name_resp(query, breakdown, user) {
     const words = query.toLowerCase().split(' ')
 
     let nameIndex = words.length - 1
@@ -28,27 +22,16 @@ function * name_resp(query) {
     let name = ''
     // Make the first letters uppercase and make it into one string.
     for (let i = 0; i < names.length; i++) {
-        name += ` ${names[i].charAt(0).toUpperCase() + names[i].slice(1)}`
+        name += `${names[i].charAt(0).toUpperCase() + names[i].slice(1)}`
     }
-    details.name = name.trim()
-    fs.writeFile(DETAILS_FILE, JSON.stringify(details, null, 2), err => {
-        if (err) {
-            return console.log(err)
+    if (name.length <= 0) {
+        return {
+            text: 'I\'m sorry, I did\'t quite catch your name...'
         }
-    })
-
-    return {text: `Okay I'll call you ${details.name}.`, name: details.name}
-}
-
-function * register(app, io) {
-    try {
-        details = JSON.parse(fs.readFileSync(DETAILS_FILE))
-    } catch (err) {
-        // Ignore and use the default name.
+    } else {
+        yield global.db.setValue('personal_details', user, 'name', name)
+        return {text: `Okay I'll call you ${name}.`, name: name}
     }
-    app.get('/', (req, res) => {
-        res.json(details)
-    })
 }
 
 const examples = () => (
@@ -57,7 +40,6 @@ const examples = () => (
 
 module.exports = {
     get: name_resp,
-    register,
     hard_rule,
     examples
 }

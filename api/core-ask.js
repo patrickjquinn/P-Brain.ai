@@ -1,7 +1,6 @@
 const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
-const log = require.main.require('./log')
 const fs = require('fs')
 const config = require.main.require('./config/index.js').get
 
@@ -88,18 +87,6 @@ function * train_recognizer(skills) {
     }
 }
 
-function * correct_last(new_skill) {
-    const response = yield log.remove_last_response()
-    if (response) {
-        response.skill = new_skill
-        while (classifier.getClassifications(response.query)[0].label != new_skill) {
-            yield log.response(response.query, response.response, response.skill)
-            classifier.addDocument(response.query, response.skill)
-            classifier.retrain()
-        }
-    }
-}
-
 function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
     q = strip(q).toLowerCase()
@@ -143,14 +130,14 @@ function classify(q) {
     throw new Error('No skill found.')
 }
 
-function * query(q) {
-    yield log.add(q)
+function * query(q, user) {
+    const query_data = yield global.db.addQuery(q, user)
     const classification = classify(q)
 
     console.log(`Using skill ${classification.skill.name} for ${q}`)
-    const resp = yield classification.skill.get(q, classification.intent_breakdown)
+    const resp = yield classification.skill.get(q, classification.intent_breakdown, user)
 
-    yield log.response(q, resp, classification.skill.name)
+    yield global.db.addResponse(query_data, classification.skill.name, resp)
 
     return {
         msg: resp,
@@ -159,8 +146,8 @@ function * query(q) {
     }
 }
 
+global.query = query;
 module.exports = {
     query,
-    train_recognizer,
-    correct_last
+    train_recognizer
 }

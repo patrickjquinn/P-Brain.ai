@@ -10,7 +10,7 @@
     <meta http-equiv="cleartype" content="on">
 
     <link rel="stylesheet" href="css/app.css">
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <script type="text/javascript">
@@ -18,12 +18,11 @@
             if (typeof window.orientation !== 'undefined') {
                 return true;
             }
-
             return false;
         }
     </script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.4.0/annyang.min.js"></script>
     <script src="https://cdn.jsdelivr.net/webtorrent/latest/webtorrent.min.js"></script>
 
     <script src="js/speechkitt.min.js"></script>
@@ -43,7 +42,7 @@
             </div>
         </div>
     </div>
-    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
     <script src="js/index.js"></script>
     <script type="text/javascript">
         if (!annyang) {
@@ -53,7 +52,6 @@
             SpeechKITT.annyang();
             SpeechKITT.setStylesheet('themes/flat.css');
             SpeechKITT.vroom();
-
             if (detectmob()) {
                 annyang.start({
                     autoRestart: true,
@@ -68,35 +66,94 @@
         }
     </script>
     <script>
-        var socket = io();
-        push_response('Just a second...');
-        socket.on('set_name', function(msg) {
-            var name = msg.name;
-
-            if (!name){
-                name = "Brain";
-            }   
-
-            $(".loading").remove();
-
-            if (annyang) {
-                var commands = {};
-                commands[name + " *tag"] = log_speech;
-                commands["(hey) " + name + " *tag"] = log_speech;
-                commands["(okay) " + name + " *tag"] = log_speech;
-                commands[name] = observe_speech;
-
-                
-                annyang.addCommands(commands);
-                SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
-                SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
+        var socket = null;
+        function setupSocket(token) {
+            socket = io.connect('/', {query: 'token=' + token});
+            push_response('Just a second...');
+            socket.on('set_name', function(msg) {
+                var name = msg.name;
+    
+                if (!name){
+                    name = "Brain";
+                }   
+    
+                $(".loading").remove();
+    
+                if (annyang) {
+                    var commands = {};
+                    commands[name + " *tag"] = log_speech;
+                    commands["(hey) " + name + " *tag"] = log_speech;
+                    commands["(okay) " + name + " *tag"] = log_speech;
+                    commands[name] = observe_speech;
+    
+                    
+                    annyang.addCommands(commands);
+                    SpeechKITT.setInstructionsText('Say "' + name + '" followed by…');
+                    SpeechKITT.setSampleCommands(["What's the time", "Play Rumors by Fleetwood Mac"]);
+                }
+            });
+    
+            socket.on('response', function(msg) {
+                $(".loading").remove();
+                response_handler(msg);
+            });
+        }
+    </script>
+    
+    <script>
+        function setCookie(cname, cvalue) {
+            var d = new Date();
+            d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+            var expires = "expires="+ d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+        
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
             }
-        });
-
-        socket.on('response', function(msg) {
-            $(".loading").remove();
-            response_handler(msg);
-        });
+            return null;
+        }
+    </script>
+    
+    <script>
+        function validate(token, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) {
+                        callback(null);
+                    } else {
+                        callback(xhr.responseText);
+                    }
+                }
+            }
+            xhr.open('GET', '/api/validate?token=' + token, true);
+            xhr.send();
+        }
+        
+        if (getCookie("token")) {
+            validate(getCookie("token"), function (err) {
+                if (err) {
+                    console.log("Token cookie, invalid, reloading for re-authentication");
+                    location.reload();
+                } else {
+                    setupSocket(getCookie("token"));
+                }
+            });
+        } else {
+            console.log("Token cookie not found, reloading for setup.");
+            location.reload();
+        }
     </script>
 
 </body>

@@ -1,16 +1,20 @@
+const co = require('co')
 const express = require('express')
 const app = express()
 const http = require('http').Server(app)
 const io = require('socket.io')(http)
 const wrap = require('co-express')
 const compression = require('compression')
+const bodyParser = require('body-parser')
 const fs = require('fs')
 const ip = require('ip')
-const co = require('co')
-
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
+const authenticator = require('./authentication')
 const config = require('./config/index.js').get
+const jsonParser = bodyParser.urlencoded({ extended: false })
+const cookieParser = require('cookie-parser')
+global.db = require('./sqlite_db')
 
 app.use(compression({
     threshold: 0,
@@ -25,34 +29,33 @@ app.use((req, res, next) => {
     next()
 })
 
-app.use(express.static('./src'))
+app.use(cookieParser());
+
+app.use('/', [ authenticator.filter, express.static('./src') ])
 
 // TODO parse services in query
-app.get('/api/ask', wrap(function * (req, res) {
+app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
-    res.header('Content-Type', 'application/json')
-
     try {
-        const result = yield search.query(input)
-        res.send(result)
+        const result = yield search.query(input, req.user)
+        res.json(result)
     } catch (e) {
         console.log(e)
-        res.send({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
+        res.json({msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
     }
 }))
 
-app.get('/api/correct_last/:skill', wrap(function * (req, res) {
-    const input = req.params.skill.toLowerCase()
-    yield search.correct_last(input)
-    res.json({text: 'Successfully re-trained.'})
-}))
+app.get('/api/login', authenticator.login);
+app.get('/api/validate', authenticator.validate)
+io.use(authenticator.verifyIO);
 
 io.on('connect', socket => {
     socket.on('ask', co.wrap(function * (msg) {
+        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
         const input = msg.text.toLowerCase()
         try {
-            const result = yield search.query(input)
+            const result = yield search.query(input, user)
             socket.emit('response', result)
         } catch (e) {
             console.log(e)
@@ -60,7 +63,8 @@ io.on('connect', socket => {
         }
     }))
     co(function * () {
-        yield skills.registerClient(socket)
+        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
+        yield skills.registerClient(socket, user)
     }).catch(err => {
         console.log(err)
         throw err
@@ -68,16 +72,42 @@ io.on('connect', socket => {
 })
 
 const skillsApi = express()
+skillsApi.all('/', authenticator.filter)
 app.use('/api/skills', skillsApi)
 
+function * initialSetup() {
+    const port = yield global.db.getGlobalValue("port")
+    if (!port) {
+        console.log("Setting default values in database")
+        yield global.db.setGlobalValue("port", 4567)
+        const user = {
+            username: 'demo',
+            password: yield authenticator.encryptPassword('demo')
+        }
+        yield global.db.saveUser(user)
+    }
+}
+
 co(function * () {
+    console.log("Setting up database.")
+    yield global.db.setup('pbrain.db')
+    yield initialSetup()
+
+    global.sendToUser = function(user, type, message) {
+        const sockets = authenticator.getSocketsByUser(user)
+        sockets.map(function (socket) {
+            socket.emit(type, message)
+        })
+    }
+
     console.log("Loading skills.")
-    yield skills.loadSkills(skillsApi, io)
+    yield skills.loadSkills()
     console.log("Training recognizer.")
     yield search.train_recognizer(skills.getSkills())
     console.log("Starting server.")
-    http.listen(config.port, () => {
-        console.log(`Server started on http://localhost:${config.port}`)
+    const port = yield global.db.getGlobalValue("port")
+    http.listen(port, () => {
+        console.log(`Server started on http://localhost:${port}`)
     })
 }).catch(err => {
     console.log(err)

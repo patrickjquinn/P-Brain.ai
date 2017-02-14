@@ -3,4 +3,6 @@ node_modules/*
 log/*.json
 config/*
 .idea/*
+db/memorybank/*
 yarn.lock
+pbrain.db
