@@ -8,7 +8,7 @@ let DEFAULT_NAME = 'Brain'
 
 function * getName(user) {
     try {
-        const nametmp = yield global.db.setValue("name", user, "name")
+        const nametmp = yield global.db.getValue("name", user, "name")
         if (nametmp) {
             return nametmp
         }
