@@ -5,3 +5,4 @@ config/*
 .idea/*
 db/memorybank/*
 yarn.lock
+pbrain.db
