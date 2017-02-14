@@ -108,7 +108,7 @@ co(function * () {
     }
 
     console.log("Loading skills.")
-    yield skills.loadSkills(skillsApi, io)
+    yield skills.loadSkills()
     console.log("Training recognizer.")
     yield search.train_recognizer(skills.getSkills())
     console.log("Starting server.")

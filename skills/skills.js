@@ -9,17 +9,7 @@ const getDirectories = srcpath =>
 
 const skills = []
 
-function * loadSkills(skillsApi, io) {
-    skillsApi.get('/', (req, res) => {
-        const skillNames = []
-        skills.map(skill => {
-            if (skill.intent) {
-                skillNames.push(skill.name)
-            }
-        })
-        res.json(skillNames)
-    })
-
+function * loadSkills() {
     const skills_dir = __dirname.replace('/api', '')
     const dirs = getDirectories(skills_dir)
 
@@ -28,12 +18,6 @@ function * loadSkills(skillsApi, io) {
         const skill = require(`./${dir}`)
         skill.name = dir
         skills.push(skill)
-
-        if (typeof (skill.register) === 'function') {
-            const localSkillApi = express()
-            skillsApi.use('/' + skill.name, localSkillApi)
-            yield skill.register(localSkillApi, io)
-        }
     }
 }
 
