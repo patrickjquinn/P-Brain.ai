@@ -2,6 +2,7 @@ global.db = require('./sqlite_db')
 const auth = require('./authentication')
 const co = require('co')
 if (process.argv.length != 4) {
+    console.log("Adds a user to the database or updates the password if they exist.")
     console.log("Usage: password.js <username> <password>")
 } else {
     co(function * () {
