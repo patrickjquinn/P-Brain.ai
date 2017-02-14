@@ -1,9 +1,7 @@
 const WtoN = require('words-to-num')
-const config = require.main.require('./config/index.js').get
 const co = require('co')
 
 const timers = []
-let socket_io = null
 
 // These act as unit tests rather than training data because the skill supplies no intent.
 const examples = () => (
@@ -97,8 +95,12 @@ function formatTime(time) {
     return message
 }
 
-function initializeClock(time, command) {
-    const timer = {deadline: new Date(Date.parse(new Date()) + time), time, timerInterval: null}
+function initializeClock(time, command, user) {
+    const timer = {
+        deadline: new Date(Date.parse(new Date()) + time),
+        time, timerInterval: null,
+        user: user
+    }
     if (command) {
         timer.command = command
     }
@@ -117,11 +119,11 @@ function initializeClock(time, command) {
                   silent: (timer.command) ? true : false
                 }
             }
-            socket_io.emit('response', response)
+            global.sendToUser(user, 'response', response)
             if (timer.command) {
                 co(function * () {
                     const data = yield global.query(timer.command)
-                    socket_io.emit('response', data)
+                    global.sendToUser(user, 'response', data)
                 }).catch(err => {
                     console.log(err)
                 })
@@ -161,16 +163,27 @@ function getLastUnit(words) {
     return unit
 }
 
-function * timer_resp(query) {
+function getUserTimers(user) {
+    const user_timers = []
+    timers.map(function (timer) {
+        if (timer.user.user_id == user.user_id) {
+            user_timers.push(timer)
+        }
+    })
+    return user_timers
+}
+
+function * timer_resp(query, breakdown, user) {
     // Parse showing timers.
     if (query.startsWith('show') || query.startsWith('what')) {
         let timersString = 'You have no active timers.'
-        if (timers.length > 0) {
-            timersString = `You have ${timers.length == 1 ? 'a ' : ''}timer${timers.length > 1 ? 's' : ''} for: `
-            for (let i = 0; i < timers.length; i++) {
-                const formatted = formatTime(getTimeRemaining(timers[i].deadline.getTime() - Date.now()))
-                const command = (timers[i].command) ? ` which will run '${timers[i].command}'` : ''
-                timersString += `${i > 0 ? ', ' : ''}${(i > 0 && i == timers.length - 1) ? 'and ' : ''}${formatted}${command}`
+        const user_timers = getUserTimers(user)
+        if (user_timers.length > 0) {
+            timersString = `You have ${user_timers.length == 1 ? 'a ' : ''}timer${user_timers.length > 1 ? 's' : ''} for: `
+            for (let i = 0; i < user_timers.length; i++) {
+                const formatted = formatTime(getTimeRemaining(user_timers[i].deadline.getTime() - Date.now()))
+                const command = (user_timers[i].command) ? ` which will run '${user_timers[i].command}'` : ''
+                timersString += `${i > 0 ? ', ' : ''}${(i > 0 && i == user_timers.length - 1) ? 'and ' : ''}${formatted}${command}`
             }
         }
         return {text: timersString}
@@ -202,7 +215,7 @@ function * timer_resp(query) {
         command = wordsToSentence(command, 0, command.length)
     }
 
-    initializeClock(time, command)
+    initializeClock(time, command, user)
 
     if (commandIndex) {
         return {time, text: 'Okay, task scheduled for ' + formatTime(getTimeRemaining(time))}
@@ -210,13 +223,8 @@ function * timer_resp(query) {
     return {time, text: 'Okay, timer set for ' + formatTime(getTimeRemaining(time))}
 }
 
-function * register(app, io) {
-    socket_io = io
-}
-
 module.exports = {
     get: timer_resp,
     hard_rule,
-    register,
     examples
 }
