@@ -2,132 +2,114 @@ const md5 = require('md5')
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const basicAuth = require('basic-auth')
-const config = require.main.require('./config/index.js').get
+const co = require('co')
 
-const USERS_FILE = "config/users.json"
-const TOKENS_FILE = "config/tokens.json"
-
-let users = null
-let authenticated = null
-
-function getTokens() {
-    if (!authenticated) {
-        try {
-            authenticated = JSON.parse(fs.readFileSync(TOKENS_FILE))
-        } catch (err) {
-            // Ignore and use a default.
-            console.log("Failed to load tokens file. Using default.")
-            authenticated = []
-        } 
+function * getStaticSalt() {
+    let salt = yield global.db.getGlobalValue("static_salt")
+    if (!salt) {
+        salt = md5(`${Math.random()}${Date.now()}`)
+        yield global.db.setGlobalValue("static_salt", salt)
     }
-    return authenticated
+    return salt
 }
 
-function saveTokens() {
-    fs.writeFile(TOKENS_FILE, JSON.stringify(authenticated, null, 2), err => {
-        if (err) {
-            return console.log(err)
-        }
-    })
+function * getSecret() {
+    let secret = yield global.db.getGlobalValue("jwtsecret")
+    if (!secret) {
+        secret = md5(`${Math.random()}${Date.now()}`)
+        yield global.db.setGlobalValue("jwtsecret", secret)
+    }
+    return secret
+}
+
+function * encryptPassword(password) {
+    const salt = yield getStaticSalt()
+    return md5(password + salt).toUpperCase()
 }
 
 function filter(req, res, next) {
     function unauthorized(res) {
         res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
         return res.sendStatus(401);
-    };
+    }
   
-    var user = basicAuth(req);
-    if (isUserValid(user.name, user.pass)) {
-        next()
-    } else {
-        return unauthorized(res)
-    }
+    const basicUser = basicAuth(req);
+    co(function * () {
+        const encryptedPass = yield encryptPassword(basicUser.pass)
+        const user = yield global.db.getUser(basicUser.name, encryptedPass)
+        if (user) {
+            next()
+        } else {
+            unauthorized(res)
+        }
+    }).catch(err => {
+        res.status(503).json(err)
+    })
 }
 
-function isUserValid(user, pass) {
-    if (!user || !pass || user.length == 0 || pass.length == 0) {
-        return null
+function login(req, res) {
+    function unauthorized(res) {
+        res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+        return res.sendStatus(401);
     }
-    pass = md5(pass + config.auth.static_salt).toUpperCase()
-    if (!users) {
-        if (!loadUsers()) {
-            return null
+
+    const basicUser = basicAuth(req);
+    co(function * () {
+        const encryptedPass = yield encryptPassword(basicUser.pass)
+        const user = yield global.db.getUser(basicUser.name, encryptedPass)
+        if (user) {
+            const secret = yield getSecret()
+            const token = jwt.sign(user, secret).trim()
+            yield global.db.addToken(user, token)
+            return res.json({ token: token})
+        } else {
+            unauthorized(res)
         }
-    }
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].username == user && users[i].password == pass) {
-            return users[i]
-        }
-    }
-    return null
+    }).catch(err => {
+        res.status(503).json(err)
+    })
 }
 
-function authenticate(username, pass) {
-    const user = isUserValid(username, pass)
-    if (user) {
-        var token = jwt.sign(user, config.auth.jwtSecret)
-        getTokens().push({
-            id: user.id,
-            token: token.trim()
+function validate(req, res) {
+    const token = req.query.token
+    if (token) {
+        co(function *() {
+            const user = yield global.db.getUserFromToken(token.trim())
+            if (user) {
+                res.sendStatus(200)
+            } else {
+                res.sendStatus(401)
+            }
+        }).catch(err => {
+            res.status(503).json(err)
         })
-        saveTokens()
-        return {token: token.trim() }
+    } else {
+        res.sendStatus(401)
     }
-    return null
-}
-
-function getTokenId(token) {
-    const tokens = getTokens()
-    for (let i = 0; i < tokens.length; i++) {
-        if (tokens[i].token == token) {
-            return tokens[i].id
-        }
-    }
-    return null
 }
 
 function verifyIO(socket, next) {
     let token = socket.handshake.query.token
-    if (!token) {
-        next(new Error('No token supplied'))
-    } else {
-        jwt.verify(token, config.auth.jwtSecret, function(err, decoded) {
-            if (err) {
-                next(new Error('Token not valid'))
-            } else if (getTokenId(token) != null) {
+    if (token) {
+        co(function * () {
+            const user = yield global.db.getUserFromToken(token.trim())
+            if (user) {
                 next()
             } else {
                 next(new Error('Token not found'))
             }
-        });
+        }).catch(err => {
+            next(new Error(err))
+        })
+    } else {
+        next(new Error('No token supplied'))
     }
-}
-
-function verifyToken(token) {
-    try {
-        jwt.verify(token, config.auth.jwtSecret)
-    } catch (err) {
-        return false
-    }
-    return getTokenId(token) != null
-}
-
-function loadUsers() {
-    try {
-        users = JSON.parse(fs.readFileSync(USERS_FILE))
-    } catch (err) {
-        // Ignore and use the default name.
-        console.log("Failed to load users file.")
-        console.log(err)
-        return false
-    }
-    return true
 }
 
 module.exports = {
-  authenticate,
-  verifyIO,
-  verifyToken,
-  filter
+    verifyIO,
+    filter,
+    login,
+    validate,
+    encryptPassword
 }

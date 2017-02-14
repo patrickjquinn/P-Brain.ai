@@ -1,3 +1,4 @@
+const co = require('co')
 const express = require('express')
 const app = express()
 const http = require('http').Server(app)
@@ -5,16 +6,14 @@ const io = require('socket.io')(http)
 const wrap = require('co-express')
 const compression = require('compression')
 const bodyParser = require('body-parser')
-const basicAuth = require('basic-auth')
 const fs = require('fs')
 const ip = require('ip')
-const co = require('co')
-const db = require('./db/index.js')
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
 const authenticator = require('./authentication')
 const config = require('./config/index.js').get
 const jsonParser = bodyParser.urlencoded({ extended: false })
+global.db = require('./sqlite_db')
 
 app.use(compression({
     threshold: 0,
@@ -31,22 +30,6 @@ app.use((req, res, next) => {
 
 // Don't bother with authentication for this.
 app.use(express.static('./src'))
-
-app.get('/api/profile/get', wrap(function * (req, res) {
-    const token = req.query.token
-
-    res.header('Content-Type', 'application/json')
-    res.send(db.get_user(token));
-}))
-
-app.post('/api/profile/create', jsonParser, wrap(function * (req, res) {
-    const profile = req.body
-
-    console.log(profile)
-
-    res.header('Content-Type', 'application/json')
-    res.send(db.create_user(profile));
-}))
 
 // TODO parse services in query
 app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
@@ -69,35 +52,8 @@ app.get('/api/correct_last/:skill', authenticator.filter, wrap(function * (req, 
     res.json({text: 'Successfully re-trained.'})
 }))
 
-app.get('/api/login', function (req, res) {
-    function unauthorized(res) {
-        res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-        return res.sendStatus(401);
-    };
-  
-    var user = basicAuth(req);
-  
-    const token = authenticator.authenticate(user.name, user.pass)
-    if (token) {
-        return res.json(token)
-    } else {
-        return unauthorized(res)
-    }
-});
-
-app.get('/api/validate', function (req, res) {
-    const token = req.query.token
-    if (token) {
-        if (authenticator.verifyToken(token.trim())) {
-            res.sendStatus(200)
-        } else {
-            res.sendStatus(401)
-        }
-    } else {
-        res.sendStatus(401)
-    }
-})
-
+app.get('/api/login', authenticator.login);
+app.get('/api/validate', authenticator.validate)
 io.use(authenticator.verifyIO);
 
 io.on('connect', socket => {
@@ -123,13 +79,31 @@ const skillsApi = express()
 skillsApi.all('/', authenticator.filter)
 app.use('/api/skills', skillsApi)
 
+function * initialSetup() {
+    const port = yield global.db.getGlobalValue("port")
+    if (!port) {
+        console.log("Setting default values in database")
+        yield global.db.setGlobalValue("port", 4567)
+        const user = {
+            username: 'demo',
+            password: yield authenticator.encryptPassword('demo')
+        }
+        yield global.db.saveUser(user)
+    }
+}
+
 co(function * () {
+    console.log("Setting up database.")
+    yield global.db.setup('pbrain.db')
+    yield initialSetup()
+
     console.log("Loading skills.")
     yield skills.loadSkills(skillsApi, io)
     console.log("Training recognizer.")
     yield search.train_recognizer(skills.getSkills())
     console.log("Starting server.")
-    http.listen(config.port, () => {
+    const port = yield global.db.getGlobalValue("port")
+    http.listen(port, () => {
         console.log(`Server started on http://localhost:${config.port}`)
     })
 }).catch(err => {
