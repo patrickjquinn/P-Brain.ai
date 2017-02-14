@@ -4,6 +4,8 @@ const fs = require('fs')
 const basicAuth = require('basic-auth')
 const co = require('co')
 
+const clients = []
+
 function * getStaticSalt() {
     let salt = yield global.db.getGlobalValue("static_salt")
     if (!salt) {
@@ -105,6 +107,15 @@ function verifyIO(socket, next) {
         co(function * () {
             const user = yield global.db.getUserFromToken(token.trim())
             if (user) {
+                clients.push({ user: user, token: token, socket: socket})
+                socket.on('disconnect', function() {
+                    for (let i = 0; i < clients.length; i++) {
+                        if (clients[i].socket === socket) {
+                            clients.splice(i, 1)
+                            break
+                        }
+                    }
+                })
                 next()
             } else {
                 next(new Error('Token not found'))
@@ -117,11 +128,22 @@ function verifyIO(socket, next) {
     }
 }
 
+function getSocketsByUser(user) {
+    const sockets = []
+    clients.map(function (client) {
+        if (client.user.user_id == user.user_id) {
+            sockets.push(client.socket)
+        }
+    })
+    return sockets
+}
+
 module.exports = {
     verifyIO,
     filter,
     login,
     validate,
     encryptPassword,
-    getUser
+    getUser,
+    getSocketsByUser
 }

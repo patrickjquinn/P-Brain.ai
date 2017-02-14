@@ -100,6 +100,13 @@ co(function * () {
     yield global.db.setup('pbrain.db')
     yield initialSetup()
 
+    global.sendToUser = function(user, type, message) {
+        const sockets = authenticator.getSocketsByUser(user)
+        sockets.map(function (socket) {
+            socket.emit(type, message)
+        })
+    }
+
     console.log("Loading skills.")
     yield skills.loadSkills(skillsApi, io)
     console.log("Training recognizer.")

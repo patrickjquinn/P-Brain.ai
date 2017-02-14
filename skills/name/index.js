@@ -5,7 +5,6 @@ function hard_rule(query, breakdown) {
 }
 
 let DEFAULT_NAME = 'Brain'
-let socket_io = null
 
 function * getName(user) {
     try {
@@ -34,21 +33,9 @@ function * name_resp(query, breakdown, user) {
 
     yield global.db.setValue("name", user, "name", name)
 
-    socket_io.emit('set_name', {name})
+    global.sendToUser(user, 'set_name', {name})
 
     return {text: `You can now call me ${name}.`, name}
-}
-
-function * register(app, io) {
-    try {
-        const nametmp = yield global.db.setValue("name", user, "name")
-        if (nametmp) {
-            name = nametmp
-        }
-    } catch (err) {
-        // Ignore and use the default name.
-    }
-    socket_io = io
 }
 
 function * registerClient(socket, user) {
@@ -71,7 +58,6 @@ const examples = () => (
 
 module.exports = {
     get: name_resp,
-    register,
     registerClient,
     hard_rule,
     examples
