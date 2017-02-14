@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use('/', [ authenticator.filter, express.static('./src') ])
 
 // TODO parse services in query
-app.get('/api/ask', authenticator.filter, wrap(function * (req, res) {
+app.get('/api/ask', authenticator.filterNoNewToken, wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     try {

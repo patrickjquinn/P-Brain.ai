@@ -29,7 +29,11 @@ function * encryptPassword(password) {
     return md5(password + salt).toUpperCase()
 }
 
-function filter(req, res, next) {
+function filterNoNewToken(req, res, next) {
+    filter(req, res, next, true)
+}
+
+function filter(req, res, next, no_new_token = false) {
     function unauthorized(res) {
         res.set('WWW-Authenticate', 'Basic realm=Authorization Required (default demo and demo)');
         return res.sendStatus(401);
@@ -55,13 +59,15 @@ function filter(req, res, next) {
             const encryptedPass = yield encryptPassword(basicUser.pass)
             const user = yield global.db.getUser(basicUser.name, encryptedPass)
             if (user) {
-                const secret = yield getSecret()
-                const token = jwt.sign(user, secret).trim()
-                yield global.db.addToken(user, token)
+                if (!no_new_token) {
+                    const secret = yield getSecret()
+                    const token = jwt.sign(user, secret).trim()
+                    yield global.db.addToken(user, token)
+                    res.cookie('token', token, {maxAge: 900000})
+                    req.token = token
+                }
 
                 req.user = user
-                req.token = token
-                res.cookie('token', token, {maxAge: 900000})
                 next()
             } else {
                 unauthorized(res)
@@ -125,6 +131,7 @@ function getSocketsByUser(user) {
 module.exports = {
     verifyIO,
     filter,
+    filterNoNewToken,
     login,
     validate,
     encryptPassword,
