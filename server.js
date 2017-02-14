@@ -107,7 +107,7 @@ co(function * () {
     console.log("Starting server.")
     const port = yield global.db.getGlobalValue("port")
     http.listen(port, () => {
-        console.log(`Server started on http://localhost:${config.port}`)
+        console.log(`Server started on http://localhost:${port}`)
     })
 }).catch(err => {
     console.log(err)
