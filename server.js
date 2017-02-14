@@ -71,10 +71,6 @@ io.on('connect', socket => {
     })
 })
 
-const skillsApi = express()
-skillsApi.all('/', authenticator.filter)
-app.use('/api/skills', skillsApi)
-
 function * initialSetup() {
     const port = yield global.db.getGlobalValue("port")
     if (!port) {
