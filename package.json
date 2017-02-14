@@ -36,6 +36,7 @@
     "natural": "*",
     "socket.io": "^1.7.2",
     "speakeasy-nlp": "^0.2.2",
+    "sqlite3": "^3.1.8",
     "striptags": "*",
     "tabletojson": "*",
     "thunkify-wrap": "*",
