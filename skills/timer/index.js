@@ -122,7 +122,7 @@ function initializeClock(time, command, user) {
             global.sendToUser(user, 'response', response)
             if (timer.command) {
                 co(function * () {
-                    const data = yield global.query(timer.command)
+                    const data = yield global.query(timer.command, timer.user)
                     global.sendToUser(user, 'response', data)
                 }).catch(err => {
                     console.log(err)
