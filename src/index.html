@@ -126,21 +126,6 @@
     </script>
     
     <script>
-        function login(username, password, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == XMLHttpRequest.DONE) {
-                    if (xhr.status == 200) {
-                        callback(null, JSON.parse(xhr.responseText).token);
-                    } else {
-                        callback(xhr.responseText, null);
-                    }
-                }
-            }
-            xhr.open('GET', '/api/login', true);
-            xhr.setRequestHeader("Authorization", "Basic " + btoa("demo:demo"));
-            xhr.send();
-        }
         function validate(token, callback) {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
@@ -156,29 +141,18 @@
             xhr.send();
         }
         
-        function presentLogin() {
-            var username = prompt("Enter username", "demo");
-            var password = prompt("Enter password", "demo");
-            login(username, password, function (err, token) {
-                if (!err) {
-                    setCookie("token", token);
-                    setupSocket(token);
-                } else {
-                    presentLogin();
-                }
-            });
-        }
-        
         if (getCookie("token")) {
             validate(getCookie("token"), function (err) {
                 if (err) {
-                    presentLogin();
+                    console.log("Token cookie, invalid, reloading for re-authentication");
+                    location.reload();
                 } else {
                     setupSocket(getCookie("token"));
                 }
             });
         } else {
-            presentLogin();
+            console.log("Token cookie not found, reloading for setup.");
+            location.reload();
         }
     </script>
 
