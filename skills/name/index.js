@@ -1,4 +1,3 @@
-const fs = require('fs')
 const co = require('co')
 
 function hard_rule(query, breakdown) {

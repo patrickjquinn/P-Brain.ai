@@ -37,11 +37,11 @@ function * loadSkills(skillsApi, io) {
     }
 }
 
-function * registerClient(socket) {
+function * registerClient(socket, user) {
     for (let i = 0; i < skills.length; i++) {
         const skill = skills[i]
         if (typeof (skill.registerClient) === 'function') {
-            yield skill.registerClient(socket)
+            yield skill.registerClient(socket, user)
         }
     }
 }

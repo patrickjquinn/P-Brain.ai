@@ -1,19 +1,15 @@
-const config = require.main.require('./config/index.js').get
-const request = require('co-request')
 const co = require('co')
 
-function * get_name() {
-    const details_url = `http://localhost:${config.port}/api/skills/personal_details`
-    let data = yield request(details_url)
-    data = JSON.parse(data.body)
-    return data.name
-}
-
-function * make_greeting(silent) {
-    const name = yield get_name()
+function * make_greeting(silent, user) {
+    let name = yield global.db.getValue('personal_details', user, 'name')
     let greeting_name = ''
     if (name) {
-        greeting_name = `, ${name.split(' ')[0]}`
+        name = name.trim()
+        if (name.includes(" ")) {
+            greeting_name = `, ${name.split(' ')[0]}`
+        } else {
+            greeting_name = `, ${name}`
+        }
     }
     const dt = new Date().getHours()
 
@@ -28,24 +24,11 @@ function * make_greeting(silent) {
     return {text: response, silent}
 }
 
-function * registerClient(socket) {
-    const greeting = yield make_greeting(true)
+function * registerClient(socket, user) {
+    const greeting = yield make_greeting(true, user)
     socket.emit('response', {type: 'greeting', msg: greeting})
 }
 
-function * register(app, io) {
-    app.get('/', (req, res) => {
-        co(function * () {
-            const greeting = yield make_greeting(false)
-            res.json(greeting)
-        }).catch(err => {
-            console.log(err)
-            res.status(503).send(err.message)
-        })
-    })
-}
-
 module.exports = {
-    registerClient,
-    register
+    registerClient
 }
