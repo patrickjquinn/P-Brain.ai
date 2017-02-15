@@ -5,7 +5,7 @@ const util = require('util')
 // no punctuation and spaces replaced with underscores, such as 'bedroom_light'.
 // The second substitute is the command, this module assumes there is an 'on', 'off' and 'state' command.
 // On success the server returns { state: 'on' } and on failure error will be set { error: 'Failure' }.
-const IOT_URL = "http://192.168.2.4:42238/devices/%s/methods/%s"
+const IOT_URL = 'http://192.168.2.4:42238/devices/%s/methods/%s'
 
 function * do_iot(device, state) {
     let data = yield request(util.format(IOT_URL, device, state))
@@ -13,13 +13,10 @@ function * do_iot(device, state) {
     if (data.error) {
         console.log(`IoT Error: ${data.error} - ${device} - ${state}`)
         return {text: `I'm sorry, I can't turn the ${device} ${state}.`}
-    } else {
-        if (state == 'state') {
-            return {text: `The ${device} is ${data.state}.`}
-        } else {
-            return {text: `Turning the ${device} ${state}.`}
-        }
+    } else if (state == 'state') {
+        return {text: `The ${device} is ${data.state}.`}
     }
+    return {text: `Turning the ${device} ${state}.`}
 }
 
 function hard_rule(query, breakdown) {
@@ -30,7 +27,7 @@ function hard_rule(query, breakdown) {
         return true
     }
     if (query.startsWith('is the') && query.endsWith('on')) {
-        return true;
+        return true
     }
     return false
 }
@@ -39,22 +36,22 @@ function * iot_resp(query) {
     let state = null
     let device = null
 
-    const words = query.split(" ")
+    const words = query.split(' ')
     // Parse the query with the form 'Turn on the light.'.
     if (query.startsWith('turn on the') || query.startsWith('turn off the')) {
-        state = words[1];
-        device = query.replace(`turn ${state} the`, "").trim()
+        state = words[1]
+        device = query.replace(`turn ${state} the`, '').trim()
     } else if (query.startsWith('turn the')) { // Parse the query with the form 'Turn the light on.'.
         if (words.length > 3) {
             state = words[words.length - 1]
             const stateIndex = query.lastIndexOf(state)
-            device = query.substring(0, stateIndex).replace('turn the', "").trim()
+            device = query.substring(0, stateIndex).replace('turn the', '').trim()
         }
-    } else if(query.startsWith('is the')) { // Parse the form 'Is the light on?'.
+    } else if (query.startsWith('is the')) { // Parse the form 'Is the light on?'.
         if (words.length > 3) {
             state = 'state'
             const stateIndex = query.lastIndexOf('on')
-            device = query.substring(0, stateIndex).replace('is the', "").trim()
+            device = query.substring(0, stateIndex).replace('is the', '').trim()
         }
     }
 

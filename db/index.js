@@ -1,4 +1,4 @@
-const db = require('diskdb').connect('./db/memorybank', ['users','responses','queries','tokens','global'])
+const db = require('diskdb').connect('./db/memorybank', ['users', 'responses', 'queries', 'tokens', 'global'])
 
 function add_user(details) {
     if (details.name && details.id) {
@@ -41,7 +41,7 @@ function get_user_from_token(token) {
     }
 }
 
-function get_user(username, password){
+function get_user(username, password) {
 
 }
 
@@ -53,26 +53,26 @@ function remove_token() {
 
 }
 
-function set_global_value(key,value){
-    if (key && value){
-        let pair = {'key':key,'value':value}
+function set_global_value(key, value) {
+    if (key && value) {
+        const pair = {key, value}
 
         try {
-            db.global.save(pair);
+            db.global.save(pair)
             return {status: 'OK', code: 200}
         } catch (err) {
             return {status: 'FAIL', code: 500, reason: err}
-        } 
+        }
     }
     return {status: 'FAIL', code: 500, reason: 'a valid key and value are required'}
 }
 
-function get_global_value(key){
+function get_global_value(key) {
     if (key) {
         try {
-            let value = db.global.find({'key':key})
+            const value = db.global.find({key})
             return {status: 'OK', code: 200, body: value}
-        } catch (err){
+        } catch (err) {
             return {status: 'FAIL', code: 500, reason: err}
         }
     }

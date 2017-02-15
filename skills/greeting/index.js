@@ -5,7 +5,7 @@ function * make_greeting(silent, user) {
     let greeting_name = ''
     if (name) {
         name = name.trim()
-        if (name.includes(" ")) {
+        if (name.includes(' ')) {
             greeting_name = `, ${name.split(' ')[0]}`
         } else {
             greeting_name = `, ${name}`

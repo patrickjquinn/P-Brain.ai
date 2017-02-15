@@ -1,6 +1,6 @@
 function hard_rule(query, breakdown) {
-    return (query.includes("my") && query.includes("name")) ||
-                (query.includes("im") && query.includes("called"));
+    return (query.includes('my') && query.includes('name')) ||
+                (query.includes('im') && query.includes('called'))
 }
 
 function * name_resp(query, breakdown, user) {
@@ -28,10 +28,9 @@ function * name_resp(query, breakdown, user) {
         return {
             text: 'I\'m sorry, I did\'t quite catch your name...'
         }
-    } else {
-        yield global.db.setValue('personal_details', user, 'name', name)
-        return {text: `Okay I'll call you ${name}.`, name: name}
     }
+    yield global.db.setValue('personal_details', user, 'name', name)
+    return {text: `Okay I'll call you ${name}.`, name}
 }
 
 const examples = () => (
