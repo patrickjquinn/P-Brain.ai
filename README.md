@@ -16,7 +16,7 @@ https://www.youtube.com/watch?v=4EF_qEYNNwU
 
 - Node 6
 - Python >= 2
-- Yarn
+- Yarn / npm
 
 # Setup
 
