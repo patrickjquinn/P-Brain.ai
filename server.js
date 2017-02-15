@@ -78,7 +78,8 @@ function * initialSetup() {
         yield global.db.setGlobalValue("port", 4567)
         const user = {
             username: 'demo',
-            password: yield authenticator.encryptPassword('demo')
+            password: yield authenticator.encryptPassword('demo'),
+            is_admin: 1
         }
         yield global.db.saveUser(user)
     }
