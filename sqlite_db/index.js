@@ -145,13 +145,42 @@ function * setValue(skill, user, key, value) {
 }
 
 function * getValue(skill, user, key) {
+    let query = "SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id"
+    const conditions = []
+    const values = []
+    if (skill) {
+        conditions.push('skill = ?')
+        values.push(skill)
+    }
+    if (user && user.user_id) {
+        conditions.push('user_settings.user_id = ?')
+        values.push(user.user_id)
+    }
+    if (key) {
+        conditions.push('key = ?')
+        values.push(key)
+    }
+    for (let i = 0; i < conditions.length; i++) {
+        if (i == 0) {
+            query = `${query} WHERE ${conditions[i]}`
+        } else {
+            query = `${query} AND ${conditions[i]}`
+        }
+    }
     return new Promise(function (resolve, reject) {
-        db.get("SELECT value FROM user_settings WHERE skill = ? AND user_id = ? AND key = ?", skill, user.user_id, key, function(err, row) {
+        db.all(query, values, function (err, rows) {
             if (err) {
                 reject(err)
             } else {
-                if (row) {
-                    resolve(JSON.parse(row.value))
+                if (Array.isArray(rows) && rows.length > 0) {
+                    rows.map((row) => {
+                        row.value = JSON.parse(row.value)
+                    })
+                    if (key) {
+                        resolve(rows[0].value)
+                    } else {
+                        resolve(rows)
+                    }
                 } else {
                     resolve(undefined)
                 }
@@ -174,13 +203,38 @@ function * setSkillValue(skill, key, value) {
 }
 
 function * getSkillValue(skill, key) {
+    let query = "SELECT skill, key, value FROM skill_settings"
+    const conditions = []
+    const values = []
+    if (skill) {
+        conditions.push('skill = ?')
+        values.push(skill)
+    }
+    if (key) {
+        conditions.push('key = ?')
+        values.push(key)
+    }
+    for (let i = 0; i < conditions.length; i++) {
+        if (i == 0) {
+            query = `${query} WHERE ${conditions[i]}`
+        } else {
+            query = `${query} AND ${conditions[i]}`
+        }
+    }
     return new Promise(function (resolve, reject) {
-        db.get("SELECT value FROM skill_settings WHERE skill = ? AND key = ?", skill, key, function(err, row) {
+        db.all(query, values, function (err, rows) {
             if (err) {
                 reject(err)
             } else {
-                if (row) {
-                    resolve(JSON.parse(row.value))
+                if (Array.isArray(rows) && rows.length > 0) {
+                    rows.map((row) => {
+                        row.value = JSON.parse(row.value)
+                    })
+                    if (key) {
+                        resolve(rows[0].value)
+                    } else {
+                        resolve(rows)
+                    }
                 } else {
                     resolve(undefined)
                 }
@@ -203,13 +257,21 @@ function * setGlobalValue(key, value) {
 }
 
 function * getGlobalValue(key) {
+    const query = `SELECT key, value FROM global_settings${(key) ? ' WHERE key = ?' : ''}`
     return new Promise(function (resolve, reject) {
-        db.get("SELECT value FROM global_settings WHERE key = ?", key, function(err, row) {
+        db.all(query, key, function (err, rows) {
             if (err) {
                 reject(err)
             } else {
-                if (row) {
-                    resolve(JSON.parse(row.value))
+                if (Array.isArray(rows) && rows.length > 0) {
+                    rows.map((row) => {
+                        row.value = JSON.parse(row.value)
+                    })
+                    if (key) {
+                        resolve(rows[0].value)
+                    } else {
+                        resolve(rows)
+                    }
                 } else {
                     resolve(undefined)
                 }
@@ -327,6 +389,7 @@ module.exports = {
     deleteToken,
     getUserFromToken,
     getUser,
+    getUserFromName,
     saveUser,
     getUserTokens,
     addQuery,
