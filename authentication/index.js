@@ -89,6 +89,30 @@ function login(req, res) {
     })
 }
 
+function logout(req, res) {
+    co(function * () {
+        if (req.params.user) {
+            const url_user = yield global.db.getUserFromName(req.params.user)
+            if (url_user) {
+                if (req.user.is_admin || req.user.user_id == url_user.user_id) {
+                    yield global.db.deleteUserTokens(url_user)
+                    res.send("Success")
+                } else {
+                    res.status(401).send("Not authorized for this user")
+                }
+            } else {
+                res.status(404).send("User not found")
+            }
+        } else {
+            yield global.db.deleteUserTokens(req.user)
+            res.send("Success")
+        }
+    }).catch(err => {
+        console.log(err)
+        res.status(503).json(err)
+    })
+}
+
 function validate(req, res) {
     res.sendStatus(200)
 }
@@ -135,6 +159,7 @@ module.exports = {
     filter,
     filterNoNewToken,
     login,
+    logout,
     validate,
     encryptPassword,
     getSocketsByUser

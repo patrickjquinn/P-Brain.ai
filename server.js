@@ -48,6 +48,7 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
 }))
 
 app.get('/api/login', authenticator.login)
+app.get('/api/logout/:user?', [authenticator.filter(false), authenticator.logout])
 app.get('/api/validate', authenticator.validate)
 io.use(authenticator.verifyIO)
 

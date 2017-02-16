@@ -257,6 +257,18 @@ function * deleteToken(token) {
     })
 }
 
+function * deleteUserTokens(user) {
+    return new Promise((resolve, reject) => {
+        db.get('DELETE FROM tokens WHERE user_id = ?', user.user_id, (err, row) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 function * getUserFromToken(token) {
     return new Promise((resolve, reject) => {
         db.get('SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', token, (err, row) => {
@@ -318,6 +330,7 @@ module.exports = {
     getGlobalValue,
     addToken,
     deleteToken,
+    deleteUserTokens,
     getUserFromToken,
     getUser,
     getUserFromName,
