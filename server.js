@@ -78,12 +78,8 @@ function * initialSetup() {
     if (!port) {
         console.log('Setting default values in database')
         yield global.db.setGlobalValue('port', 4567)
-        const user = {
-            username: 'demo',
-            password: yield authenticator.encryptPassword('demo'),
-            is_admin: true
-        }
-        yield global.db.saveUser(user)
+        yield global.db.setGlobalValue('promiscuous_mode', true)
+        yield global.db.setGlobalValue('promiscuous_admins', true)
     }
 }
 
