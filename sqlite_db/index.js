@@ -144,29 +144,26 @@ function * setValue(skill, user, key, value) {
     })
 }
 
-function * getValue(skill, user, key) {
-    let query = "SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id"
-    const conditions = []
-    const values = []
-    if (skill) {
-        conditions.push('skill = ?')
-        values.push(skill)
-    }
-    if (user && user.user_id) {
-        conditions.push('user_settings.user_id = ?')
-        values.push(user.user_id)
-    }
-    if (key) {
-        conditions.push('key = ?')
-        values.push(key)
-    }
+function makeConditionalQuery(query, conditions, values) {
+    const endConditions = []
+    const endValues = []
     for (let i = 0; i < conditions.length; i++) {
-        if (i == 0) {
-            query = `${query} WHERE ${conditions[i]}`
-        } else {
-            query = `${query} AND ${conditions[i]}`
+        if (values[i] != undefined && values[i] != null) {
+            endConditions.push(conditions[i])
+            endValues.push(values[i])
         }
     }
+    for (let i = 0; i < endConditions.length; i++) {
+        if (i == 0) {
+            query = `${query} WHERE ${endConditions[i]}`
+        } else {
+            query = `${query} AND ${endConditions[i]}`
+        }
+    }
+    return {query: query, values: endValues}
+}
+
+function * allQueryWrapper(query, values, key) {
     return new Promise(function (resolve, reject) {
         db.all(query, values, function (err, rows) {
             if (err) {
@@ -187,6 +184,13 @@ function * getValue(skill, user, key) {
             }
         })
     })
+}
+
+function * getValue(skill, user, key) {
+    const base = "SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id"
+    let user_id = (user) ? user.user_id : undefined
+    const query = makeConditionalQuery(base, ['skill = ?', 'user_settings.user_id = ?', 'key = ?'], [skill, user_id, key])
+    return yield allQueryWrapper(query.query, query.values, key)
 }
 
 function * setSkillValue(skill, key, value) {
@@ -203,44 +207,9 @@ function * setSkillValue(skill, key, value) {
 }
 
 function * getSkillValue(skill, key) {
-    let query = "SELECT skill, key, value FROM skill_settings"
-    const conditions = []
-    const values = []
-    if (skill) {
-        conditions.push('skill = ?')
-        values.push(skill)
-    }
-    if (key) {
-        conditions.push('key = ?')
-        values.push(key)
-    }
-    for (let i = 0; i < conditions.length; i++) {
-        if (i == 0) {
-            query = `${query} WHERE ${conditions[i]}`
-        } else {
-            query = `${query} AND ${conditions[i]}`
-        }
-    }
-    return new Promise(function (resolve, reject) {
-        db.all(query, values, function (err, rows) {
-            if (err) {
-                reject(err)
-            } else {
-                if (Array.isArray(rows) && rows.length > 0) {
-                    rows.map((row) => {
-                        row.value = JSON.parse(row.value)
-                    })
-                    if (key) {
-                        resolve(rows[0].value)
-                    } else {
-                        resolve(rows)
-                    }
-                } else {
-                    resolve(undefined)
-                }
-            }
-        })
-    })
+    const base = "SELECT skill, key, value FROM skill_settings"
+    const query = makeConditionalQuery(base, ['skill = ?', 'key = ?'], [skill, key])
+    return yield allQueryWrapper(query.query, query.values, key)
 }
 
 function * setGlobalValue(key, value) {
@@ -257,27 +226,9 @@ function * setGlobalValue(key, value) {
 }
 
 function * getGlobalValue(key) {
-    const query = `SELECT key, value FROM global_settings${(key) ? ' WHERE key = ?' : ''}`
-    return new Promise(function (resolve, reject) {
-        db.all(query, key, function (err, rows) {
-            if (err) {
-                reject(err)
-            } else {
-                if (Array.isArray(rows) && rows.length > 0) {
-                    rows.map((row) => {
-                        row.value = JSON.parse(row.value)
-                    })
-                    if (key) {
-                        resolve(rows[0].value)
-                    } else {
-                        resolve(rows)
-                    }
-                } else {
-                    resolve(undefined)
-                }
-            }
-        })
-    })
+    const base = 'SELECT key, value FROM global_settings'
+    const query = makeConditionalQuery(base, ['key = ?'], [key])
+    return yield allQueryWrapper(query.query, query.values, key)
 }
 
 function * addToken(user, token) {
