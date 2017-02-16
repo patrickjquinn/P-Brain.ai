@@ -2,11 +2,11 @@ global.db = require('./sqlite_db')
 const auth = require('./authentication')
 const co = require('co')
 if (process.argv.length < 4) {
-    console.log("Adds a user to the database or updates the password if they exist.")
-    console.log("Usage: password.js <username> <password> <is_admin(0/1)>")
+    console.log('Adds a user to the database or updates the password if they exist.')
+    console.log('Usage: password.js <username> <password> <is_admin(0/1)>')
 } else {
     co(function * () {
-        console.log("Setting up database.")
+        console.log('Setting up database.')
         yield global.db.setup('pbrain.db')
         let is_admin = 0
         if (process.argv[4]) {
@@ -19,7 +19,7 @@ if (process.argv.length < 4) {
         }
         console.log(user)
         yield global.db.saveUser(user)
-        console.log("User saved")
+        console.log('User saved')
     }).catch(err => {
         console.log(err)
         throw err

@@ -7,19 +7,19 @@ const co = require('co')
 const clients = []
 
 function * getStaticSalt() {
-    let salt = yield global.db.getGlobalValue("static_salt")
+    let salt = yield global.db.getGlobalValue('static_salt')
     if (!salt) {
         salt = md5(`${Math.random()}${Date.now()}`)
-        yield global.db.setGlobalValue("static_salt", salt)
+        yield global.db.setGlobalValue('static_salt', salt)
     }
     return salt
 }
 
 function * getSecret() {
-    let secret = yield global.db.getGlobalValue("jwtsecret")
+    let secret = yield global.db.getGlobalValue('jwtsecret')
     if (!secret) {
         secret = md5(`${Math.random()}${Date.now()}`)
-        yield global.db.setGlobalValue("jwtsecret", secret)
+        yield global.db.setGlobalValue('jwtsecret', secret)
     }
     return secret
 }
@@ -34,7 +34,7 @@ function filterNoNewToken(req, res, next) {
 }
 
 function filter(newToken) {
-    return function(req, res, next) {
+    return (req, res, next) => {
         function unauthorized(res) {
             res.set('WWW-Authenticate', 'Basic realm=Authorization Required (default demo and demo)');
             return res.sendStatus(401);
@@ -55,7 +55,7 @@ function filter(newToken) {
                 }
             }
 
-            const basicUser = basicAuth(req);
+            const basicUser = basicAuth(req)
             if (basicUser && basicUser.name && basicUser.pass) {
                 const encryptedPass = yield encryptPassword(basicUser.pass)
                 const user = yield global.db.getUser(basicUser.name, encryptedPass)
@@ -94,13 +94,13 @@ function validate(req, res) {
 }
 
 function verifyIO(socket, next) {
-    let token = socket.handshake.query.token
+    const token = socket.handshake.query.token
     if (token) {
         co(function * () {
             const user = yield global.db.getUserFromToken(token.trim())
             if (user) {
-                clients.push({ user: user, token: token, socket: socket})
-                socket.on('disconnect', function() {
+                clients.push({user, token, socket})
+                socket.on('disconnect', () => {
                     for (let i = 0; i < clients.length; i++) {
                         if (clients[i].socket === socket) {
                             clients.splice(i, 1)
@@ -122,7 +122,7 @@ function verifyIO(socket, next) {
 
 function getSocketsByUser(user) {
     const sockets = []
-    clients.map(function (client) {
+    clients.map(client => {
         if (client.user.user_id == user.user_id) {
             sockets.push(client.socket)
         }

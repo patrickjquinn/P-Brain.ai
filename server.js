@@ -29,10 +29,10 @@ app.use((req, res, next) => {
     next()
 })
 
-app.use(cookieParser());
+app.use(cookieParser())
 
-app.use('/', [ authenticator.filter(true), express.static('./src') ])
-app.use('/api/settings', [ authenticator.filter(false), settingsApi ])
+app.use('/', [authenticator.filter(true), express.static('./src')])
+app.use('/api/settings', [authenticator.filter(false), settingsApi])
 
 // TODO parse services in query
 app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
@@ -47,9 +47,9 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
     }
 }))
 
-app.get('/api/login', authenticator.login);
+app.get('/api/login', authenticator.login)
 app.get('/api/validate', authenticator.validate)
-io.use(authenticator.verifyIO);
+io.use(authenticator.verifyIO)
 
 io.on('connect', socket => {
     socket.on('ask', co.wrap(function * (msg) {
@@ -73,10 +73,10 @@ io.on('connect', socket => {
 })
 
 function * initialSetup() {
-    const port = yield global.db.getGlobalValue("port")
+    const port = yield global.db.getGlobalValue('port')
     if (!port) {
-        console.log("Setting default values in database")
-        yield global.db.setGlobalValue("port", 4567)
+        console.log('Setting default values in database')
+        yield global.db.setGlobalValue('port', 4567)
         const user = {
             username: 'demo',
             password: yield authenticator.encryptPassword('demo'),
@@ -87,23 +87,23 @@ function * initialSetup() {
 }
 
 co(function * () {
-    console.log("Setting up database.")
+    console.log('Setting up database.')
     yield global.db.setup('pbrain.db')
     yield initialSetup()
 
-    global.sendToUser = function(user, type, message) {
+    global.sendToUser = function (user, type, message) {
         const sockets = authenticator.getSocketsByUser(user)
-        sockets.map(function (socket) {
+        sockets.map(socket => {
             socket.emit(type, message)
         })
     }
 
-    console.log("Loading skills.")
+    console.log('Loading skills.')
     yield skills.loadSkills()
-    console.log("Training recognizer.")
+    console.log('Training recognizer.')
     yield search.train_recognizer(skills.getSkills())
-    console.log("Starting server.")
-    const port = yield global.db.getGlobalValue("port")
+    console.log('Starting server.')
+    const port = yield global.db.getGlobalValue('port')
     http.listen(port, () => {
         console.log(`Server started on http://localhost:${port}`)
     })

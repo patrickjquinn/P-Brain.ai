@@ -1,14 +1,14 @@
 const co = require('co')
 
 function hard_rule(query, breakdown) {
-    return query.includes("your name") || query.includes("youre called");
+    return query.includes('your name') || query.includes('youre called')
 }
 
-let DEFAULT_NAME = 'Brain'
+const DEFAULT_NAME = 'Brain'
 
 function * getName(user) {
     try {
-        const nametmp = yield global.db.getValue("name", user, "name")
+        const nametmp = yield global.db.getValue('name', user, 'name')
         if (nametmp) {
             return nametmp
         }
@@ -31,7 +31,7 @@ function * name_resp(query, breakdown, user) {
     name = words[words.length - 1]
     name = name.charAt(0).toUpperCase() + name.slice(1)
 
-    yield global.db.setValue("name", user, "name", name)
+    yield global.db.setValue('name', user, 'name', name)
 
     global.sendToUser(user, 'set_name', {name})
 

@@ -99,7 +99,7 @@ function initializeClock(time, command, user) {
     const timer = {
         deadline: new Date(Date.parse(new Date()) + time),
         time, timerInterval: null,
-        user: user
+        user
     }
     if (command) {
         timer.command = command
@@ -115,8 +115,8 @@ function initializeClock(time, command, user) {
             const response = {
                 type: 'timer',
                 msg: {
-                  text: `Hey there! Your timer for ${formattedTime} is finished.`,
-                  silent: (timer.command) ? true : false
+                    text: `Hey there! Your timer for ${formattedTime} is finished.`,
+                    silent: Boolean(timer.command)
                 }
             }
             global.sendToUser(user, 'response', response)
@@ -165,7 +165,7 @@ function getLastUnit(words) {
 
 function getUserTimers(user) {
     const user_timers = []
-    timers.map(function (timer) {
+    timers.map(timer => {
         if (timer.user.user_id == user.user_id) {
             user_timers.push(timer)
         }

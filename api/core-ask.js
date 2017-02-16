@@ -146,7 +146,7 @@ function * query(q, user) {
     }
 }
 
-global.query = query;
+global.query = query
 module.exports = {
     query,
     train_recognizer
