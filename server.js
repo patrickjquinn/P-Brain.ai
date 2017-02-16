@@ -12,7 +12,7 @@ const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
 const authenticator = require('./authentication')
 const config = require('./config/index.js').get
-const jsonParser = bodyParser.urlencoded({extended: false})
+const settingsApi = require('./api/settings.js')
 const cookieParser = require('cookie-parser')
 global.db = require('./sqlite_db')
 
@@ -31,10 +31,11 @@ app.use((req, res, next) => {
 
 app.use(cookieParser())
 
-app.use('/', [authenticator.filter, express.static('./src')])
+app.use('/', [authenticator.filter(true), express.static('./src')])
+app.use('/api/settings', [authenticator.filter(false), settingsApi])
 
 // TODO parse services in query
-app.get('/api/ask', authenticator.filterNoNewToken, wrap(function * (req, res) {
+app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     try {
@@ -47,6 +48,7 @@ app.get('/api/ask', authenticator.filterNoNewToken, wrap(function * (req, res) {
 }))
 
 app.get('/api/login', authenticator.login)
+app.get('/api/logout/:user?', [authenticator.filter(false), authenticator.logout])
 app.get('/api/validate', authenticator.validate)
 io.use(authenticator.verifyIO)
 
@@ -78,7 +80,8 @@ function * initialSetup() {
         yield global.db.setGlobalValue('port', 4567)
         const user = {
             username: 'demo',
-            password: yield authenticator.encryptPassword('demo')
+            password: yield authenticator.encryptPassword('demo'),
+            is_admin: true
         }
         yield global.db.saveUser(user)
     }

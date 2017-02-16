@@ -33,57 +33,85 @@ function filterNoNewToken(req, res, next) {
     filter(req, res, next, true)
 }
 
-function filter(req, res, next, no_new_token = false) {
-    function unauthorized(res) {
-        res.set('WWW-Authenticate', 'Basic realm=Authorization Required (default demo and demo)')
-        return res.sendStatus(401)
-    }
-
-    co(function * () {
-        // If there's a token cookies then use that instead of username/password combo.
-        let token = req.query.token
-        if (!token) {
-            token = req.cookies.token
+function filter(newToken) {
+    return (req, res, next) => {
+        function unauthorized(res) {
+            res.set('WWW-Authenticate', 'Basic realm=Authorization Required (default demo and demo)');
+            return res.sendStatus(401);
         }
-        if (token) {
-            const user = yield global.db.getUserFromToken(token.trim())
-            if (user) {
-                req.user = user
-                req.token = token.trim()
-                return next()
+
+        co(function * () {
+            // If there's a token cookies then use that instead of username/password combo.
+            let token = req.query.token
+            if (!token) {
+                token = req.cookies.token
             }
-        }
-
-        const basicUser = basicAuth(req)
-        if (basicUser && basicUser.name && basicUser.pass) {
-            const encryptedPass = yield encryptPassword(basicUser.pass)
-            const user = yield global.db.getUser(basicUser.name, encryptedPass)
-            if (user) {
-                if (!no_new_token) {
-                    const secret = yield getSecret()
-                    const token = jwt.sign(user, secret).trim()
-                    yield global.db.addToken(user, token)
-                    res.cookie('token', token, {maxAge: 900000})
-                    req.token = token
+            if (token) {
+                const user = yield global.db.getUserFromToken(token.trim())
+                if (user) {
+                    req.user = user
+                    req.token = token.trim()
+                    return next()
                 }
+            }
 
-                req.user = user
-                next()
+            const basicUser = basicAuth(req)
+            if (basicUser && basicUser.name && basicUser.pass) {
+                const encryptedPass = yield encryptPassword(basicUser.pass)
+                const user = yield global.db.getUser(basicUser.name, encryptedPass)
+                if (user) {
+                    if (newToken) {
+                        const secret = yield getSecret()
+                        const token = jwt.sign(user, secret).trim()
+                        yield global.db.addToken(user, token)
+                        res.cookie('token', token, {maxAge: 900000})
+                        req.token = token
+                    }
+
+                    req.user = user
+                    next()
+                } else {
+                    unauthorized(res)
+                }
             } else {
                 unauthorized(res)
             }
+        }).catch(err => {
+            console.log(err)
+            res.status(503).json(err)
+        })
+    }
+}
+
+function login(req, res) {
+    filter(true)(req, res, () => {
+        res.json({token: req.token})
+    })
+}
+
+function logout(req, res) {
+    co(function * () {
+        if (req.params.user) {
+            const url_user = yield global.db.getUserFromName(req.params.user)
+            if (url_user) {
+                if (req.user.is_admin || req.user.user_id == url_user.user_id) {
+                    yield global.db.deleteUserTokens(url_user)
+                    res.send(`Successfully logged out all devices for ${url_user.username}`)
+                } else {
+                    res.status(401).send("Not authorized for this user")
+                }
+            } else {
+                res.status(404).send("User not found")
+            }
+        } else if (req.token) {
+            yield global.db.deleteToken(req.token)
+            res.send("Successfully logged out this device")
         } else {
-            unauthorized(res)
+            res.send("No devices logged out")
         }
     }).catch(err => {
         console.log(err)
         res.status(503).json(err)
-    })
-}
-
-function login(req, res) {
-    filter(req, res, () => {
-        res.json({token: req.token})
     })
 }
 
@@ -133,6 +161,7 @@ module.exports = {
     filter,
     filterNoNewToken,
     login,
+    logout,
     validate,
     encryptPassword,
     getSocketsByUser
