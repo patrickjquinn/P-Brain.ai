@@ -96,16 +96,19 @@ function logout(req, res) {
             if (url_user) {
                 if (req.user.is_admin || req.user.user_id == url_user.user_id) {
                     yield global.db.deleteUserTokens(url_user)
-                    res.send("Success")
+                    res.send(`Successfully logged out all devices for ${url_user.username}`)
                 } else {
                     res.status(401).send("Not authorized for this user")
                 }
             } else {
                 res.status(404).send("User not found")
             }
+        } else if (req.token) {
+            yield global.db.deleteToken(req.token)
+            res.send("Successfully logged out this device")
         } else {
             yield global.db.deleteUserTokens(req.user)
-            res.send("Success")
+            res.send("Successfully logged out all devices")
         }
     }).catch(err => {
         console.log(err)
