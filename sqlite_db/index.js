@@ -89,6 +89,7 @@ function * getUserFromName(username) {
             if (err) {
                 reject(err)
             } else {
+                row.is_admin = row.is_admin == 1
                 resolve(row)
             }
         })
@@ -125,6 +126,7 @@ function * getUser(username, password) {
             if (err) {
                 reject(err)
             } else {
+                row.is_admin = row.is_admin == 1
                 resolve(row)
             }
         })

@@ -80,7 +80,7 @@ function * initialSetup() {
         const user = {
             username: 'demo',
             password: yield authenticator.encryptPassword('demo'),
-            is_admin: 1
+            is_admin: true
         }
         yield global.db.saveUser(user)
     }
