@@ -107,8 +107,7 @@ function logout(req, res) {
             yield global.db.deleteToken(req.token)
             res.send("Successfully logged out this device")
         } else {
-            yield global.db.deleteUserTokens(req.user)
-            res.send("Successfully logged out all devices")
+            res.send("No devices logged out")
         }
     }).catch(err => {
         console.log(err)
