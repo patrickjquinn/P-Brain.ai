@@ -15,7 +15,7 @@ const setupQuery =
 
 function * getVersion() {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM version LIMIT 1', function(err, row) {
+        db.get('SELECT * FROM version LIMIT 1', (err, row) => {
             if (err) {
                 reject(err)
             } else {
@@ -31,7 +31,7 @@ function * getVersion() {
 
 function * setVersion(version) {
     return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO version(version) VALUES (?)', version, function(err, row) {
+        db.get('INSERT OR REPLACE INTO version(version) VALUES (?)', version, (err, row) => {
             if (err) {
                 reject(err)
             } else {
@@ -43,7 +43,7 @@ function * setVersion(version) {
 
 function * databaseV1Setup() {
     return new Promise((resolve, reject) => {
-        db.run('ALTER TABLE users ADD is_admin INTEGER DEFAULT 0', function (err) {
+        db.run('ALTER TABLE users ADD is_admin INTEGER DEFAULT 0', (err) => {
             if (err) {
                 reject(err)
             } else {

@@ -84,7 +84,7 @@ function filter(newToken) {
 }
 
 function login(req, res) {
-    filter(true)(req, res, function() {
+    filter(true)(req, res, () => {
         res.json({token: req.token})
     })
 }
