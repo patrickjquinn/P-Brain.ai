@@ -306,28 +306,6 @@ function * addResponse(query, skill, response) {
     })
 }
 
-/*co(function * () {
-    const val = yield getUserFromName("demo")
-    console.log(val)
-    val.password = 'new_password'
-    yield saveUser(val)
-
-    yield setValue('timer', val, 'setting1', { val: 'value1'})
-    console.log(yield getValue('timer', val, 'setting1'))
-    yield setSkillValue('timer', 'setting1', { val: 'value1'})
-    console.log(yield getSkillValue('timer', 'setting1'))
-    yield setGlobalValue('setting1', { val: 'value1'})
-    console.log(yield getGlobalValue('setting1'))
-
-    yield addToken(val, "sdkjhfksdhfkjsdhfkjsdhf")
-    console.log(yield getUserFromToken("sdkjhfksdhfkjsdhfkjsdhf"))
-    yield addToken(val, "76853746tiuhsdfgjh")
-    console.log(yield getUserTokens(val))
-}).catch(err => {
-    console.log(err)
-    throw err
-})*/
-
 module.exports = {
     setup,
     setValue,
