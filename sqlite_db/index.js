@@ -89,7 +89,9 @@ function * getUserFromName(username) {
             if (err) {
                 reject(err)
             } else {
-                row.is_admin = row.is_admin == 1
+                if (row) {
+                    row.is_admin = row.is_admin == 1
+                }
                 resolve(row)
             }
         })
@@ -126,7 +128,9 @@ function * getUser(username, password) {
             if (err) {
                 reject(err)
             } else {
-                row.is_admin = row.is_admin == 1
+                if (row) {
+                    row.is_admin = row.is_admin == 1
+                }
                 resolve(row)
             }
         })
@@ -275,6 +279,9 @@ function * getUserFromToken(token) {
             if (err) {
                 reject(err)
             } else {
+                if (row) {
+                    row.is_admin = row.is_admin == 1
+                }
                 resolve(row)
             }
         })
