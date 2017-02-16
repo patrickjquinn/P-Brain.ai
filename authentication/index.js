@@ -59,6 +59,8 @@ function filter(newToken) {
             if (basicUser && basicUser.name && basicUser.pass) {
                 const encryptedPass = yield encryptPassword(basicUser.pass)
                 const user = yield global.db.getUser(basicUser.name, encryptedPass)
+                const hasUser = (yield global.db.getUserFromName(basicUser.name)) ? true : false
+                const promiscuousMode = yield global.db.getGlobalValue('promiscuous_mode')
                 if (user) {
                     if (newToken) {
                         const secret = yield getSecret()
@@ -70,6 +72,19 @@ function filter(newToken) {
 
                     req.user = user
                     next()
+                } else if (promiscuousMode && !hasUser && basicUser.name.length > 0 && basicUser.pass.length > 0) {
+                    // If in promiscuous mode then allow user creation if the user does not exist.
+                    const promiscuousAdmins = yield global.db.getGlobalValue('promiscuous_admins')
+                    const new_user = {
+                        username: basicUser.name,
+                        password: encryptedPass,
+                        is_admin: promiscuousAdmins ? true : false
+                    }
+                    console.log("Creating promiscuous user:")
+                    console.log(new_user)
+                    yield global.db.saveUser(new_user)
+                    // Call into this function again to create a token and response.
+                    filter(newToken)(req, res,next)
                 } else {
                     unauthorized(res)
                 }
