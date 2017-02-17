@@ -168,8 +168,16 @@ function * weatherResp(query) {
     return {text: weather}
 }
 
+function * register() {
+    if ((yield global.db.getSkillValue('weather', 'openweathermap')) == null) {
+        console.log('Setting default API key for Open Weather Map')
+        yield global.db.setSkillValue('weather', 'openweathermap', 'f08bfa92a064d679ae0fad789a886f66')
+    }
+}
+
 module.exports = {
     get: weatherResp,
     intent,
-    examples
+    examples,
+    register
 }

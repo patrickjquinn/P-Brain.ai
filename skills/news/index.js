@@ -43,6 +43,13 @@ const examples = () => (
     ['Tell me the current news.']
 )
 
+function * register() {
+    if ((yield global.db.getSkillValue('news', 'newsapi')) == null) {
+        console.log('Setting default API key for news')
+        yield global.db.setSkillValue('news', 'newsapi', 'f4504df34ba9432f80ff040a41736518')
+    }
+}
+
 module.exports = {
     get: news_resp,
     intent,

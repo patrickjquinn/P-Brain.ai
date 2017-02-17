@@ -73,22 +73,10 @@ io.on('connect', socket => {
 
 function * initialSetup() {
     if ((yield global.db.getGlobalValue('port')) == null) {
-        console.log('Setting default values in database')
+        console.log('Setting default global values in database')
         yield global.db.setGlobalValue('port', 4567)
         yield global.db.setGlobalValue('promiscuous_mode', true)
         yield global.db.setGlobalValue('promiscuous_admins', true)
-    }
-    if ((yield global.db.getSkillValue('fact', 'wolframalpha')) == null) {
-        console.log('Setting default API key for Wolfram Alpha')
-        yield global.db.setSkillValue('fact', 'wolframalpha', 'U7L4VR-K3WJPLK6Y2')
-    }
-    if ((yield global.db.getSkillValue('weather', 'openweathermap')) == null) {
-        console.log('Setting default API key for Open Weather Map')
-        yield global.db.setSkillValue('weather', 'openweathermap', 'f08bfa92a064d679ae0fad789a886f66')
-    }
-    if ((yield global.db.getSkillValue('news', 'newsapi')) == null) {
-        console.log('Setting default API key for news')
-        yield global.db.setSkillValue('news', 'newsapi', 'f4504df34ba9432f80ff040a41736518')
     }
 }
 

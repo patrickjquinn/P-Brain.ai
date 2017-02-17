@@ -30,6 +30,10 @@ function * wlfra_resp(query) {
 }
 
 function * register() {
+    if ((yield global.db.getSkillValue('fact', 'wolframalpha')) == null) {
+        console.log('Setting default API key for Wolfram Alpha')
+        yield global.db.setSkillValue('fact', 'wolframalpha', 'U7L4VR-K3WJPLK6Y2')
+    }
     client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframlpha'))
 }
 
