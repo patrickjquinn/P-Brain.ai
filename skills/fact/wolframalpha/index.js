@@ -8,7 +8,7 @@ co(function * () {
         console.log('Setting default API key for Wolfram Alpha')
         yield global.db.setSkillValue('fact', 'wolframalpha', 'U7L4VR-K3WJPLK6Y2')
     }
-    client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframlpha'))
+    client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframalpha'))
 }).catch(err => {
     console.log(err)
     throw err
