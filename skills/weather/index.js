@@ -1,10 +1,9 @@
 const request = require('co-request')
-const config = require('../../config')
-const keys = config.get
+const util = require('util')
 
-const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=<query>&units=metric&appid=' + keys.openweathermap.key
-const api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=' + keys.openweathermap.key + '&units=metric&q='
-const api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=' + keys.openweathermap.key + '&units=metric&q='
+const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?units=metric&appid=%s&q=%s'
+const api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=%s&units=metric&q=%s'
+const api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=%s&units=metric&q=%s'
 
 const intent = () => ({
     keywords: ['what is the weather', 'whats it like in qqqq', 'temperature', 'whats the weather qqqq'],
@@ -60,17 +59,19 @@ function * weatherResp(query) {
         current_loc = 'dublin'
     }
 
+    const key = yield global.db.getSkillValue('weather', 'openweathermap')
+
     if (query.indexOf(' in ') != -1) {
         country = query.split(' in ')[1]
 
         if (country && country != '') {
-            res = yield request(api_opnw_in + country, {
+            res = yield request(util.format(api_opnw_in, key, country), {
                 headers: {
                     'Content-type': 'application/json'
                 }
             })
         } else {
-            res = yield request(api_opnw.replace('<query>', current_loc), {
+            res = yield request(util.format(api_opnw, key, current_loc), {
                 headers: {
                     'Content-type': 'application/json'
                 }
@@ -91,7 +92,7 @@ function * weatherResp(query) {
             index = get_index_from_day(country)
         }
 
-        res = yield request(api_opnw_on + current_loc, {
+        res = yield request(util.format(api_opnw_on, key, current_loc), {
             headers: {
                 'Content-type': 'application/json'
             }
@@ -101,13 +102,13 @@ function * weatherResp(query) {
     } else if (query.indexOf(' tomorrow') != -1) {
         index = get_index_from_day() + 1
         forcast = true
-        res = yield request(api_opnw_on + current_loc, {
+        res = yield request(util.format(api_opnw_on, key, current_loc), {
             headers: {
                 'Content-type': 'application/json'
             }
         })
     } else {
-        res = yield request(api_opnw.replace('<query>', current_loc), {
+        res = yield request(util.format(api_opnw, key, current_loc), {
             headers: {
                 'Content-type': 'application/json'
             }

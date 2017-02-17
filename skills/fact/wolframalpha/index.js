@@ -1,10 +1,10 @@
 const request = require('co-request')
-const config = require.main.require('./config').get
-const wolfram = require('wolfram-alpha').createClient(config.wolframalpha.key)
+const wolfram = require('wolfram-alpha')
+let client = null
 
 function * query_wrapper(query) {
     return new Promise(function (resolve, reject) {
-        wolfram.query(query, function(err, result) {
+        client.query(query, function(err, result) {
             if (err) {
                 reject(err)
             } else {
@@ -29,6 +29,11 @@ function * wlfra_resp(query) {
     }
 }
 
+function * register() {
+    client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframlpha'))
+}
+
 module.exports = {
-    get: wlfra_resp
+    get: wlfra_resp,
+    register
 }

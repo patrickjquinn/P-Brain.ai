@@ -2,7 +2,6 @@ const natural = require('natural')
 const speakeasy = require('speakeasy-nlp')
 const genify = require('thunkify-wrap').genify
 const fs = require('fs')
-const config = require.main.require('./config/index.js').get
 
 const classifier = new natural.BayesClassifier()
 
@@ -33,15 +32,6 @@ function * train_recognizer(skills) {
             })
         }
     })
-
-    if (config.trains_from_responses) {
-        const responses = yield log.get_responses()
-        if (responses) {
-            responses.map(response => {
-                classifier.addDocument(strip(response.query), response.skill)
-            })
-        }
-    }
 
     classifier.train()
 

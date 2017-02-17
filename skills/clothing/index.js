@@ -1,8 +1,7 @@
 const request = require('co-request')
-const config = require('../../config')
+const util = require('util')
 
-const keys = config.get
-const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=dublin,ireland&units=metric&appid=' + keys.openweathermap.key
+const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?q=dublin,ireland&units=metric&appid=%s'
 const type_wardrobe = {
     rain: 'a jacket',
     snow: 'a scarf and gloves',
@@ -22,7 +21,8 @@ function contains_key(string, keyword) {
 function * clothing_resp() {
     let response = 'Looks like <condition>, better wear <clothes>'
     let clothes = 'a jacket'
-    let data = yield request(api_opnw, {
+    const key = yield global.db.getSkillValue('weather', 'openweathermap')
+    let data = yield request(util.format(api_opnw, key), {
         headers: {
             'Content-type': 'application/json'
         }

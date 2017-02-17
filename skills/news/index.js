@@ -1,6 +1,4 @@
 const request = require('co-request')
-const config = require('../../config')
-const keys = config.get
 
 const intent = () => ({
     keywords: ['news', 'bbc news'],
@@ -20,7 +18,8 @@ function * news_resp(query) {
         source = 'bloomberg'
     }
 
-    let news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey=' + keys.newsapi.key + '&source=' + source
+    const key = yield global.db.getSkillValue('news', 'newsapi')
+    let news_url = 'https://newsapi.org/v1/articles?sortBy=latest&apiKey=' + key + '&source=' + source
 
     if (source == 'bbc-news' || source == 'bbc-sport' || source == 'new-scientist' || source == 'bloomberg') {
         news_url = news_url.replace('latest', 'top')
