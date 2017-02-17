@@ -1,22 +1,25 @@
 const request = require('co-request')
 const util = require('util')
 
-// The first substitute is expected to by the device name, all lower case,
-// no punctuation and spaces replaced with underscores, such as 'bedroom_light'.
-// The second substitute is the command, this module assumes there is an 'on', 'off' and 'state' command.
-// On success the server returns { state: 'on' } and on failure error will be set { error: 'Failure' }.
-const IOT_URL = 'http://192.168.2.4:42238/devices/%s/methods/%s'
-
 function * do_iot(device, state) {
-    let data = yield request(util.format(IOT_URL, device, state))
-    data = JSON.parse(data.body)
-    if (data.error) {
-        console.log(`IoT Error: ${data.error} - ${device} - ${state}`)
-        return {text: `I'm sorry, I can't turn the ${device} ${state}.`}
-    } else if (state == 'state') {
-        return {text: `The ${device} is ${data.state}.`}
+    // The first substitute of the IoT URL is expected to by the device name, all lower case,
+    // no punctuation, and spaces replaced with underscores. Such as 'bedroom_light' as a name.
+    // The second substitute is the command, this module assumes there is an 'on', 'off' and 'state' command.
+    // On success the server returns { state: '<state>' } and on failure error will be set { error: 'Failure' }.
+    const iot_url = yield global.db.getSkillValue('ts_iot', 'url')
+    if (iot_url) {
+        let data = yield request(util.format(iot_url, device, state))
+        data = JSON.parse(data.body)
+        if (data.error) {
+            console.log(`IoT Error: ${data.error} - ${device} - ${state}`)
+            return {text: `I'm sorry, I can't turn the ${device} ${state}.`}
+        } else if (state == 'state') {
+            return {text: `The ${device} is ${data.state}.`}
+        }
+        return {text: `Turning the ${device} ${state}.`}
+    } else {
+        return {text: `I'm sorry, the IoT module has no configured URL.`}
     }
-    return {text: `Turning the ${device} ${state}.`}
 }
 
 function hard_rule(query, breakdown) {
