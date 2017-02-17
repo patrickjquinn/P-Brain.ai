@@ -37,13 +37,8 @@ const examples = () => (
     ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?', 'What is 200 Pounds in Euro?']
 )
 
-function * register() {
-    yield wolframalpha.register()
-}
-
 module.exports = {
     get: fact_resp,
     intent,
-    examples,
-    register
+    examples
 }

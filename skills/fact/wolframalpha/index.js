@@ -1,6 +1,18 @@
 const request = require('co-request')
 const wolfram = require('wolfram-alpha')
+const co = require('co')
+
 let client = null
+co(function * () {
+    if ((yield global.db.getSkillValue('fact', 'wolframalpha')) == null) {
+        console.log('Setting default API key for Wolfram Alpha')
+        yield global.db.setSkillValue('fact', 'wolframalpha', 'U7L4VR-K3WJPLK6Y2')
+    }
+    client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframlpha'))
+}).catch(err => {
+    console.log(err)
+    throw err
+})
 
 function * query_wrapper(query) {
     return new Promise(function (resolve, reject) {
@@ -29,15 +41,6 @@ function * wlfra_resp(query) {
     }
 }
 
-function * register() {
-    if ((yield global.db.getSkillValue('fact', 'wolframalpha')) == null) {
-        console.log('Setting default API key for Wolfram Alpha')
-        yield global.db.setSkillValue('fact', 'wolframalpha', 'U7L4VR-K3WJPLK6Y2')
-    }
-    client = wolfram.createClient(yield global.db.getSkillValue('fact', 'wolframlpha'))
-}
-
 module.exports = {
-    get: wlfra_resp,
-    register
+    get: wlfra_resp
 }

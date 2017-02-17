@@ -1,9 +1,20 @@
 const request = require('co-request')
 const util = require('util')
+const co = require('co')
 
 const api_opnw = 'http://api.openweathermap.org/data/2.5/weather?units=metric&appid=%s&q=%s'
 const api_opnw_in = 'http://api.openweathermap.org/data/2.5/weather?appid=%s&units=metric&q=%s'
 const api_opnw_on = 'http://api.openweathermap.org/data/2.5/forecast?appid=%s&units=metric&q=%s'
+
+co(function * () {
+    if ((yield global.db.getSkillValue('weather', 'openweathermap')) == null) {
+        console.log('Setting default API key for Open Weather Map')
+        yield global.db.setSkillValue('weather', 'openweathermap', 'f08bfa92a064d679ae0fad789a886f66')
+    }
+}).catch(err => {
+    console.log(err)
+    throw err
+})
 
 const intent = () => ({
     keywords: ['what is the weather', 'whats it like in qqqq', 'temperature', 'whats the weather qqqq'],
@@ -168,16 +179,8 @@ function * weatherResp(query) {
     return {text: weather}
 }
 
-function * register() {
-    if ((yield global.db.getSkillValue('weather', 'openweathermap')) == null) {
-        console.log('Setting default API key for Open Weather Map')
-        yield global.db.setSkillValue('weather', 'openweathermap', 'f08bfa92a064d679ae0fad789a886f66')
-    }
-}
-
 module.exports = {
     get: weatherResp,
     intent,
-    examples,
-    register
+    examples
 }

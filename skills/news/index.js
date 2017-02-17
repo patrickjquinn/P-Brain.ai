@@ -1,4 +1,15 @@
 const request = require('co-request')
+const co = require('co')
+
+co(function * () {
+    if ((yield global.db.getSkillValue('news', 'newsapi')) == null) {
+        console.log('Setting default API key for news')
+        yield global.db.setSkillValue('news', 'newsapi', 'f4504df34ba9432f80ff040a41736518')
+    }
+}).catch(err => {
+    console.log(err)
+    throw err
+})
 
 const intent = () => ({
     keywords: ['news', 'bbc news'],
@@ -42,13 +53,6 @@ function * news_resp(query) {
 const examples = () => (
     ['Tell me the current news.']
 )
-
-function * register() {
-    if ((yield global.db.getSkillValue('news', 'newsapi')) == null) {
-        console.log('Setting default API key for news')
-        yield global.db.setSkillValue('news', 'newsapi', 'f4504df34ba9432f80ff040a41736518')
-    }
-}
 
 module.exports = {
     get: news_resp,
