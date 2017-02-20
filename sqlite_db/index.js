@@ -339,9 +339,12 @@ function * getUserTokens(user, token) {
 }
 
 function * addQuery(query, user, token) {
+    if (token == null) {
+        token = {token: null}
+    }
     return new Promise((resolve, reject) => {
         query = JSON.stringify(query)
-        db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token, function (err) {
+        db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token.token, function (err) {
             if (err) {
                 reject(err)
             } else {

@@ -58,7 +58,8 @@ function filter(newToken) {
                 const hasUser = (yield global.db.getUserFromName(basicUser.name)) ? true : false
                 const promiscuousMode = yield global.db.getGlobalValue('promiscuous_mode')
                 if (user) {
-                    if (newToken) {
+                    if (newToken === true) {
+                        console.log(`Creating new token for user ${user.username}.`)
                         const secret = yield getSecret()
                         const token = jwt.sign(user, secret).trim()
                         yield global.db.saveToken(user, {token})
@@ -76,8 +77,7 @@ function filter(newToken) {
                         password: encryptedPass,
                         is_admin: promiscuousAdmins ? true : false
                     }
-                    console.log("Creating promiscuous user:")
-                    console.log(new_user)
+                    console.log(`Creating promiscuous user ${new_user.username}.`)
                     yield global.db.saveUser(new_user)
                     // Call into this function again to create a token and response.
                     filter(newToken)(req, res,next)
