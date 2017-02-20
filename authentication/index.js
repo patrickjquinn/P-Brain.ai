@@ -62,7 +62,7 @@ function filter(newToken) {
                         const secret = yield getSecret()
                         const token = jwt.sign(user, secret).trim()
                         yield global.db.saveToken(user, {token})
-                        res.cookie('token', token, {maxAge: 900000})
+                        res.cookie('token', token, {maxAge: (10 * 365 * 24 * 60 * 60)}) // 10 years.
                         req.token = (yield global.db.getUserTokens(user, {token:token.trim()}))[0]
                     }
 
