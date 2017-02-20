@@ -29,10 +29,6 @@ function * encryptPassword(password) {
     return md5(password + salt).toUpperCase()
 }
 
-function filterNoNewToken(req, res, next) {
-    filter(req, res, next, true)
-}
-
 function filter(newToken) {
     return (req, res, next) => {
         function unauthorized(res) {
@@ -47,10 +43,10 @@ function filter(newToken) {
                 token = req.cookies.token
             }
             if (token) {
-                const user = yield global.db.getUserFromToken(token.trim())
+                const user = yield global.db.getUserFromToken({token:token.trim()})
                 if (user) {
                     req.user = user
-                    req.token = token.trim()
+                    req.token = (yield global.db.getUserTokens(user, {token:token.trim()}))[0]
                     return next()
                 }
             }
@@ -65,9 +61,9 @@ function filter(newToken) {
                     if (newToken) {
                         const secret = yield getSecret()
                         const token = jwt.sign(user, secret).trim()
-                        yield global.db.addToken(user, token)
+                        yield global.db.saveToken(user, {token})
                         res.cookie('token', token, {maxAge: 900000})
-                        req.token = token
+                        req.token = (yield global.db.getUserTokens(user, {token:token.trim()}))[0]
                     }
 
                     req.user = user
@@ -130,6 +126,28 @@ function logout(req, res) {
     })
 }
 
+function viewTokens(req, res) {
+    co(function * () {
+        if (req.params.user) {
+            const url_user = yield global.db.getUserFromName(req.params.user)
+            if (url_user) {
+                if (req.user.is_admin || req.user.user_id == url_user.user_id) {
+                    res.json(yield global.db.getUserTokens(url_user))
+                } else {
+                    res.status(401).send("Not authorized for this user")
+                }
+            } else {
+                res.status(404).send("User not found")
+            }
+        } else {
+            res.json(yield global.db.getUserTokens(req.user))
+        }
+    }).catch(err => {
+        console.log(err)
+        res.status(503).json(err)
+    })
+}
+
 function validate(req, res) {
     res.sendStatus(200)
 }
@@ -138,9 +156,10 @@ function verifyIO(socket, next) {
     const token = socket.handshake.query.token
     if (token) {
         co(function * () {
-            const user = yield global.db.getUserFromToken(token.trim())
+            const user = yield global.db.getUserFromToken({token:token.trim()})
             if (user) {
-                clients.push({user, token, socket})
+                const full_token = (yield global.db.getUserTokens(user, {token:token.trim()}))[0]
+                clients.push({user, token: full_token, socket})
                 socket.on('disconnect', () => {
                     for (let i = 0; i < clients.length; i++) {
                         if (clients[i].socket === socket) {
@@ -171,13 +190,23 @@ function getSocketsByUser(user) {
     return sockets
 }
 
+function getSocketByToken(token) {
+    for (let i = 0; i < clients.length; i++) {
+        if (clients[i].token.token == token.token) {
+            return clients[i].socket
+        }
+    }
+    return null
+}
+
 module.exports = {
     verifyIO,
     filter,
-    filterNoNewToken,
+    viewTokens,
     login,
     logout,
     validate,
     encryptPassword,
-    getSocketsByUser
+    getSocketsByUser,
+    getSocketByToken
 }

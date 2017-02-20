@@ -1,7 +1,7 @@
 const co = require('co')
 
 function hard_rule(query, breakdown) {
-    return query.includes('your name') || query.includes('youre called')
+    return query.startsWith('your name') || query.startsWith('youre called')
 }
 
 const DEFAULT_NAME = 'Brain'

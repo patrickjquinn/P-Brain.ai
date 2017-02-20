@@ -37,7 +37,7 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     try {
-        const result = yield search.query(input, req.user)
+        const result = yield search.query(input, req.user, req.token)
         res.json(result)
     } catch (e) {
         console.log(e)
@@ -47,27 +47,28 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
 
 app.get('/api/login', authenticator.login)
 app.get('/api/logout/:user?', [authenticator.filter(false), authenticator.logout])
+app.get('/api/tokens/:user?', [authenticator.filter(false), authenticator.viewTokens])
 app.get('/api/validate', authenticator.validate)
 io.use(authenticator.verifyIO)
 
 io.on('connect', socket => {
-    socket.on('ask', co.wrap(function * (msg) {
+    co(function *() {
         const user = yield global.db.getUserFromToken(socket.handshake.query.token)
-        const input = msg.text.toLowerCase()
-        try {
-            const result = yield search.query(input, user)
-            socket.emit('response', result)
-        } catch (e) {
-            console.log(e)
-            socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
-        }
-    }))
-    co(function * () {
-        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
+        const token = (yield global.db.getUserTokens(user, {token: socket.handshake.query.token}))[0]
+
+        socket.on('ask', co.wrap(function *(msg) {
+            const input = msg.text.toLowerCase()
+            try {
+                const result = yield search.query(input, user, token)
+                socket.emit('response', result)
+            } catch (e) {
+                console.log(e)
+                socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
+            }
+        }))
         yield skills.registerClient(socket, user)
     }).catch(err => {
         console.log(err)
-        throw err
     })
 })
 
@@ -90,6 +91,14 @@ co(function * () {
         sockets.map(socket => {
             socket.emit(type, message)
         })
+    }
+    global.sendToDevice = function(token, type, message) {
+        const socket = authenticator.getSocketByToken(token)
+        if (socket) {
+            socket.emit(type, message)
+        } else {
+            console.log("Failed to send to device: " + JSON.stringify(token))
+        }
     }
 
     console.log('Loading skills.')

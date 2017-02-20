@@ -16,7 +16,7 @@ String.prototype.replaceAll = function (search, replacement) {
 }
 
 function strip(word) {
-    return word.replaceAll('\'', '').replace(/\?/g, '')
+    return word.replaceAll('\'', '').replace(/\?/g, '').replaceAll('.', '').toLowerCase().trim()
 }
 
 function * train_recognizer(skills) {
@@ -79,7 +79,7 @@ function * train_recognizer(skills) {
 
 function classify(q) {
     const intent_breakdown = speakeasy.classify(q)
-    q = strip(q).toLowerCase()
+    q = strip(q)
     const hard_skills = []
     loaded_skills.map(skill => {
         if (skill.hard_rule) {
@@ -120,12 +120,12 @@ function classify(q) {
     throw new Error('No skill found.')
 }
 
-function * query(q, user) {
-    const query_data = yield global.db.addQuery(q, user)
+function * query(q, user, token) {
+    const query_data = yield global.db.addQuery(q, user, token)
     const classification = classify(q)
 
     console.log(`Using skill ${classification.skill.name} for ${q}`)
-    const resp = yield classification.skill.get(q, classification.intent_breakdown, user)
+    const resp = yield classification.skill.get(strip(q), classification.intent_breakdown, user, token)
 
     yield global.db.addResponse(query_data, classification.skill.name, resp)
 
