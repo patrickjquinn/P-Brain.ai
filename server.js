@@ -110,6 +110,17 @@ co(function * () {
     http.listen(port, () => {
         console.log(`Server started on http://localhost:${port}`)
     })
+
+    const promiscuous = yield global.db.getGlobalValue('promiscuous_mode')
+    const promiscuous_admins = yield global.db.getGlobalValue('promiscuous_admins')
+    if (promiscuous) {
+        console.log('Warning! Promiscuous mode is enabled all logins will succeed.')
+        if (promiscuous_admins) {
+            console.log('Possibly deadly warning! Promiscuous admins is enabled.' +
+                ' All new users will be admins and can view each others data.')
+        }
+        console.log(`Settings can be changed at http://localhost:${port}/settings.html`)
+    }
 }).catch(err => {
     console.log(err)
     throw err
