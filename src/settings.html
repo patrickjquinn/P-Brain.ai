@@ -3,32 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <title>P-Brain Settings</title>
+    <style>
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-    <h1>P-Brain Settings</h1>
-    Changing user settings tends to only require a client refresh. Changing skill and global settings tends to require a server restart.
-    <h2>User Settings</h2>
+<h1>P-Brain Settings</h1>
+Changing user settings tends to only require a client refresh. Changing skill and global settings tends to require a
+server restart.
+<h2>User Settings</h2>
+<div>
     <table id="user_settings" border="1">
         <tr>
-            <th>Skill</th><th>User</th><th>Key</th><th>Value</th>
+            <th>Skill</th>
+            <th>User</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_user_skill"/></td>
+            <td><input type="text" id="add_user_user"/></td>
+            <td><input type="text" id="add_user_key"/></td>
+            <td><input type="text" id="add_user_value"/></td>
+            <td><input type="submit" id="add_user_add" value="Add"/></td>
         </tr>
     </table>
+</div>
+<div id="skill_settings_div">
     <h2>Skill Settings</h2>
     <table id="skill_settings" border="1">
         <tr>
-            <th>Skill</th><th>Key</th><th>Value</th>
+            <th>Skill</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_skill_skill"/></td>
+            <td><input type="text" id="add_skill_key"/></td>
+            <td><input type="text" id="add_skill_value"/></td>
+            <td><input type="submit" id="add_skill_add" value="Add"/></td>
         </tr>
     </table>
+</div>
+<div id="global_settings_div">
     <h2>Global Settings</h2>
     <table id="global_settings" border="1">
         <tr>
-            <th>Key</th><th>Value</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_global_key"/></td>
+            <td><input type="text" id="add_global_value"/></td>
+            <td><input type="submit" id="add_global_add" value="Add"/></td>
         </tr>
     </table>
+</div>
 <script>
     function request(url, callback) {
         const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 if (xhr.status == 200) {
                     callback(xhr.responseText);
@@ -59,88 +101,132 @@
         return value;
     }
 
-    function setupUpdate(element, url, value, length) {
+    function clearTable(table) {
+        const tBody = table.tBodies[0].cloneNode(false);
+        tBody.appendChild(table.rows[0]);
+        tBody.appendChild(table.rows[1]);
+        table.replaceChild(tBody, table.tBodies[0]);
+    }
+
+    function setupUserSettings() {
+        request('/api/settings/user_setting', function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("user_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const skill = row.insertCell(0);
+                    skill.innerHTML = setting.skill;
+                    const user = row.insertCell(1);
+                    user.innerHTML = setting.username;
+                    const key = row.insertCell(2);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(3), row.insertCell(4), `/api/settings/user_setting/${setting.username}/${setting.skill}/${setting.key}`, setting.value, refreshUserSettings);
+                });
+            }
+        });
+    }
+    function refreshUserSettings() {
+        clearTable(document.getElementById("user_settings"));
+        setupUserSettings();
+    }
+    function setupSkillSettings() {
+        request('/api/settings/skill_setting', function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("skill_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const skill = row.insertCell(0);
+                    skill.innerHTML = setting.skill;
+                    const key = row.insertCell(1);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(2), row.insertCell(3), `/api/settings/skill_setting/${setting.skill}/${setting.key}`, setting.value, refreshSkillSettings);
+                });
+            } else {
+                document.getElementById("skill_settings_div").style.visibility = "hidden";
+            }
+        });
+    }
+    function refreshSkillSettings() {
+        clearTable(document.getElementById("skill_settings"));
+        setupSkillSettings();
+    }
+    function setupGlobalSettings() {
+        request('/api/settings/global_setting', function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("global_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const key = row.insertCell(0);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(1), row.insertCell(2), `/api/settings/global_setting/${setting.key}`, setting.value, refreshGlobalSettings);
+                });
+            } else {
+                document.getElementById("global_settings_div").style.visibility = "hidden";
+            }
+        });
+    }
+    function refreshGlobalSettings() {
+        clearTable(document.getElementById("global_settings"));
+        setupGlobalSettings();
+    }
+
+    function setupUpdate(element, action, url, value, refresh) {
         const text = document.createElement("INPUT");
         text.setAttribute("type", "text");
-        text.setAttribute("size", length);
+        if (value) {
+            text.setAttribute("size", value.length);
+        }
         text.value = value;
         element.appendChild(text);
+
         const update = document.createElement("INPUT");
         update.setAttribute("type", "submit");
         update.value = "Update";
-        update.onclick = function() {
+        action.appendChild(update);
+
+        const remove = document.createElement("INPUT");
+        remove.setAttribute("type", "submit");
+        remove.value = "Remove";
+        action.appendChild(remove);
+
+        remove.onclick = function () {
+            if (confirm("Are you sure you want to delete this item?")) {
+                update.disabled = true;
+                remove.disabled = true;
+                request(`${url}/remove`, function (data) {
+                    update.disabled = false;
+                    remove.disabled = false;
+                    if (data) {
+                        refresh();
+                        alert("Successfully removed!");
+                    } else {
+                        alert("Removing failed.");
+                    }
+                })
+            }
+        };
+        update.onclick = function () {
             const newValue = encodeURIComponent(JSON.stringify(parseValue(text.value)));
             update.disabled = true;
-            request(`${url}${newValue}`, function (data) {
+            remove.disabled = true;
+            request(`${url}?value=${newValue}`, function (data) {
                 update.disabled = false;
+                remove.disabled = false;
                 if (data) {
-                    update.value = "Update (Success!)";
+                    alert("Update success!");
                 } else {
-                    update.value = "Update (Failure)";
+                    alert("Update failed.");
                 }
             })
         };
-
-        element.appendChild(update);
     }
 
-    function getLongestSetting(data) {
-        let longestSetting = 20;
-        data.map(function (setting) {
-            if (setting.value) {
-                if (setting.value.length > longestSetting) {
-                    longestSetting = setting.value.length;
-                }
-            }
-        });
-        return longestSetting;
-    }
-
-    request('/api/settings/user_setting', function(data) {
-        if (data) {
-            data = JSON.parse(data);
-            const table = document.getElementById("user_settings");
-            const length = getLongestSetting(data);
-            data.map(function (setting) {
-                const row = table.insertRow(-1);
-                const skill = row.insertCell(0);
-                skill.innerHTML = setting.skill;
-                const user = row.insertCell(1);
-                user.innerHTML = setting.username;
-                const key = row.insertCell(2);
-                key.innerHTML = setting.key;
-                setupUpdate(row.insertCell(3), `/api/settings/user_setting/${setting.username}/${setting.skill}/${setting.key}?value=`, setting.value, length);
-            });
-        }
-    });
-    request('/api/settings/skill_setting', function(data) {
-        if (data) {
-            data = JSON.parse(data);
-            const table = document.getElementById("skill_settings");
-            const length = getLongestSetting(data);
-            data.map(function (setting) {
-                const row = table.insertRow(-1);
-                const skill = row.insertCell(0);
-                skill.innerHTML = setting.skill;
-                const key = row.insertCell(1);
-                key.innerHTML = setting.key;
-                setupUpdate(row.insertCell(2), `/api/settings/skill_setting/${setting.skill}/${setting.key}?value=`, setting.value, length);
-            });
-        }
-    });
-    request('/api/settings/global_setting', function(data) {
-        if (data) {
-            data = JSON.parse(data);
-            const table = document.getElementById("global_settings");
-            const length = getLongestSetting(data);
-            data.map(function (setting) {
-                const row = table.insertRow(-1);
-                const key = row.insertCell(0);
-                key.innerHTML = setting.key;
-                setupUpdate(row.insertCell(1), `/api/settings/global_setting/${setting.key}?value=`, setting.value, length);
-            });
-        }
-    });
+    setupUserSettings();
+    setupSkillSettings();
+    setupGlobalSettings();
 </script>
 </body>
 </html>
