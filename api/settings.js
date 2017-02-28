@@ -32,19 +32,20 @@ router.get('/skill_setting/:skill?/:name?', wrap(function *(req, res) {
 }))
 
 router.get('/user_setting/:user?/:skill?/:name?', wrap(function *(req, res) {
-    const user = req.user
-    if (user.is_admin || user.username == req.params.user) {
-        const url_user = yield global.db.getUserFromName(req.params.user)
-        if (req.params.user && req.params.skill && req.params.name && req.query.value) {
-            const value = JSON.parse(req.query.value)
-            yield global.db.setValue(req.params.skill, url_user, req.params.name, value)
-            res.json(value)
+    let user = req.user
+    if (req.params.user) {
+        if (user.is_admin || req.params.user == user.username) {
+            user = yield global.db.getUserFromName(req.params.user)
+            if (req.params.user && req.params.skill && req.params.name && req.query.value) {
+                const value = JSON.parse(req.query.value)
+                yield global.db.setValue(req.params.skill, user, req.params.name, value)
+                return res.json(value)
+            }
         } else {
-            res.json(yield global.db.getValue(req.params.skill, url_user, req.params.name))
+            return res.sendStatus(401)
         }
-    } else {
-        res.sendStatus(401)
     }
+    return res.json(yield global.db.getValue(req.params.skill, user, req.params.name))
 }))
 
 module.exports = router
