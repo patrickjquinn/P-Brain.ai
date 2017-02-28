@@ -68,6 +68,17 @@ function * allQueryWrapper(query, values, key) {
     return undefined
 }
 
+function exportUser(user) {
+    if (user) {
+        return {
+            user_id: user.user_id,
+            username: user.username,
+            is_admin: user.is_admin == 1
+        }
+    }
+    return null
+}
+
 function * getVersion() {
     const row = yield queryWrapper(db.get, 'SELECT * FROM version ORDER BY version DESC LIMIT 1')
     return row.version
@@ -121,11 +132,8 @@ function * setup(database) {
 }
 
 function * getUserFromName(username) {
-    const user = yield queryWrapper(db.get, 'SELECT user_id, username, is_admin FROM users WHERE username = ?', [username])
-    if (user) {
-        user.is_admin = user.is_admin == 1
-    }
-    return user
+    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ?', [username])
+    return exportUser(user)
 }
 
 function * saveUser(user) {
@@ -139,11 +147,17 @@ function * saveUser(user) {
 }
 
 function * getUser(username, password) {
-    const user = yield queryWrapper(db.get, 'SELECT user_id, username, is_admin FROM users WHERE username = ? AND password = ?', [username, password])
-    if (user) {
-        user.is_admin = user.is_admin == 1
-    }
-    return user
+    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
+    return exportUser(user)
+}
+
+function * getUsers() {
+    const users = yield queryWrapper(db.all, 'SELECT * FROM users ORDER BY user_id ASC')
+    const parsed = []
+    users.map((user) => {
+        parsed.push(exportUser(user))
+    })
+    return parsed
 }
 
 function * setValue(skill, user, key, value) {
@@ -159,7 +173,7 @@ function * getValue(skill, user, key) {
     const base = 'SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id'
     let user_id = (user) ? user.user_id : undefined
     const query = makeConditionalQuery(base, ['skill = ?', 'user_settings.user_id = ?', 'key = ?'], [skill, user_id, key])
-    query.query += ' ORDER BY skill ASC, users.username ASC, key ASC'
+    query.query += ' ORDER BY skill ASC, user_settings.user_id ASC, key ASC'
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
@@ -216,11 +230,8 @@ function * getUserFromToken(token) {
     if (token.token) {
         token = token.token
     }
-    const user = yield queryWrapper(db.get, 'SELECT users.user_id, users.username, users.is_admin FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', [token])
-    if (user) {
-        user.is_admin = user.is_admin == 1
-    }
-    return user
+    const user = yield queryWrapper(db.get, 'SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', [token])
+    return exportUser(user)
 }
 
 function * getUserTokens(user, token) {
@@ -274,6 +285,7 @@ module.exports = {
     deleteUserTokens,
     getUserFromToken,
     getUser,
+    getUsers,
     getUserFromName,
     saveUser,
     getUserTokens,
