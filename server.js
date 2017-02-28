@@ -11,6 +11,7 @@ const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
 const authenticator = require('./authentication')
 const settingsApi = require('./api/settings.js')
+const usersApi = require('./api/users.js')
 const cookieParser = require('cookie-parser')
 global.db = require('./sqlite_db')
 
@@ -31,6 +32,7 @@ app.use(cookieParser())
 
 app.use('/', [authenticator.filter(true), express.static('./src')])
 app.use('/api/settings', [authenticator.filter(false), settingsApi])
+app.use('/api/users', [authenticator.filter(false), usersApi])
 
 // TODO parse services in query
 app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
