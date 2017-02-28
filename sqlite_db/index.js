@@ -168,6 +168,18 @@ function * setValue(skill, user, key, value) {
     })
 }
 
+function * deleteValue(skill, user, key) {
+    return new Promise((resolve, reject) => {
+        db.get('DELETE FROM user_settings WHERE skill = ? AND user_id = ? AND key = ?', skill, user.user_id, key, (err, row) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 function makeConditionalQuery(query, conditions, values) {
     const endConditions = []
     const endValues = []
@@ -238,6 +250,18 @@ function * getSkillValue(skill, key) {
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
+function * deleteSkillValue(skill, key) {
+    return new Promise((resolve, reject) => {
+        db.get('DELETE FROM skill_settings WHERE skill = ? AND key = ?', skill, key, (err, row) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 function * setGlobalValue(key, value) {
     value = JSON.stringify(value)
     return new Promise((resolve, reject) => {
@@ -256,6 +280,18 @@ function * getGlobalValue(key) {
     const query = makeConditionalQuery(base, ['key = ?'], [key])
     query.query += ' ORDER BY key ASC'
     return yield allQueryWrapper(query.query, query.values, key)
+}
+
+function * deleteGlobalValue(key) {
+    return new Promise((resolve, reject) => {
+        db.get('DELETE FROM global_settings WHERE key = ?', key, (err, row) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
 }
 
 function * saveToken(user, token) {
@@ -375,10 +411,13 @@ module.exports = {
     setup,
     setValue,
     getValue,
+    deleteValue,
     setSkillValue,
     getSkillValue,
+    deleteSkillValue,
     setGlobalValue,
     getGlobalValue,
+    deleteGlobalValue,
     saveToken,
     deleteToken,
     deleteUserTokens,
