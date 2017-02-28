@@ -55,7 +55,7 @@ function filter(newToken) {
             if (basicUser && basicUser.name && basicUser.pass) {
                 const encryptedPass = yield encryptPassword(basicUser.pass)
                 const user = yield global.db.getUser(basicUser.name, encryptedPass)
-                const hasUser = (yield global.db.getUserFromName(basicUser.name)) ? true : false
+                const hasUser = !!(yield global.db.getUserFromName(basicUser.name))
                 const promiscuousMode = yield global.db.getGlobalValue('promiscuous_mode')
                 if (user) {
                     if (newToken === true) {
@@ -75,7 +75,7 @@ function filter(newToken) {
                     const new_user = {
                         username: basicUser.name,
                         password: encryptedPass,
-                        is_admin: promiscuousAdmins ? true : false
+                        is_admin: !!promiscuousAdmins
                     }
                     console.log(`Creating promiscuous user ${new_user.username}.`)
                     yield global.db.saveUser(new_user)
