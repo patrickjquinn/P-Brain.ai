@@ -13,168 +13,18 @@ const setupQuery =
     'CREATE TABLE IF NOT EXISTS user_settings(user_id INTEGER REFERENCES users(user_id), skill TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(user_id, skill, key));' +
     'CREATE TABLE IF NOT EXISTS version(version INTEGER);'
 
-function * getVersion() {
+function * queryWrapper(fn, query, values) {
+    if (values) {
+        fn = fn.bind(db, query, values)
+    } else {
+        fn = fn.bind(db, query)
+    }
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM version LIMIT 1', (err, row) => {
+        fn((err, rows) => {
             if (err) {
-                reject(err)
+                reject(new Error(`Error running query: ${query} - ${JSON.stringify(values)}: ${err}`))
             } else {
-                if (row) {
-                    resolve(row.version)
-                } else {
-                    resolve(0)
-                }
-            }
-        })
-    })
-}
-
-function * setVersion(version) {
-    return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO version(version) VALUES (?)', version, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
-}
-
-function * databaseV1Setup() {
-    return new Promise((resolve, reject) => {
-        db.run('ALTER TABLE users ADD is_admin INTEGER DEFAULT 0', (err) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
-}
-
-function * databaseV2Setup() {
-    const query = 'ALTER TABLE tokens ADD name TEXT DEFAULT NULL;' +
-            'ALTER TABLE queries ADD token TEXT REFERENCES tokens(token);'
-    return new Promise((resolve, reject) => {
-        db.exec(query, (err) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
-}
-
-function * setup(database) {
-    return new Promise((resolve, reject) => {
-        db = new sqlite3.cached.Database(database, err => {
-            if (err) {
-                console.log(`Failed to open database. ${err}`)
-                reject(err)
-            } else {
-                db.exec(setupQuery, err => {
-                    if (err) {
-                        reject(err)
-                    } else {
-                        co(function * () {
-                            const version = yield getVersion()
-                            switch(version) {
-                                case 0:
-                                    yield databaseV1Setup()
-                                    yield setVersion(1)
-                                    // Fallthrough.
-                                case 1:
-                                    yield databaseV2Setup()
-                                    yield setVersion(2)
-                                default: break
-                            }
-                        }).catch(err => {
-                            reject(err)
-                        })
-                        resolve()
-                    }
-                })
-            }
-        })
-    })
-}
-
-function * getUserFromName(username) {
-    return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM users WHERE username = ?', username, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                if (row) {
-                    row.is_admin = row.is_admin == 1
-                }
-                resolve(row)
-            }
-        })
-    })
-}
-
-function * saveUser(user) {
-    const dbuser = yield getUserFromName(user.username)
-    const is_admin = (user.is_admin) ? user.is_admin : 0
-    return new Promise((resolve, reject) => {
-        if (dbuser) {
-            db.run('UPDATE users SET username=?,password=?,is_admin=? WHERE user_id=?', user.username, user.password, is_admin, dbuser.user_id, (err) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve()
-                }
-            })
-        } else {
-            db.run('INSERT INTO users(username, password, is_admin) VALUES(?, ?, ?)', user.username, user.password, is_admin, (err) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve()
-                }
-            })
-        }
-    })
-}
-
-function * getUser(username, password) {
-    return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM users WHERE username = ? AND password = ?', username, password, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                if (row) {
-                    row.is_admin = row.is_admin == 1
-                }
-                resolve(row)
-            }
-        })
-    })
-}
-
-function * setValue(skill, user, key, value) {
-    value = JSON.stringify(value)
-    return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO user_settings(skill, user_id, key, value) VALUES (?, ?, ?, ?)', skill, user.user_id, key, value, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
-}
-
-function * deleteValue(skill, user, key) {
-    return new Promise((resolve, reject) => {
-        db.get('DELETE FROM user_settings WHERE skill = ? AND user_id = ? AND key = ?', skill, user.user_id, key, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
+                resolve(rows);
             }
         })
     })
@@ -200,26 +50,100 @@ function makeConditionalQuery(query, conditions, values) {
 }
 
 function * allQueryWrapper(query, values, key) {
+    const rows = yield queryWrapper(db.all, query, values)
+    if (Array.isArray(rows) && rows.length > 0) {
+        rows.map((row) => {
+            row.value = JSON.parse(row.value)
+        })
+        if (key) {
+            return rows[0].value
+        } else {
+            return rows
+        }
+    }
+    return undefined
+}
+
+function * getVersion() {
+    const row = yield queryWrapper(db.get, 'SELECT * FROM version ORDER BY version DESC LIMIT 1')
+    return row.version
+}
+
+function * setVersion() {
+    yield queryWrapper(db.get, 'INSERT OR REPLACE INTO version(version) VALUES (?)', [version])
+}
+
+function * databaseV1Setup() {
+    yield queryWrapper(db.run, 'ALTER TABLE users ADD is_admin INTEGER DEFAULT 0')
+}
+
+function * databaseV2Setup() {
+    const query = 'ALTER TABLE tokens ADD name TEXT DEFAULT NULL;' +
+            'ALTER TABLE queries ADD token TEXT REFERENCES tokens(token);'
+    yield queryWrapper(db.exec, query)
+}
+
+function * createDb(database) {
     return new Promise((resolve, reject) => {
-        db.all(query, values, (err, rows) => {
+        const local_db = new sqlite3.cached.Database(database, err => {
             if (err) {
                 reject(err)
             } else {
-                if (Array.isArray(rows) && rows.length > 0) {
-                    rows.map((row) => {
-                        row.value = JSON.parse(row.value)
-                    })
-                    if (key) {
-                        resolve(rows[0].value)
-                    } else {
-                        resolve(rows)
-                    }
-                } else {
-                    resolve(undefined)
-                }
+                resolve(local_db)
             }
         })
     })
+}
+
+function * setup(database) {
+    db = yield createDb(database)
+    yield queryWrapper(db.exec, setupQuery)
+    const version = yield getVersion()
+    switch(version) {
+        case 0:
+            yield databaseV1Setup()
+            yield setVersion(1)
+            // Fallthrough.
+        case 1:
+            yield databaseV2Setup()
+            yield setVersion(2)
+        default: break
+    }
+}
+
+function * getUserFromName(username) {
+    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ?', [username])
+    if (user) {
+        user.is_admin = row.is_admin == 1
+    }
+    return user
+}
+
+function * saveUser(user) {
+    const dbuser = yield getUserFromName(user.username)
+    const is_admin = (user.is_admin) ? user.is_admin : 0
+    if (dbuser) {
+        yield queryWrapper(db.run, 'UPDATE users SET username=?,password=?,is_admin=? WHERE user_id=?', [user.username, user.password, is_admin, dbuser.user_id])
+    } else {
+        yield queryWrapper(db.run, 'INSERT INTO users(username, password, is_admin) VALUES(?, ?, ?)', [user.username, user.password, is_admin])
+    }
+}
+
+function * getUser(username, password) {
+    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
+    if (user) {
+        user.is_admin = row.is_admin == 1
+    }
+    return user
+}
+
+function * setValue(skill, user, key, value) {
+    value = JSON.stringify(value)
+    yield queryWrapper(db.run, 'INSERT OR REPLACE INTO user_settings(skill, user_id, key, value) VALUES (?, ?, ?, ?)', [skill, user.user_id, key, value])
+}
+
+function * deleteValue(skill, user, key) {
+    yield queryWrapper(db.run, 'DELETE FROM user_settings WHERE skill = ? AND user_id = ? AND key = ?', [skill, user.user_id, key])
 }
 
 function * getValue(skill, user, key) {
@@ -232,15 +156,7 @@ function * getValue(skill, user, key) {
 
 function * setSkillValue(skill, key, value) {
     value = JSON.stringify(value)
-    return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO skill_settings(skill, key, value) VALUES (?, ?, ?)', skill, key, value, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'INSERT OR REPLACE INTO skill_settings(skill, key, value) VALUES (?, ?, ?)', [skill, key, value])
 }
 
 function * getSkillValue(skill, key) {
@@ -251,28 +167,12 @@ function * getSkillValue(skill, key) {
 }
 
 function * deleteSkillValue(skill, key) {
-    return new Promise((resolve, reject) => {
-        db.get('DELETE FROM skill_settings WHERE skill = ? AND key = ?', skill, key, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'DELETE FROM skill_settings WHERE skill = ? AND key = ?', [skill, key])
 }
 
 function * setGlobalValue(key, value) {
     value = JSON.stringify(value)
-    return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO global_settings(key, value) VALUES (?, ?)', key, value, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'INSERT OR REPLACE INTO global_settings(key, value) VALUES (?, ?)', [key, value])
 }
 
 function * getGlobalValue(key) {
@@ -283,80 +183,35 @@ function * getGlobalValue(key) {
 }
 
 function * deleteGlobalValue(key) {
-    return new Promise((resolve, reject) => {
-        db.get('DELETE FROM global_settings WHERE key = ?', key, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'DELETE FROM global_settings WHERE key = ?', [key])
 }
 
 function * saveToken(user, token) {
     const dbtokens = yield getUserTokens(user, token)
-    return new Promise((resolve, reject) => {
-        if (dbtokens.length > 0) {
-            db.run('UPDATE tokens SET name=? WHERE user_id=? AND token=?', token.name, user.user_id, token.token, (err) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve()
-                }
-            })
-        } else {
-            db.run('INSERT INTO tokens(token, user_id, name) VALUES(?, ?, ?)', token.token, user.user_id, token.name, (err) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve()
-                }
-            })
-        }
-    })
+    if (dbtokens.length > 0) {
+        yield queryWrapper(db.run, 'UPDATE tokens SET name=? WHERE user_id=? AND token=?', [token.name, user.user_id, token.token])
+    } else {
+        yield queryWrapper(db.run, 'INSERT INTO tokens(token, user_id, name) VALUES(?, ?, ?)', [token.token, user.user_id, token.name])
+    }
 }
 
 function * deleteToken(token) {
-    return new Promise((resolve, reject) => {
-        db.get('DELETE FROM tokens WHERE token = ?', token.token, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'DELETE FROM tokens WHERE token = ?', [token.token])
 }
 
 function * deleteUserTokens(user) {
-    return new Promise((resolve, reject) => {
-        db.get('DELETE FROM tokens WHERE user_id = ?', user.user_id, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    yield queryWrapper(db.run, 'DELETE FROM tokens WHERE user_id = ?', [user.user_id])
 }
 
 function * getUserFromToken(token) {
     if (token.token) {
         token = token.token
     }
-    return new Promise((resolve, reject) => {
-        db.get('SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', token, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                if (row) {
-                    row.is_admin = row.is_admin == 1
-                }
-                resolve(row)
-            }
-        })
-    })
+    const user = yield queryWrapper(db.get, 'SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', [token])
+    if (user) {
+        user.is_admin = user.is_admin == 1
+    }
+    return user
 }
 
 function * getUserTokens(user, token) {
@@ -366,45 +221,28 @@ function * getUserTokens(user, token) {
     }
     const base = 'SELECT token, timestamp, name FROM tokens'
     const query = makeConditionalQuery(base, ['user_id = ?', 'name = ?', 'token = ?'], [user.user_id, parsedToken.name, parsedToken.token])
-    return new Promise((resolve, reject) => {
-        db.all(query.query, query.values, (err, rows) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(rows)
-            }
-        })
-    })
+    return yield queryWrapper(db.all, query.query, query.values)
 }
 
 function * addQuery(query, user, token) {
     if (token == null) {
         token = {token: null}
     }
+    query = JSON.stringify(query)
     return new Promise((resolve, reject) => {
-        query = JSON.stringify(query)
         db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token.token, function (err) {
             if (err) {
                 reject(err)
             } else {
-                // lastId +1 because row IDs start at 0 and SQL IDs start at 1.
-                resolve({query_id: this.lastId + 1, query, user})
+                resolve({query_id: this.lastID, query, user})
             }
         })
     })
 }
 
 function * addResponse(query, skill, response) {
-    return new Promise((resolve, reject) => {
-        response = JSON.stringify(response)
-        db.run('INSERT INTO responses(query_id, skill, response) VALUES(?, ?, ?)', query.query_id, skill, response, err => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
-    })
+    response = JSON.stringify(response)
+    yield queryWrapper(db.run, 'INSERT INTO responses(query_id, skill, response) VALUES(?, ?, ?)', [query.query_id, skill, response])
 }
 
 module.exports = {
