@@ -121,7 +121,7 @@ function * setup(database) {
 }
 
 function * getUserFromName(username) {
-    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ?', [username])
+    const user = yield queryWrapper(db.get, 'SELECT user_id, username, is_admin FROM users WHERE username = ?', [username])
     if (user) {
         user.is_admin = user.is_admin == 1
     }
@@ -139,7 +139,7 @@ function * saveUser(user) {
 }
 
 function * getUser(username, password) {
-    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
+    const user = yield queryWrapper(db.get, 'SELECT user_id, username, is_admin FROM users WHERE username = ? AND password = ?', [username, password])
     if (user) {
         user.is_admin = user.is_admin == 1
     }
@@ -216,7 +216,7 @@ function * getUserFromToken(token) {
     if (token.token) {
         token = token.token
     }
-    const user = yield queryWrapper(db.get, 'SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', [token])
+    const user = yield queryWrapper(db.get, 'SELECT users.user_id, users.username, users.is_admin FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', [token])
     if (user) {
         user.is_admin = user.is_admin == 1
     }
