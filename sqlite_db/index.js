@@ -20,13 +20,17 @@ function * queryWrapper(fn, query, values) {
         fn = fn.bind(db, query)
     }
     return new Promise((resolve, reject) => {
-        fn((err, rows) => {
-            if (err) {
-                reject(new Error(`Error running query: ${query} - ${JSON.stringify(values)}: ${err}`))
-            } else {
-                resolve(rows);
-            }
-        })
+        try {
+            fn((err, rows) => {
+                if (err) {
+                    reject(new Error(`Error running query: ${query} - ${JSON.stringify(values)}: ${err}`))
+                } else {
+                    resolve(rows);
+                }
+            })
+        } catch(err) {
+            reject(err)
+        }
     })
 }
 
@@ -69,7 +73,7 @@ function * getVersion() {
     return row.version
 }
 
-function * setVersion() {
+function * setVersion(version) {
     yield queryWrapper(db.get, 'INSERT OR REPLACE INTO version(version) VALUES (?)', [version])
 }
 
@@ -85,13 +89,17 @@ function * databaseV2Setup() {
 
 function * createDb(database) {
     return new Promise((resolve, reject) => {
-        const local_db = new sqlite3.cached.Database(database, err => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(local_db)
-            }
-        })
+        try {
+            const local_db = new sqlite3.cached.Database(database, err => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(local_db)
+                }
+            })
+        } catch(err) {
+            reject(err)
+        }
     })
 }
 
@@ -107,6 +115,7 @@ function * setup(database) {
         case 1:
             yield databaseV2Setup()
             yield setVersion(2)
+            // Fallthrough.
         default: break
     }
 }
@@ -114,7 +123,7 @@ function * setup(database) {
 function * getUserFromName(username) {
     const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ?', [username])
     if (user) {
-        user.is_admin = row.is_admin == 1
+        user.is_admin = user.is_admin == 1
     }
     return user
 }
@@ -132,7 +141,7 @@ function * saveUser(user) {
 function * getUser(username, password) {
     const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
     if (user) {
-        user.is_admin = row.is_admin == 1
+        user.is_admin = user.is_admin == 1
     }
     return user
 }
@@ -230,13 +239,17 @@ function * addQuery(query, user, token) {
     }
     query = JSON.stringify(query)
     return new Promise((resolve, reject) => {
-        db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token.token, function (err) {
-            if (err) {
-                reject(err)
-            } else {
-                resolve({query_id: this.lastID, query, user})
-            }
-        })
+        try {
+            db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token.token, function (err) {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve({query_id: this.lastID, query, user})
+                }
+            })
+        } catch (err) {
+            reject(err)
+        }
     })
 }
 
