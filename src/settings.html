@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>P-Brain Settings</title>
+</head>
+<body>
+    <h1>P-Brain Settings</h1>
+    Changing user settings tends to only require a client refresh. Changing skill and global settings tends to require a server restart.
+    <h2>User Settings</h2>
+    <table id="user_settings" border="1">
+        <tr>
+            <th>Skill</th><th>User</th><th>Key</th><th>Value</th>
+        </tr>
+    </table>
+    <h2>Skill Settings</h2>
+    <table id="skill_settings" border="1">
+        <tr>
+            <th>Skill</th><th>Key</th><th>Value</th>
+        </tr>
+    </table>
+    <h2>Global Settings</h2>
+    <table id="global_settings" border="1">
+        <tr>
+            <th>Key</th><th>Value</th>
+        </tr>
+    </table>
+<script>
+    function request(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                    callback(xhr.responseText);
+                } else {
+                    callback(null);
+                }
+            }
+        };
+        xhr.open('GET', url, true);
+        xhr.send();
+    }
+    function parseValue(value) {
+        if (value == 'true') {
+            value = true;
+        } else if (value == 'false') {
+            value = false;
+        } else {
+            const asInt = parseInt(value);
+            if (isNaN(asInt)) {
+                const asFloat = parseFloat(value);
+                if (!isNaN(asFloat)) {
+                    value = asFloat;
+                }
+            } else {
+                value = asInt;
+            }
+        }
+        return value;
+    }
+
+    function setupUpdate(element, url, value, length) {
+        const text = document.createElement("INPUT");
+        text.setAttribute("type", "text");
+        text.setAttribute("size", length);
+        text.value = value;
+        element.appendChild(text);
+        const update = document.createElement("INPUT");
+        update.setAttribute("type", "submit");
+        update.value = "Update";
+        update.onclick = function() {
+            const newValue = encodeURIComponent(JSON.stringify(parseValue(text.value)));
+            update.disabled = true;
+            request(`${url}${newValue}`, function (data) {
+                update.disabled = false;
+                if (data) {
+                    update.value = "Update (Success!)";
+                } else {
+                    update.value = "Update (Failure)";
+                }
+            })
+        };
+
+        element.appendChild(update);
+    }
+
+    function getLongestSetting(data) {
+        let longestSetting = 20;
+        data.map(function (setting) {
+            if (setting.value) {
+                if (setting.value.length > longestSetting) {
+                    longestSetting = setting.value.length;
+                }
+            }
+        });
+        return longestSetting;
+    }
+
+    request('/api/settings/user_setting', function(data) {
+        if (data) {
+            data = JSON.parse(data);
+            const table = document.getElementById("user_settings");
+            const length = getLongestSetting(data);
+            data.map(function (setting) {
+                const row = table.insertRow(-1);
+                const skill = row.insertCell(0);
+                skill.innerHTML = setting.skill;
+                const user = row.insertCell(1);
+                user.innerHTML = setting.username;
+                const key = row.insertCell(2);
+                key.innerHTML = setting.key;
+                setupUpdate(row.insertCell(3), `/api/settings/user_setting/${setting.username}/${setting.skill}/${setting.key}?value=`, setting.value, length);
+            });
+        }
+    });
+    request('/api/settings/skill_setting', function(data) {
+        if (data) {
+            data = JSON.parse(data);
+            const table = document.getElementById("skill_settings");
+            const length = getLongestSetting(data);
+            data.map(function (setting) {
+                const row = table.insertRow(-1);
+                const skill = row.insertCell(0);
+                skill.innerHTML = setting.skill;
+                const key = row.insertCell(1);
+                key.innerHTML = setting.key;
+                setupUpdate(row.insertCell(2), `/api/settings/skill_setting/${setting.skill}/${setting.key}?value=`, setting.value, length);
+            });
+        }
+    });
+    request('/api/settings/global_setting', function(data) {
+        if (data) {
+            data = JSON.parse(data);
+            const table = document.getElementById("global_settings");
+            const length = getLongestSetting(data);
+            data.map(function (setting) {
+                const row = table.insertRow(-1);
+                const key = row.insertCell(0);
+                key.innerHTML = setting.key;
+                setupUpdate(row.insertCell(1), `/api/settings/global_setting/${setting.key}?value=`, setting.value, length);
+            });
+        }
+    });
+</script>
+</body>
+</html>
