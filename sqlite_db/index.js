@@ -214,6 +214,7 @@ function * getValue(skill, user, key) {
     const base = 'SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id'
     let user_id = (user) ? user.user_id : undefined
     const query = makeConditionalQuery(base, ['skill = ?', 'user_settings.user_id = ?', 'key = ?'], [skill, user_id, key])
+    query.query += ' ORDER BY skill ASC, users.username ASC, key ASC'
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
@@ -233,6 +234,7 @@ function * setSkillValue(skill, key, value) {
 function * getSkillValue(skill, key) {
     const base = 'SELECT skill, key, value FROM skill_settings'
     const query = makeConditionalQuery(base, ['skill = ?', 'key = ?'], [skill, key])
+    query.query += ' ORDER BY skill ASC, key ASC'
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
@@ -252,6 +254,7 @@ function * setGlobalValue(key, value) {
 function * getGlobalValue(key) {
     const base = 'SELECT key, value FROM global_settings'
     const query = makeConditionalQuery(base, ['key = ?'], [key])
+    query.query += ' ORDER BY key ASC'
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
