@@ -54,8 +54,8 @@ function filter(newToken) {
             const basicUser = basicAuth(req)
             if (basicUser && basicUser.name && basicUser.pass) {
                 const encryptedPass = yield encryptPassword(basicUser.pass)
-                const user = yield global.db.getUser(basicUser.name, encryptedPass)
-                const hasUser = !!(yield global.db.getUserFromName(basicUser.name))
+                const user = yield global.db.getUser({username: basicUser.name, password: encryptedPass})
+                const hasUser = !!(yield global.db.getUser({username: basicUser.name}))
                 const promiscuousMode = yield global.db.getGlobalValue('promiscuous_mode')
                 if (user) {
                     if (newToken === true) {
@@ -103,7 +103,7 @@ function login(req, res) {
 function logout(req, res) {
     co(function * () {
         if (req.params.user) {
-            const url_user = yield global.db.getUserFromName(req.params.user)
+            const url_user = yield global.db.getUser({username: req.params.user})
             if (url_user) {
                 if (req.user.is_admin || req.user.user_id == url_user.user_id) {
                     yield global.db.deleteUserTokens(url_user)
@@ -129,7 +129,7 @@ function logout(req, res) {
 function viewTokens(req, res) {
     co(function * () {
         if (req.params.user) {
-            const url_user = yield global.db.getUserFromName(req.params.user)
+            const url_user = yield global.db.getUser({username: req.params.user})
             if (url_user) {
                 if (req.user.is_admin || req.user.user_id == url_user.user_id) {
                     res.json(yield global.db.getUserTokens(url_user))

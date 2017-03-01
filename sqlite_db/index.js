@@ -131,24 +131,36 @@ function * setup(database) {
     }
 }
 
-function * getUserFromName(username) {
-    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ?', [username])
-    return exportUser(user)
-}
-
 function * saveUser(user) {
-    const dbuser = yield getUserFromName(user.username)
-    const is_admin = (user.is_admin) ? user.is_admin : 0
+    // Only update an existing user if the user_id is specified. Technically we could also use the unique username
+    // but that's likely to cause unpredictable behaviour when updating usernames.
+    const dbuser = yield getUser({user_id: user.user_id})
     if (dbuser) {
-        yield queryWrapper(db.run, 'UPDATE users SET username=?,password=?,is_admin=? WHERE user_id=?', [user.username, user.password, is_admin, dbuser.user_id])
+        const updated = {
+            user_id: dbuser.user_id,
+            username: user.username ? user.username : dbuser.username,
+            password: user.password ? user.password : dbuser.password,
+            is_admin: (user.is_admin === true || user.is_admin === false) ? (user.is_admin ? 1 : 0) : dbuser.is_admin
+        }
+        yield queryWrapper(db.run, 'UPDATE users SET username=?,password=?,is_admin=? WHERE user_id=?', [updated.username, updated.password, updated.is_admin, dbuser.user_id])
     } else {
+        const is_admin = (user.is_admin === true) ? user.is_admin : 0
         yield queryWrapper(db.run, 'INSERT INTO users(username, password, is_admin) VALUES(?, ?, ?)', [user.username, user.password, is_admin])
     }
 }
 
-function * getUser(username, password) {
-    const user = yield queryWrapper(db.get, 'SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
-    return exportUser(user)
+function * getUser(user) {
+    if (user.user_id == null && user.username == null) {
+        return null
+    }
+    const base = 'SELECT * FROM users'
+    const query = makeConditionalQuery(base, ['user_id = ?', 'username = ?', 'password = ?'], [user.user_id, user.username, user.password])
+    const dbuser = yield queryWrapper(db.get, query.query, query.values)
+    return dbuser
+}
+
+function * getUserForExport(user) {
+    return exportUser(yield getUser(user))
 }
 
 function * getUsers() {
@@ -284,9 +296,8 @@ module.exports = {
     deleteToken,
     deleteUserTokens,
     getUserFromToken,
-    getUser,
+    getUser: getUserForExport,
     getUsers,
-    getUserFromName,
     saveUser,
     getUserTokens,
     addQuery,
