@@ -15,7 +15,7 @@ const setupQuery =
 
 function * getVersion() {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM version LIMIT 1', (err, row) => {
+        db.get('SELECT * FROM version ORDER BY version DESC LIMIT 1', (err, row) => {
             if (err) {
                 reject(err)
             } else {
