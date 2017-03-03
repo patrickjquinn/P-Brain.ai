@@ -48,7 +48,7 @@ router.get('/:user/:delete?', wrap(function *(req, res) {
             if (req.user.is_admin && req.query.password && req.query.is_admin) {
                 console.log("Adding new user");
                 const target_user = {
-                    username: req.params.username,
+                    username: req.params.user,
                     password: yield global.auth.encryptPassword(req.query.password),
                     is_admin: req.query.is_admin === true || req.query.is_admin == 'true'
                 }
