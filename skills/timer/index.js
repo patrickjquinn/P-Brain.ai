@@ -95,11 +95,12 @@ function formatTime(time) {
     return message
 }
 
-function initializeClock(time, command, user) {
+function initializeClock(time, command, user, device) {
     const timer = {
         deadline: new Date(Date.parse(new Date()) + time),
         time, timerInterval: null,
-        user
+        user,
+        device
     }
     if (command) {
         timer.command = command
@@ -122,7 +123,7 @@ function initializeClock(time, command, user) {
             global.sendToUser(user, 'response', response)
             if (timer.command) {
                 co(function * () {
-                    const data = yield global.query(timer.command, timer.user)
+                    const data = yield global.query(timer.command, timer.user, timer.device)
                     global.sendToUser(user, 'response', data)
                 }).catch(err => {
                     console.log(err)
@@ -173,7 +174,7 @@ function getUserTimers(user) {
     return user_timers
 }
 
-function * timer_resp(query, breakdown, user) {
+function * timer_resp(query, breakdown, user, device) {
     // Parse showing timers.
     if (query.startsWith('show') || query.startsWith('what')) {
         let timersString = 'You have no active timers.'
@@ -215,7 +216,7 @@ function * timer_resp(query, breakdown, user) {
         command = wordsToSentence(command, 0, command.length)
     }
 
-    initializeClock(time, command, user)
+    initializeClock(time, command, user, device)
 
     if (commandIndex) {
         return {time, text: 'Okay, task scheduled for ' + formatTime(getTimeRemaining(time))}

@@ -5,7 +5,7 @@ let db = null
 
 const setupQuery =
     'CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);' +
-    'CREATE TABLE IF NOT EXISTS tokens(token TEXT PRIMARY KEY, timestamp INT DEFAULT (strftime(\'%s\',\'now\')), user_id INTEGER REFERENCES users(user_id));' +
+    'CREATE TABLE IF NOT EXISTS tokens(token TEXT PRIMARY KEY NOT NULL, timestamp INT DEFAULT (strftime(\'%s\',\'now\')), user_id INTEGER REFERENCES users(user_id));' +
     'CREATE TABLE IF NOT EXISTS queries(query_id INTEGER PRIMARY KEY, query TEXT NOT NULL, timestamp INT DEFAULT (strftime(\'%s\',\'now\')), user_id INTEGER REFERENCES users(user_id));' +
     'CREATE TABLE IF NOT EXISTS responses(query_id INTEGER PRIMARY KEY REFERENCES queries(query_id), response TEXT NOT NULL, skill TEXT NOT NULL);' +
     'CREATE TABLE IF NOT EXISTS global_settings(key TEXT PRIMARY KEY, value TEXT);' +
@@ -15,7 +15,7 @@ const setupQuery =
 
 function * getVersion() {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM version LIMIT 1', (err, row) => {
+        db.get('SELECT * FROM version ORDER BY version DESC LIMIT 1', (err, row) => {
             if (err) {
                 reject(err)
             } else {
@@ -53,6 +53,20 @@ function * databaseV1Setup() {
     })
 }
 
+function * databaseV2Setup() {
+    const query = 'ALTER TABLE tokens ADD name TEXT DEFAULT NULL;' +
+            'ALTER TABLE queries ADD token TEXT REFERENCES tokens(token);'
+    return new Promise((resolve, reject) => {
+        db.exec(query, (err) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+}
+
 function * setup(database) {
     return new Promise((resolve, reject) => {
         db = new sqlite3.cached.Database(database, err => {
@@ -70,6 +84,10 @@ function * setup(database) {
                                 case 0:
                                     yield databaseV1Setup()
                                     yield setVersion(1)
+                                    // Fallthrough.
+                                case 1:
+                                    yield databaseV2Setup()
+                                    yield setVersion(2)
                                 default: break
                             }
                         }).catch(err => {
@@ -237,21 +255,32 @@ function * getGlobalValue(key) {
     return yield allQueryWrapper(query.query, query.values, key)
 }
 
-function * addToken(user, token) {
+function * saveToken(user, token) {
+    const dbtokens = yield getUserTokens(user, token)
     return new Promise((resolve, reject) => {
-        db.get('INSERT OR REPLACE INTO tokens(token, user_id) VALUES (?, ?)', token, user.user_id, (err, row) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        })
+        if (dbtokens.length > 0) {
+            db.run('UPDATE tokens SET name=? WHERE user_id=? AND token=?', token.name, user.user_id, token.token, (err) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve()
+                }
+            })
+        } else {
+            db.run('INSERT INTO tokens(token, user_id, name) VALUES(?, ?, ?)', token.token, user.user_id, token.name, (err) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve()
+                }
+            })
+        }
     })
 }
 
 function * deleteToken(token) {
     return new Promise((resolve, reject) => {
-        db.get('DELETE FROM tokens WHERE token = ?', token, (err, row) => {
+        db.get('DELETE FROM tokens WHERE token = ?', token.token, (err, row) => {
             if (err) {
                 reject(err)
             } else {
@@ -274,6 +303,9 @@ function * deleteUserTokens(user) {
 }
 
 function * getUserFromToken(token) {
+    if (token.token) {
+        token = token.token
+    }
     return new Promise((resolve, reject) => {
         db.get('SELECT users.* FROM users INNER JOIN tokens ON tokens.user_id=users.user_id WHERE tokens.token = ?', token, (err, row) => {
             if (err) {
@@ -288,9 +320,15 @@ function * getUserFromToken(token) {
     })
 }
 
-function * getUserTokens(user) {
+function * getUserTokens(user, token) {
+    const parsedToken = {
+        token: (token ? token.token : undefined),
+        name: ((token && token.token == null) ? token.name : undefined)
+    }
+    const base = 'SELECT token, timestamp, name FROM tokens'
+    const query = makeConditionalQuery(base, ['user_id = ?', 'name = ?', 'token = ?'], [user.user_id, parsedToken.name, parsedToken.token])
     return new Promise((resolve, reject) => {
-        db.all('SELECT token, timestamp FROM tokens WHERE user_id = ?', user.user_id, (err, rows) => {
+        db.all(query.query, query.values, (err, rows) => {
             if (err) {
                 reject(err)
             } else {
@@ -300,10 +338,13 @@ function * getUserTokens(user) {
     })
 }
 
-function * addQuery(query, user) {
+function * addQuery(query, user, token) {
+    if (token == null) {
+        token = {token: null}
+    }
     return new Promise((resolve, reject) => {
         query = JSON.stringify(query)
-        db.run('INSERT INTO queries(query, user_id) VALUES(?, ?)', query, user.user_id, function (err) {
+        db.run('INSERT INTO queries(query, user_id, token) VALUES(?, ?, ?)', query, user.user_id, token.token, function (err) {
             if (err) {
                 reject(err)
             } else {
@@ -335,7 +376,7 @@ module.exports = {
     getSkillValue,
     setGlobalValue,
     getGlobalValue,
-    addToken,
+    saveToken,
     deleteToken,
     deleteUserTokens,
     getUserFromToken,
