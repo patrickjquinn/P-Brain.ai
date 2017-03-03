@@ -44,6 +44,7 @@ router.get('/:user/:delete?', wrap(function *(req, res) {
                 }
             }
         } else {
+            // This branch is for creating a new user.
             if (req.user.is_admin && req.query.password && req.query.is_admin) {
                 console.log("Adding new user");
                 const target_user = {
@@ -59,7 +60,7 @@ router.get('/:user/:delete?', wrap(function *(req, res) {
                     res.status(503).json({error: `Failed to add user ${JSON.stringify(err)}`})
                 }
             } else {
-                res.status(404).json({error: 'Target user not found.'})
+                res.status(404).json({error: 'Not enough parameters supplied or you\'re not an admin.'})
             }
         }
     } else {
