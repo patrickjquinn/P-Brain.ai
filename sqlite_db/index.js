@@ -144,8 +144,20 @@ function * saveUser(user) {
         }
         yield queryWrapper(db.run, 'UPDATE users SET username=?,password=?,is_admin=? WHERE user_id=?', [updated.username, updated.password, updated.is_admin, dbuser.user_id])
     } else {
-        const is_admin = (user.is_admin === true) ? user.is_admin : 0
+        const is_admin = (user.is_admin === true) ? 1 : 0
         yield queryWrapper(db.run, 'INSERT INTO users(username, password, is_admin) VALUES(?, ?, ?)', [user.username, user.password, is_admin])
+    }
+}
+
+function * deleteUser(user) {
+    if (user.user_id) {
+        yield queryWrapper(db.run, 'DELETE FROM tokens WHERE user_id = ?', [user.user_id])
+        yield queryWrapper(db.run, 'DELETE FROM user_settings WHERE user_id = ?', [user.user_id])
+        // This ones a little complicated. First it selects all the queries where the user_id is the current user_id.
+        // It then removes any responses where the query_id matches any query_id's in the selected set.
+        yield queryWrapper(db.run, 'DELETE FROM responses WHERE responses.query_id IN (SELECT responses.query_id FROM responses INNER JOIN queries ON queries.query_id = responses.query_id WHERE queries.user_id = ?)', [user.user_id])
+        yield queryWrapper(db.run, 'DELETE FROM queries WHERE user_id = ?', [user.user_id])
+        yield queryWrapper(db.run, 'DELETE FROM users WHERE user_id = ?', [user.user_id])
     }
 }
 
@@ -299,6 +311,7 @@ module.exports = {
     getUser: getUserForExport,
     getUsers,
     saveUser,
+    deleteUser,
     getUserTokens,
     addQuery,
     addResponse

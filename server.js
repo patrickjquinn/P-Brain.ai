@@ -9,10 +9,10 @@ const fs = require('fs')
 const ip = require('ip')
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
-const authenticator = require('./authentication')
 const settingsApi = require('./api/settings.js')
 const usersApi = require('./api/users.js')
 const cookieParser = require('cookie-parser')
+global.auth = require('./authentication')
 global.db = require('./sqlite_db')
 
 app.use(compression({
@@ -30,12 +30,15 @@ app.use((req, res, next) => {
 
 app.use(cookieParser())
 
-app.use('/', [authenticator.filter(true), express.static('./src')])
-app.use('/api/settings', [authenticator.filter(false), settingsApi])
-app.use('/api/users', [authenticator.filter(false), usersApi])
+app.use('/', [global.auth.filter(true), express.static('./src')])
+app.use('/api/settings', [global.auth.filter(false), settingsApi])
+app.use('/api/users', [global.auth.filter(false), usersApi])
+app.get('/me', global.auth.filter(false), wrap(function * (req, res) {
+    res.json(req.user)
+}))
 
 // TODO parse services in query
-app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
+app.get('/api/ask', global.auth.filter(false), wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     try {
@@ -47,11 +50,11 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
     }
 }))
 
-app.get('/api/login', authenticator.login)
-app.get('/api/logout/:user?', [authenticator.filter(false), authenticator.logout])
-app.get('/api/tokens/:user?', [authenticator.filter(false), authenticator.viewTokens])
-app.get('/api/validate', authenticator.validate)
-io.use(authenticator.verifyIO)
+app.get('/api/login', global.auth.login)
+app.get('/api/logout/:user?', [global.auth.filter(false), global.auth.logout])
+app.get('/api/tokens/:user?', [global.auth.filter(false), global.auth.viewTokens])
+app.get('/api/validate', global.auth.validate)
+io.use(global.auth.verifyIO)
 
 io.on('connect', socket => {
     co(function *() {
@@ -89,13 +92,13 @@ co(function * () {
     yield initialSetup()
 
     global.sendToUser = function (user, type, message) {
-        const sockets = authenticator.getSocketsByUser(user)
+        const sockets = global.auth.getSocketsByUser(user)
         sockets.map(socket => {
             socket.emit(type, message)
         })
     }
     global.sendToDevice = function(token, type, message) {
-        const socket = authenticator.getSocketByToken(token)
+        const socket = global.auth.getSocketByToken(token)
         if (socket) {
             socket.emit(type, message)
         } else {
