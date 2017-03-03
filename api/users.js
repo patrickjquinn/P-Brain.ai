@@ -2,12 +2,12 @@ const wrap = require('co-express')
 const router = require('express').Router()
 
 router.get('/', wrap(function *(req, res) {
-    const user = req.user
-    if (user.is_admin) {
+    // If the user is an admin, return all users. If they're not, only return them.
+    if (req.user.is_admin) {
         const users = yield global.db.getUsers()
         res.json(users)
     } else {
-        res.sendStatus(401).json({error: 'Forbidden.'})
+        res.json([req.user])
     }
 }))
 
