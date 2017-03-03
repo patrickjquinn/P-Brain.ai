@@ -42,6 +42,14 @@ function filter(newToken) {
             if (!token) {
                 token = req.cookies.token
             }
+            try {
+                token = JSON.parse(token)
+            } catch (err) {
+                // Ignore the error, string token.
+            }
+            if (token.token) {
+                token = token.token
+            }
             if (token) {
                 const user = yield global.db.getUserFromToken({token:token.trim()})
                 if (user) {
@@ -153,12 +161,22 @@ function validate(req, res) {
 }
 
 function verifyIO(socket, next) {
-    const token = socket.handshake.query.token
+    let token = socket.handshake.query.token
+    try {
+        token = JSON.parse(token)
+    } catch (err) {
+        // Ignore the error, string token.
+    }
+    if (token.token) {
+        token = token.token
+    }
     if (token) {
         co(function * () {
             const user = yield global.db.getUserFromToken({token:token.trim()})
             if (user) {
                 const full_token = (yield global.db.getUserTokens(user, {token:token.trim()}))[0]
+                socket.user = user
+                socket.token = full_token
                 clients.push({user, token: full_token, socket})
                 socket.on('disconnect', () => {
                     for (let i = 0; i < clients.length; i++) {

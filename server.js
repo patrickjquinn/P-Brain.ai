@@ -56,25 +56,22 @@ app.get('/api/ask', global.auth.filter(false), wrap(function * (req, res) {
 app.get('/api/login', global.auth.login)
 app.get('/api/logout/:user?', [global.auth.filter(false), global.auth.logout])
 app.get('/api/tokens/:user?', [global.auth.filter(false), global.auth.viewTokens])
-app.get('/api/validate', global.auth.validate)
+app.get('/api/validate', [global.auth.filter(false), global.auth.validate])
 io.use(global.auth.verifyIO)
 
 io.on('connect', socket => {
     co(function *() {
-        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
-        const token = (yield global.db.getUserTokens(user, {token: socket.handshake.query.token}))[0]
-
         socket.on('ask', co.wrap(function *(msg) {
             const input = msg.text.toLowerCase()
             try {
-                const result = yield search.query(input, user, token)
+                const result = yield search.query(input, socket.user, socket.token)
                 socket.emit('response', result)
             } catch (e) {
                 console.log(e)
                 socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
             }
         }))
-        yield skills.registerClient(socket, user)
+        yield skills.registerClient(socket, socket.user)
     }).catch(err => {
         console.log(err)
     })
