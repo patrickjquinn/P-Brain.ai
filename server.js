@@ -33,8 +33,11 @@ app.use(cookieParser())
 app.use('/', [global.auth.filter(true), express.static('./src')])
 app.use('/api/settings', [global.auth.filter(false), settingsApi])
 app.use('/api/users', [global.auth.filter(false), usersApi])
-app.get('/api/me', global.auth.filter(false), wrap(function * (req, res) {
+app.get('/api/user', global.auth.filter(false), wrap(function * (req, res) {
     res.json(req.user)
+}))
+app.get('/api/token', global.auth.filter(false), wrap(function * (req, res) {
+    res.json(req.token)
 }))
 
 // TODO parse services in query
