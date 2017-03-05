@@ -9,9 +9,10 @@ const fs = require('fs')
 const ip = require('ip')
 const search = require('./api/core-ask.js')
 const skills = require('./skills/skills.js')
-const authenticator = require('./authentication')
 const settingsApi = require('./api/settings.js')
+const usersApi = require('./api/users.js')
 const cookieParser = require('cookie-parser')
+global.auth = require('./authentication')
 global.db = require('./sqlite_db')
 
 app.use(compression({
@@ -29,11 +30,18 @@ app.use((req, res, next) => {
 
 app.use(cookieParser())
 
-app.use('/', [authenticator.filter(true), express.static('./src')])
-app.use('/api/settings', [authenticator.filter(false), settingsApi])
+app.use('/', [global.auth.filter(true), express.static('./src')])
+app.use('/api/settings', [global.auth.filter(false), settingsApi])
+app.use('/api/users', [global.auth.filter(false), usersApi])
+app.get('/api/user', global.auth.filter(false), wrap(function * (req, res) {
+    res.json(req.user)
+}))
+app.get('/api/token', global.auth.filter(false), wrap(function * (req, res) {
+    res.json(req.token)
+}))
 
 // TODO parse services in query
-app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
+app.get('/api/ask', global.auth.filter(false), wrap(function * (req, res) {
     const input = req.query.q.toLowerCase()
 
     try {
@@ -45,28 +53,25 @@ app.get('/api/ask', authenticator.filter(false), wrap(function * (req, res) {
     }
 }))
 
-app.get('/api/login', authenticator.login)
-app.get('/api/logout/:user?', [authenticator.filter(false), authenticator.logout])
-app.get('/api/tokens/:user?', [authenticator.filter(false), authenticator.viewTokens])
-app.get('/api/validate', authenticator.validate)
-io.use(authenticator.verifyIO)
+app.get('/api/login', global.auth.login)
+app.get('/api/logout/:user?', [global.auth.filter(false), global.auth.logout])
+app.get('/api/tokens/:user?', [global.auth.filter(false), global.auth.viewTokens])
+app.get('/api/validate', [global.auth.filter(false), global.auth.validate])
+io.use(global.auth.verifyIO)
 
 io.on('connect', socket => {
     co(function *() {
-        const user = yield global.db.getUserFromToken(socket.handshake.query.token)
-        const token = (yield global.db.getUserTokens(user, {token: socket.handshake.query.token}))[0]
-
         socket.on('ask', co.wrap(function *(msg) {
             const input = msg.text.toLowerCase()
             try {
-                const result = yield search.query(input, user, token)
+                const result = yield search.query(input, socket.user, socket.token)
                 socket.emit('response', result)
             } catch (e) {
                 console.log(e)
                 socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
             }
         }))
-        yield skills.registerClient(socket, user)
+        yield skills.registerClient(socket, socket.user)
     }).catch(err => {
         console.log(err)
     })
@@ -87,13 +92,13 @@ co(function * () {
     yield initialSetup()
 
     global.sendToUser = function (user, type, message) {
-        const sockets = authenticator.getSocketsByUser(user)
+        const sockets = global.auth.getSocketsByUser(user)
         sockets.map(socket => {
             socket.emit(type, message)
         })
     }
     global.sendToDevice = function(token, type, message) {
-        const socket = authenticator.getSocketByToken(token)
+        const socket = global.auth.getSocketByToken(token)
         if (socket) {
             socket.emit(type, message)
         } else {
@@ -110,6 +115,17 @@ co(function * () {
     http.listen(port, () => {
         console.log(`Server started on http://localhost:${port}`)
     })
+
+    const promiscuous = yield global.db.getGlobalValue('promiscuous_mode')
+    const promiscuous_admins = yield global.db.getGlobalValue('promiscuous_admins')
+    if (promiscuous) {
+        console.log('Warning! Promiscuous mode is enabled all logins will succeed.')
+        if (promiscuous_admins) {
+            console.log('Possibly deadly warning! Promiscuous admins is enabled.' +
+                ' All new users will be admins and can view each others data.')
+        }
+        console.log(`Settings can be changed at http://localhost:${port}/settings.html`)
+    }
 }).catch(err => {
     console.log(err)
     throw err

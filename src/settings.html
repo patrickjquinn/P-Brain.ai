@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>P-Brain Settings</title>
+    <style>
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<h1>P-Brain Settings</h1>
+Changing user settings tends to only require a client refresh. Changing skill and global settings tends to require a
+server restart.
+<h2>User Settings</h2>
+<div>
+    <table id="user_settings" border="1">
+        <tr>
+            <th>Skill</th>
+            <th>User</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_user_skill"/></td>
+            <td><input type="text" id="add_user_user"/></td>
+            <td><input type="text" id="add_user_key"/></td>
+            <td><input type="text" id="add_user_value"/></td>
+            <td><input type="submit" id="add_user_add" value="Add"/></td>
+        </tr>
+    </table>
+</div>
+<div id="skill_settings_div">
+    <h2>Skill Settings</h2>
+    <table id="skill_settings" border="1">
+        <tr>
+            <th>Skill</th>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_skill_skill"/></td>
+            <td><input type="text" id="add_skill_key"/></td>
+            <td><input type="text" id="add_skill_value"/></td>
+            <td><input type="submit" id="add_skill_add" value="Add"/></td>
+        </tr>
+    </table>
+</div>
+<div id="global_settings_div">
+    <h2>Global Settings</h2>
+    <table id="global_settings" border="1">
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        <tr>
+            <td><input type="text" id="add_global_key"/></td>
+            <td><input type="text" id="add_global_value"/></td>
+            <td><input type="submit" id="add_global_add" value="Add"/></td>
+        </tr>
+    </table>
+</div>
+<script>
+    function request(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                    callback(xhr.responseText);
+                } else {
+                    console.log(xhr.responseText);
+                    callback(null);
+                }
+            }
+        };
+        xhr.open('GET', url, true);
+        xhr.send();
+    }
+    function parseValue(value) {
+        if (value == 'true') {
+            value = true;
+        } else if (value == 'false') {
+            value = false;
+        } else {
+            const asInt = parseInt(value);
+            if (isNaN(asInt)) {
+                const asFloat = parseFloat(value);
+                if (!isNaN(asFloat)) {
+                    value = asFloat;
+                }
+            } else {
+                value = asInt;
+            }
+        }
+        return value;
+    }
+
+    function clearTable(table) {
+        var rows = table.rows;
+        var i = rows.length - 1;
+        while (i > 1) {
+          rows[i].parentNode.removeChild(rows[i]);
+          --i;
+        }   
+    }
+
+    function setupUserSettings() {
+        const root = '/api/settings/user_setting';
+        request(root, function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("user_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const skill = row.insertCell(0);
+                    skill.innerHTML = setting.skill;
+                    const user = row.insertCell(1);
+                    user.innerHTML = setting.username;
+                    const key = row.insertCell(2);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(3), row.insertCell(4), `${root}/${setting.username}/${setting.skill}/${setting.key}`, setting.value, refreshUserSettings);
+                });
+                const addUser = document.getElementById("add_user_add");
+                const skill = document.getElementById("add_user_skill");
+                const user = document.getElementById("add_user_user");
+                const key = document.getElementById("add_user_key");
+                const value = document.getElementById("add_user_value");
+                addUser.onclick = function() {
+                    const newValue = encodeURIComponent(JSON.stringify(parseValue(value.value)));
+                    const url = `${root}/${user.value}/${skill.value}/${key.value}?value=${newValue}`;
+                    addUser.disabled = true;
+                    request(url, function (data) {
+                        addUser.disabled = false;
+                        if (data) {
+                            skill.value = user.value = key.value = value.value = "";
+                            refreshUserSettings();
+                        } else {
+                            alert("Failed to add setting.");
+                        }
+                    });
+                };
+            }
+        });
+    }
+    function refreshUserSettings() {
+        clearTable(document.getElementById("user_settings"));
+        setupUserSettings();
+    }
+    function setupSkillSettings() {
+        const root = '/api/settings/skill_setting'
+        request(root, function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("skill_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const skill = row.insertCell(0);
+                    skill.innerHTML = setting.skill;
+                    const key = row.insertCell(1);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(2), row.insertCell(3), `${root}/${setting.skill}/${setting.key}`, setting.value, refreshSkillSettings);
+                });
+                const addSkill = document.getElementById("add_skill_add");
+                const skill = document.getElementById("add_skill_skill");
+                const key = document.getElementById("add_skill_key");
+                const value = document.getElementById("add_skill_value");
+                addSkill.onclick = function() {
+                    const newValue = encodeURIComponent(JSON.stringify(parseValue(value.value)));
+                    const url = `${root}/${skill.value}/${key.value}?value=${newValue}`;
+                    addSkill.disabled = true;
+                    request(url, function (data) {
+                        addSkill.disabled = false;
+                        if (data) {
+                            skill.value = key.value = value.value = "";
+                            refreshSkillSettings();
+                        } else {
+                            alert("Failed to add setting.");
+                        }
+                    });
+                };
+            } else {
+                document.getElementById("skill_settings_div").style.visibility = "hidden";
+            }
+        });
+    }
+    function refreshSkillSettings() {
+        clearTable(document.getElementById("skill_settings"));
+        setupSkillSettings();
+    }
+    function setupGlobalSettings() {
+        const root = '/api/settings/global_setting';
+        request(root, function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("global_settings");
+                data.map(function (setting) {
+                    const row = table.insertRow(-1);
+                    const key = row.insertCell(0);
+                    key.innerHTML = setting.key;
+                    setupUpdate(row.insertCell(1), row.insertCell(2), `${root}/${setting.key}`, setting.value, refreshGlobalSettings);
+                });
+                const addGlobal = document.getElementById("add_global_add");
+                const key = document.getElementById("add_global_key");
+                const value = document.getElementById("add_global_value");
+                addGlobal.onclick = function() {
+                    const newValue = encodeURIComponent(JSON.stringify(parseValue(value.value)));
+                    const url = `${root}/${key.value}?value=${newValue}`;
+                    addGlobal.disabled = true;
+                    request(url, function (data) {
+                        addGlobal.disabled = false;
+                        if (data) {
+                            key.value = value.value = "";
+                            refreshGlobalSettings();
+                        } else {
+                            alert("Failed to add setting.");
+                        }
+                    });
+                };
+            } else {
+                document.getElementById("global_settings_div").style.visibility = "hidden";
+            }
+        });
+    }
+    function refreshGlobalSettings() {
+        clearTable(document.getElementById("global_settings"));
+        setupGlobalSettings();
+    }
+
+    function setupUpdate(element, action, url, value, refresh) {
+        const text = document.createElement("INPUT");
+        text.setAttribute("type", "text");
+        if (value) {
+            text.setAttribute("size", value.length);
+        }
+        text.value = value;
+        element.appendChild(text);
+
+        const update = document.createElement("INPUT");
+        update.setAttribute("type", "submit");
+        update.value = "Update";
+        action.appendChild(update);
+
+        const remove = document.createElement("INPUT");
+        remove.setAttribute("type", "submit");
+        remove.value = "Remove";
+        action.appendChild(remove);
+
+        remove.onclick = function () {
+            if (confirm("Are you sure you want to delete this item?")) {
+                update.disabled = true;
+                remove.disabled = true;
+                request(`${url}?delete`, function (data) {
+                    update.disabled = false;
+                    remove.disabled = false;
+                    if (data) {
+                        refresh();
+                        alert("Successfully removed!");
+                    } else {
+                        alert("Removing failed.");
+                    }
+                })
+            }
+        };
+        update.onclick = function () {
+            const newValue = encodeURIComponent(JSON.stringify(parseValue(text.value)));
+            update.disabled = true;
+            remove.disabled = true;
+            request(`${url}?value=${newValue}`, function (data) {
+                update.disabled = false;
+                remove.disabled = false;
+                if (data) {
+                    alert("Update success!");
+                } else {
+                    alert("Update failed.");
+                }
+            })
+        };
+    }
+
+    setupUserSettings();
+    setupSkillSettings();
+    setupGlobalSettings();
+</script>
+</body>
+</html>
