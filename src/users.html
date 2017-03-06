@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>P-Brain Users</title>
+    <style>
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<h1>P-Brain Users</h1>
+<ul>
+    <li>If you're not an admin you will only see your user.</li>
+    <li>If you're not an admin, any changes to admin level have no effect.</li>
+    <li>Passwords will not be updated if the password input is blank.</li>
+</ul>
+<div>
+    <table id="users" border="1">
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Admin?</th>
+            <th>Action</th>
+        </tr>
+        <tr id="add_row">
+            <td></td>
+            <td><input type="text" id="add_username"/></td>
+            <td><input type="text" id="add_password"/></td>
+            <td><input type="text" id="add_admin"/></td>
+            <td><input type="submit" id="add_add" value="Add"/></td>
+        </tr>
+    </table>
+</div>
+<script>
+    function request(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                    callback(xhr.responseText);
+                } else {
+                    console.log(xhr.responseText);
+                    callback(null);
+                }
+            }
+        };
+        xhr.open('GET', url, true);
+        xhr.send();
+    }
+    function parseValue(value) {
+        if (value == 'true') {
+            value = true;
+        } else if (value == 'false') {
+            value = false;
+        } else {
+            const asInt = parseInt(value);
+            if (isNaN(asInt)) {
+                const asFloat = parseFloat(value);
+                if (!isNaN(asFloat)) {
+                    value = asFloat;
+                }
+            } else {
+                value = asInt;
+            }
+        }
+        return value;
+    }
+
+    function clearTable(table) {
+        var rows = table.rows;
+        var i = rows.length - 1;
+        while (i > 1) {
+          rows[i].parentNode.removeChild(rows[i]);
+          --i;
+        }   
+    }
+    
+    function makeInput(row, value, type = "text") {
+        const text = document.createElement("INPUT");
+        text.setAttribute("type", type);
+        if (value) {
+            text.setAttribute("size", value.length);
+        }
+        text.value = value;
+        row.appendChild(text);
+        return text;
+    }
+
+    function setupUsers() {
+        const root = '/api/users';
+        request(root, function (data) {
+            if (data) {
+                data = JSON.parse(data);
+                const table = document.getElementById("users");
+                data.map(function (user) {
+                    const row = table.insertRow(-1);
+                    const user_id = row.insertCell(0);
+                    user_id.innerHTML = user.user_id;
+                    const username = makeInput(row.insertCell(1), user.username);
+                    if (user.password == null) {
+                        user.password = "";
+                    }
+                    const password = makeInput(row.insertCell(2), user.password);
+                    const is_admin = makeInput(row.insertCell(3), user.is_admin);
+                    
+                    const action = row.insertCell(4);
+                    const update = makeInput(action, "Update", "submit");
+                    const remove = makeInput(action, "Remove", "submit");
+                    
+                    update.onclick = function () {
+                        const updated_user = {
+                            user_id: user.user_id,
+                        };
+                        if (username.value && username.value != user.username) {
+                            updated_user.username = username.value;
+                        }
+                        if (password.value) {
+                            updated_user.password = password.value;
+                        }
+                        if (is_admin.value) {
+                            const parsed_admin = parseValue(is_admin.value);
+                            if (parsed_admin != user.is_admin) {
+                                updated_user.is_admin = parsed_admin;
+                            }
+                        }
+                        if (updated_user.username !== undefined ||
+                            updated_user.password !== undefined ||
+                            updated_user.is_admin !== undefined) {
+                            console.log("Updating user:");
+                            console.log(updated_user);
+                        }
+                    };
+                    
+                    remove.onclick = function () {
+                        remove.disabled = true;
+                        request(`/api/users/${encodeURIComponent(user.username)}/delete`, function (data) {
+                            remove.disabled = false;
+                            if (data) {
+                                refreshUsers();
+                            } else {
+                                alert("Failed to remove user!");
+                            }
+                        });
+                    };
+                });
+            }
+        });
+    }
+    function refreshUsers() {
+        clearTable(document.getElementById("users"));
+        setupUsers();
+    }
+    
+    function setupAddUser() {
+        const username = document.getElementById("add_username");
+        const password = document.getElementById("add_password");
+        const is_admin = document.getElementById("add_admin");
+        const add = document.getElementById("add_add");
+        add.onclick = function () {
+            add.disabled = true;
+            const new_user = {
+                username: username.value,
+                password: password.value,
+                is_admin: parseValue(is_admin.value)
+            };
+            if (new_user.username && new_user.password) {
+                if (new_user.is_admin === true || new_user.is_admin === false) {
+                    console.log("Add user:");
+                    console.log(new_user);
+                    const add_url = `/api/users/${encodeURIComponent(new_user.username)}?password=${encodeURI(new_user.password)}&is_admin=${encodeURI(new_user.is_admin)}`;
+                    request(add_url, function (data) {
+                        add.disabled = false;
+                        if (data) {
+                            username.value = "";
+                            password.value = "";
+                            is_admin.value = "";
+                            refreshUsers();
+                        } else {
+                            alert("Failed to add user!");
+                        }
+                    });
+                } else {
+                    alert("Admin should be true or false.");
+                }
+            } else {
+                alert("Username or password not set!");
+            }
+        }
+    }
+    
+    function getCurrentUser(callback) {
+        request('/api/user', function(data) {
+            callback(JSON.parse(data));
+        });
+    }
+    getCurrentUser(function (user) {
+        if (user == null) {
+            alert("Server error or login invalid. Refresh page.");
+        } else {
+            console.log("Current user:");
+            console.log(user);
+            if (user.is_admin) {
+                setupAddUser();
+            } else {
+                const addRow = document.getElementById("add_row");
+                addRow.style.display = "none";
+            }
+            setupUsers();
+        }
+    });
+</script>
+</body>
+</html>
