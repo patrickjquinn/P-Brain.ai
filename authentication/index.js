@@ -47,7 +47,7 @@ function filter(newToken) {
             } catch (err) {
                 // Ignore the error, string token.
             }
-            if (token.token) {
+            if (token && token.token) {
                 token = token.token
             }
             if (token) {
