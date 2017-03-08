@@ -11,7 +11,8 @@ const setupQuery =
     'CREATE TABLE IF NOT EXISTS global_settings(key TEXT PRIMARY KEY, value TEXT);' +
     'CREATE TABLE IF NOT EXISTS skill_settings(skill TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(skill, key));' +
     'CREATE TABLE IF NOT EXISTS user_settings(user_id INTEGER REFERENCES users(user_id), skill TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(user_id, skill, key));' +
-    'CREATE TABLE IF NOT EXISTS version(version INTEGER);'
+    'CREATE TABLE IF NOT EXISTS version(version INTEGER);' +
+    'INSERT OR IGNORE INTO version(version) VALUES (0)'
 
 function * queryWrapper(fn, query, values) {
     if (values) {
