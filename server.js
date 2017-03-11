@@ -62,13 +62,12 @@ io.use(global.auth.verifyIO)
 io.on('connect', socket => {
     co(function *() {
         socket.on('ask', co.wrap(function *(msg) {
-            const input = msg.text.toLowerCase()
             try {
-                const result = yield search.query(input, socket.user, socket.token)
+                const result = yield search.query(msg, socket.user, socket.token)
                 socket.emit('response', result)
             } catch (e) {
                 console.log(e)
-                socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + input}, type: 'error'})
+                socket.emit('response', {msg: {text: 'Sorry, I didn\'t understand ' + msg.text.toLowerCase()}, type: 'error'})
             }
         }))
         yield skills.registerClient(socket, socket.user)

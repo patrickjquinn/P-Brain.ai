@@ -49,7 +49,7 @@ recognition.onresult = function (event) {
         } else if (player && inputString.indexOf('stop') != -1) {
             stop_song()
         } else {
-            get_resp(inputString)
+            get_resp(inputString, recognition.is_response)
         }
     } else {
         console.log('testing')
@@ -110,9 +110,12 @@ const delay = (function () {
     }
 })()
 
-function speak_response(msg) {
+function speak_response(msg, callback) {
     const worte = new SpeechSynthesisUtterance(msg)
     worte.lang = 'en-UK'
+    if (callback) {
+        worte.onend = callback
+    }
     window.speechSynthesis.speak(worte)
 }
 
@@ -121,20 +124,27 @@ function display_response(msg) {
     if (msg.text) {
         output = msg.text
     }
+    function speech_wrapper() {
+        // Don't say yes and make this a response type.
+        observe_speech(false, true)
+    }
     if (msg.silent) {
-        push_silent_response(output)
+        push_silent_response(output, msg.canRespond ? speech_wrapper : null)
     } else {
-        push_response(output)
+        push_response(output, msg.canRespond ? speech_wrapper : null)
     }
 }
 
-function observe_speech() {
-    speak_response('Yes?')
+function observe_speech(prompt = true, is_response = false) {
+    if (prompt) {
+        speak_response('Yes?')
+    }
 
     annyang.abort()
 
     delay(() => {
         pause_song()
+        recognition.is_response = is_response
         recognition.start()
     }, 600)
 }
@@ -163,7 +173,7 @@ function isURL(str) {
     return pattern.test(str)
 }
 
-function get_resp(q) {
+function get_resp(q, is_response = false) {
     push_response('Just a second...')
 
     let query = q
@@ -175,7 +185,7 @@ function get_resp(q) {
         query = query.replace('√', 'square root of')
     }
 
-    socket.emit('ask', {text: query})
+    socket.emit('ask', {text: query, isResponse: is_response})
 }
 
 function pause_song() {

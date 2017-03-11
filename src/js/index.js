@@ -21,11 +21,11 @@ function push_silent_response(msg) {
     $('.chat').append('<div class="bubble you">' + msg + '</div>')
 }
 
-function push_response(msg) {
+function push_response(msg, callback) {
     if (msg == 'Just a second...') {
         $('.chat').append('<div class="bubble you loading">' + msg + '</div>')
     } else {
-        speak_response(msg)
+        speak_response(msg, callback)
 
         if (msg.toUpperCase().indexOf(' CLOUD') != -1) {
             $('.chat').append('<div class="bubble you"><i class="fa fa-cloud" aria-hidden="true"></i>  ' + ' ' + msg + '</div>')

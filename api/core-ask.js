@@ -81,7 +81,7 @@ function * train_recognizer(skills) {
     }
 }
 
-function * classify(q, user, token) {
+function * classify(q, user, token, isResponse) {
     const intent_breakdown = speakeasy.classify(q)
     q = strip(q)
     const hard_skills = []
@@ -94,7 +94,7 @@ function * classify(q, user, token) {
             }
         }
         if (skill.conditionalRule && user && token) {
-            if (yield skill.conditionalRule(q, intent_breakdown, user, token)) {
+            if (yield skill.conditionalRule(q, intent_breakdown, user, token, isResponse)) {
                 conditional_skills.push(skill)
             }
         }
@@ -138,19 +138,23 @@ function * classify(q, user, token) {
     throw new Error('No skill found.')
 }
 
-function * query(q, user, token) {
-    const query_data = yield global.db.addQuery(q, user, token)
-    const classification = yield classify(q, user, token)
+function * query(input, user, token) {
+    let query = input
+    if (query.text) {
+        query = query.text
+    }
+    const query_data = yield global.db.addQuery(query, user, token)
+    const classification = yield classify(query, user, token, query.isResponse)
 
-    console.log(`Using skill ${classification.skill.name} for ${q}`)
-    const resp = yield classification.skill.get(strip(q), classification.intent_breakdown, user, token)
+    console.log(`Using skill ${classification.skill.name} for ${query}`)
+    const resp = yield classification.skill.get(strip(query), classification.intent_breakdown, user, token)
 
     yield global.db.addResponse(query_data, classification.skill.name, resp)
 
     return {
         msg: resp,
         type: classification.skill.name,
-        question: q
+        question: query
     }
 }
 
