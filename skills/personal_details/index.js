@@ -1,4 +1,4 @@
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     return (query.includes('my') && query.includes('name')) ||
                 (query.includes('im') && query.includes('called'))
 }
@@ -39,6 +39,6 @@ const examples = () => (
 
 module.exports = {
     get: name_resp,
-    hard_rule,
+    hardRule,
     examples
 }

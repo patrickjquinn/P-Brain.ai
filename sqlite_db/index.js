@@ -294,6 +294,19 @@ function * addResponse(query, skill, response) {
     yield queryWrapper(db.run, 'INSERT INTO responses(query_id, skill, response) VALUES(?, ?, ?)', [query.query_id, skill, response])
 }
 
+function * getResponses(user, skill, token, timestamp) {
+    const base = 'SELECT queries.query, responses.skill, responses.response, queries.timestamp, queries.token FROM responses INNER JOIN queries ON queries.query_id=responses.query_id'
+    const query = makeConditionalQuery(base, ['queries.user_id = ?', 'responses.skill = ?', 'queries.token = ?', 'queries.timestamp >= ?'], [user.user_id, skill, token.token, timestamp])
+    const rows = yield queryWrapper(db.all, query.query, query.values)
+    if (rows && rows.length > 0) {
+        rows.map(row => {
+            row.response = JSON.parse(row.response)
+            row.query = JSON.parse(row.query)
+        })
+    }
+    return rows
+}
+
 module.exports = {
     setup,
     setValue,
@@ -315,5 +328,6 @@ module.exports = {
     deleteUser,
     getUserTokens,
     addQuery,
-    addResponse
+    addResponse,
+    getResponses,
 }

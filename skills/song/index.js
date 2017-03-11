@@ -1,6 +1,6 @@
 const yt = require('./youtube')
 
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     return query.trim().toLowerCase().startsWith('play')
 }
 
@@ -34,6 +34,6 @@ const examples = () => (
 
 module.exports = {
     get: song_resp,
-    hard_rule,
+    hardRule,
     examples
 }

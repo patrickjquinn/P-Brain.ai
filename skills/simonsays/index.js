@@ -1,4 +1,4 @@
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
 	return query.startsWith('simon says')
 }
 
@@ -14,5 +14,5 @@ function * resp(query) {
 
 module.exports = {
 	get: resp,
-	hard_rule: hard_rule
+	hardRule
 };
