@@ -1,7 +1,7 @@
 const co = require('co')
 const speakeasy = require('speakeasy-nlp')
 
-const CONVERSATION_TIME_LIMIT = 20 // Seconds to allow a conversation to run without responses for.
+const CONVERSATION_TIME_LIMIT = 10 // Seconds to allow a conversation to run without responses for.
 
 const HARD_QUERIES = [
     'how are you',
