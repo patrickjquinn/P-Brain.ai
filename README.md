@@ -67,11 +67,17 @@ Add that new folder to the `skills` directory in the project.
 
 And bang, Brain will automatically import and enable your new skill!
 
+### API
+
+For more detail on adding skills see the Wiki page [Adding Skills](https://github.com/patrickjquinn/P-Brain.ai/wiki/Adding-Skills).
+
 # Clients
 
 ### Web Client
 `http://localhost:4567/api/ask?q={query}`
 `http://localhost:4567/`
+`http://localhost:4567/settings.html`
+`http://localhost:4567/users.html`
 
 ### Raspberry Pi Client 
 
