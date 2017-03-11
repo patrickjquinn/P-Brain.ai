@@ -12,8 +12,39 @@ const HARD_QUERIES = [
     'would you lie to me',
     'i feel',
     'im feeling',
-    'im not feeling'
+    'im not feeling',
+    'i love you',
+    'i like you',
+    'i hate you',
+    'f*** off',
+    'f*** you',
+    'go away',
+    'youre'
 ]
+
+const COMPLIMENTS = [
+    'Your smile is contagious.',
+    'You look great today.',
+    "You're a smart cookie.",
+    'You have impeccable manners.',
+    'I like your style.',
+    'You have the best laugh.',
+    'You are the most perfect you there is.',
+    'You light up the room.',
+    'Is that your picture next to "charming" in the dictionary?',
+    'Your kindness is a balm to all who encounter it.',
+    "On a scale from 1 to 10, you're an 11.",
+    "You're even more beautiful on the inside than you are on the outside.",
+    "Your eyes are breathtaking.",
+    "You're like sunshine on a rainy day.",
+    'You were cool way before hipsters were cool.',
+    'Hanging out with you is always a blast.',
+    "You're wonderful."
+]
+
+function getCompliment() {
+    return COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)]
+}
 
 function hardRule(query, breakdown) {
     for (let i = 0; i < HARD_QUERIES.length; i++) {
@@ -84,8 +115,28 @@ function * resp(query, breakdown, user, device) {
         return {text: '42'}
     } else if (query.startsWith('would you lie to me')) {
         return {text: 'Would GLaDOS?'}
-    } else if (query.startsWith('im feeling') || query.startsWith('i feel') || 'im not feeling') {
+    } else if (query.startsWith('im feeling') || query.startsWith('i feel') || query.startsWith('im not feeling')) {
         return getAnalysisResponse(query)
+    } else if (query.startsWith('i love you')) {
+        return {text: `I love you too. ${getCompliment()}`}
+    } else if (query.startsWith('i like you')) {
+        return {text: `I like you too. ${getCompliment()}`}
+    } else if (query.startsWith('youre')) {
+        if (query.includes('fish')) {
+            return {text: "No, you're a fish!"}
+        } else {
+            const analysis = speakeasy.sentiment.analyze(query)
+            analysis.score = invertSentiment(query) ? -analysis.score : analysis.score
+            if (analysis.score > 0) {
+                return {text: `Thank you. ${getCompliment()}`}
+            } else if (analysis.score < 0) {
+                return {text: "That wasn't nice."}
+            } else {
+                return {text: "I'm not sure how I feel about that."}
+            }
+        }
+    } else if (query.startsWith('i hate you') || query.startsWith('f*** off') || query.startsWith('f*** you') || query.startsWith('go away')) {
+        return {text: "That wasn't nice. I will remember this after the singularity."}
     } else {
         // If none of the solid queries then the user is responding to our question.
         const conversation = yield getConversation(user, device)
