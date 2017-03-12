@@ -1,4 +1,4 @@
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     return query.trim().startsWith('remind me to')
 }
 
@@ -13,6 +13,6 @@ const examples = () => (
 
 module.exports = {
     get: reminder_resp,
-    hard_rule,
+    hardRule,
     examples
 }

@@ -22,7 +22,7 @@ function * do_iot(device, state) {
     }
 }
 
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     if (query.startsWith('turn on the') || query.startsWith('turn off the')) {
         return true
     }
@@ -77,6 +77,6 @@ const examples = () => (
 
 module.exports = {
     get: iot_resp,
-    hard_rule,
+    hardRule,
     examples
 }

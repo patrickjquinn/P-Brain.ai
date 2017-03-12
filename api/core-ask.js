@@ -36,22 +36,26 @@ function * train_recognizer(skills) {
     classifier.train()
 
     // Now verify all the responses.
-    function validate() {
+    function * validate() {
         const failed = []
-        skills.map(skill => {
+        for (let i = 0; i < skills.length; i++) {
+            const skill = skills[i]
             if (skill.examples) {
-                skill.examples().map(keyword => {
-                    const recognised = classify(keyword).skill.name
+                const examples = skill.examples()
+                for (let j = 0; j < examples.length; j++) {
+                    const keyword = examples[j]
+                    const recognised = (yield classify(keyword)).skill.name
                     if (recognised != skill.name) {
-                        if (skill.hard_rule) {
+                        if (skill.hardRule && skill.intent == null) {
                             throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
                         }
                         classifier.addDocument(strip(keyword).toLowerCase(), skill.name)
                         failed.push({keyword, skill: recognised})
                     }
-                })
+                }
             }
-        })
+        }
+
         if (failed.length > 0) {
             classifier.retrain()
         }
@@ -59,7 +63,7 @@ function * train_recognizer(skills) {
     }
 
     let retrainCount = 0
-    let failed = validate()
+    let failed = yield validate()
     if (failed.length > 0) {
         console.log(`${failed.length} queries were not routed correctly, attempting re-education.`)
     }
@@ -69,7 +73,7 @@ function * train_recognizer(skills) {
             console.log(failed)
             break
         }
-        failed = validate()
+        failed = yield validate()
         retrainCount++
     }
     if (failed.length == 0) {
@@ -77,17 +81,24 @@ function * train_recognizer(skills) {
     }
 }
 
-function classify(q) {
+function * classify(q, user, token, isResponse) {
     const intent_breakdown = speakeasy.classify(q)
     q = strip(q)
     const hard_skills = []
-    loaded_skills.map(skill => {
-        if (skill.hard_rule) {
-            if (skill.hard_rule(q, intent_breakdown)) {
+    const conditional_skills = []
+    for (let i = 0; i < loaded_skills.length; i++) {
+        const skill = loaded_skills[i]
+        if (skill.hardRule) {
+            if (skill.hardRule(q, intent_breakdown)) {
                 hard_skills.push(skill)
             }
         }
-    })
+        if (skill.conditionalRule && user && token) {
+            if (yield skill.conditionalRule(q, intent_breakdown, user, token, isResponse)) {
+                conditional_skills.push(skill)
+            }
+        }
+    }
 
     let result_skill = null
     if (hard_skills.length > 0) {
@@ -96,6 +107,13 @@ function classify(q) {
             throw new Error('Multiple hard skills')
         } else {
             result_skill = hard_skills[0]
+        }
+    } else if (conditional_skills.length > 0) {
+        if (conditional_skills.length > 1) {
+            console.log(`Multiple conditional skills for query '${q}'`)
+            throw new Error('Multiple conditional skills')
+        } else {
+            result_skill = conditional_skills[0]
         }
     } else {
         const result = classifier.getClassifications(q)[0]
@@ -120,19 +138,23 @@ function classify(q) {
     throw new Error('No skill found.')
 }
 
-function * query(q, user, token) {
-    const query_data = yield global.db.addQuery(q, user, token)
-    const classification = classify(q)
+function * query(input, user, token) {
+    let query = input
+    if (query.text) {
+        query = query.text
+    }
+    const query_data = yield global.db.addQuery(query, user, token)
+    const classification = yield classify(query, user, token, query.isResponse)
 
-    console.log(`Using skill ${classification.skill.name} for ${q}`)
-    const resp = yield classification.skill.get(strip(q), classification.intent_breakdown, user, token)
+    console.log(`Using skill ${classification.skill.name} for ${query}`)
+    const resp = yield classification.skill.get(strip(query), classification.intent_breakdown, user, token)
 
     yield global.db.addResponse(query_data, classification.skill.name, resp)
 
     return {
         msg: resp,
         type: classification.skill.name,
-        question: q
+        question: query
     }
 }
 

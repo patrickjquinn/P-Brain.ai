@@ -8,7 +8,7 @@ const examples = () => (
     ['Set a timer for 10 minutes.', 'Set a timer for 40 seconds then tell me the time', 'In 2 hours make me laugh.']
 )
 
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     query = query.trim().toLowerCase()
     const type1 = query.startsWith('set a timer for')
     if (type1) {
@@ -84,7 +84,7 @@ function formatTime(time) {
     if (units.length > 1) {
         units.splice(units.length - 1, 0, 'and')
     }
-    for (var i = 0; i < units.length; i++) {
+    for (let i = 0; i < units.length; i++) {
         message += ((i > 0) ? ' ' : '') + units[i]
     }
 
@@ -226,6 +226,6 @@ function * timer_resp(query, breakdown, user, device) {
 
 module.exports = {
     get: timer_resp,
-    hard_rule,
+    hardRule,
     examples
 }

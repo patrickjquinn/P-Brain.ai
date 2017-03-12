@@ -1,6 +1,6 @@
 const co = require('co')
 
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     return query.startsWith('your name') || query.startsWith('youre called')
 }
 
@@ -59,6 +59,6 @@ const examples = () => (
 module.exports = {
     get: name_resp,
     registerClient,
-    hard_rule,
+    hardRule,
     examples
 }

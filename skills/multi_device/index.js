@@ -4,7 +4,7 @@ String.prototype.capitalize = function(lower) {
     return (lower ? this.toLowerCase() : this).replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); })
 };
 
-function hard_rule(query, breakdown) {
+function hardRule(query, breakdown) {
     return query.startsWith('call this device') || query.startsWith('this device is called') ||
             query.startsWith('on my') || query.startsWith('on the')
 }
@@ -67,6 +67,6 @@ const examples = () => (
 
 module.exports = {
     get: multi_resp,
-    hard_rule,
+    hardRule,
     examples
 }
