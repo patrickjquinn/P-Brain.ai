@@ -16,8 +16,6 @@ const HARD_QUERIES = [
     'i love you',
     'i like you',
     'i hate you',
-    'f*** off',
-    'f*** you',
     'go away',
     'youre'
 ]
@@ -135,7 +133,7 @@ function * resp(query, breakdown, user, device) {
                 return {text: "I'm not sure how I feel about that."}
             }
         }
-    } else if (query.startsWith('i hate you') || query.startsWith('f*** off') || query.startsWith('f*** you') || query.startsWith('go away')) {
+    } else if (query.startsWith('i hate you') || query.startsWith('go away')) {
         return {text: "That wasn't nice. I will remember this after the singularity."}
     } else {
         // If none of the solid queries then the user is responding to our question.
