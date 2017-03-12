@@ -17,6 +17,8 @@ const HARD_QUERIES = [
     'i like you',
     'i hate you',
     'go away',
+    'do you like me',
+    'do you love me',
     'youre'
 ]
 
@@ -106,6 +108,8 @@ function * resp(query, breakdown, user, device) {
     } else if (query.startsWith('do you like')) {
         if (query.includes('pina coladas')) {
             return {text: `And taking walks in the rain!`}
+        } else if (query.includes('me')) {
+            return {text: 'Of course I do.'}
         } else {
             return {text: `I have no opinion on ${query.replace('do you like', '').trim()}.`}
         }
@@ -119,6 +123,8 @@ function * resp(query, breakdown, user, device) {
         return {text: `I love you too. ${getCompliment()}`}
     } else if (query.startsWith('i like you')) {
         return {text: `I like you too. ${getCompliment()}`}
+    } else if (query.startsWith('do you love me')) {
+        return {text: 'Of course I do.'}
     } else if (query.startsWith('youre')) {
         if (query.includes('fish')) {
             return {text: "No, you're a fish!"}
