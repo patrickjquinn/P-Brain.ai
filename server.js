@@ -13,7 +13,7 @@ const settingsApi = require('./api/settings.js')
 const usersApi = require('./api/users.js')
 const cookieParser = require('cookie-parser')
 global.auth = require('./authentication')
-global.db = require('./sqlite_db')
+const Database = require('./sqlite_db')
 
 app.use(compression({
     threshold: 0,
@@ -87,7 +87,7 @@ function * initialSetup() {
 
 co(function * () {
     console.log('Setting up database.')
-    yield global.db.setup('pbrain.db')
+    global.db = yield Database.setup('pbrain.db')
     yield initialSetup()
 
     global.sendToUser = function (user, type, message) {
