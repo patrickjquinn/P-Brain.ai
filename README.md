@@ -107,6 +107,34 @@ called _p-brain_ and a container called _p-brain_.
 After doing this you can stop the container by running `docker stop p-brain`. Starting it again
 is done by running `docker start p-brain`.
 
+# Node.JS Required Modules
+You can install modules by running command 'npm install <module-name>' inside Windows command propmt.
+Here is a list of required modules.
+
+-	co
+-	express
+-	socket.io
+-	co-express
+-	compression
+-	ip
+-	natural
+-	speakeasy-nlp
+-	thunkify-wrap
+-	cookie-parser
+-	md5
+-	jsonwebtoken
+-	basic-auth
+-	sqlite3
+-	co-request
+-	cheerio
+-	html-entities
+-	striptags
+-	tabletojson
+-	x-ray
+-	json2csv
+-	wolfram-alpha
+-	words-to-num
+
 ### Easter eggs
 
 - One can ask brain about 'trip to mordor'
