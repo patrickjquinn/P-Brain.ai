@@ -108,7 +108,7 @@ After doing this you can stop the container by running `docker stop p-brain`. St
 is done by running `docker start p-brain`.
 
 # Node.JS Required Modules
-You can install modules by running command 'npm install <module-name>' inside Windows command propmt.
+You can install modules by running command 'npm install [module name]' inside Windows command propmt.
 Here is a list of required modules.
 
 -	co
