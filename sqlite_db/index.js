@@ -6,7 +6,7 @@ const setupQuery =
     'CREATE TABLE IF NOT EXISTS tokens(token TEXT PRIMARY KEY NOT NULL, timestamp INT DEFAULT (strftime(\'%s\',\'now\')), user_id INTEGER REFERENCES users(user_id));' +
     'CREATE TABLE IF NOT EXISTS queries(query_id INTEGER PRIMARY KEY, query TEXT NOT NULL, timestamp INT DEFAULT (strftime(\'%s\',\'now\')), user_id INTEGER REFERENCES users(user_id));' +
     'CREATE TABLE IF NOT EXISTS responses(query_id INTEGER PRIMARY KEY REFERENCES queries(query_id), response TEXT NOT NULL, skill TEXT NOT NULL);' +
-    'CREATE TABLE IF NOT EXISTS global_settings(key TEXT PRIMARY KEY, value TEXT);' +
+    'CREATE TABLE IF NOT EXISTS global_settings(key TEXT PRIMARY KEY NOT NULL, value TEXT);' +
     'CREATE TABLE IF NOT EXISTS skill_settings(skill TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(skill, key));' +
     'CREATE TABLE IF NOT EXISTS user_settings(user_id INTEGER REFERENCES users(user_id), skill TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(user_id, skill, key));' +
     'CREATE TABLE IF NOT EXISTS version(version INTEGER);' +
@@ -187,7 +187,7 @@ Database.prototype.deleteValue = function * (skill, user, key) {
 
 Database.prototype.getValue = function * (skill, user, key) {
     const base = 'SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id'
-    let user_id = (user) ? user.user_id : undefined
+    let user_id = (user) ? (user.user_id ? user.user_id : undefined) : undefined
     const query = makeConditionalQuery(base, ['skill = ?', 'user_settings.user_id = ?', 'key = ?'], [skill, user_id, key])
     query.query += ' ORDER BY skill ASC, user_settings.user_id ASC, key ASC'
     return yield this.allQueryWrapper(query.query, query.values, key)
@@ -234,7 +234,7 @@ Database.prototype.deleteGlobalValue = function * (key) {
 }
 
 Database.prototype.saveToken = function * (user, token) {
-    const dbtokens = yield getUserTokens(user, token)
+    const dbtokens = yield this.getUserTokens(user, token)
     if (dbtokens.length > 0) {
         yield this.queryWrapper(this.db.run, 'UPDATE tokens SET name=? WHERE user_id=? AND token=?', [token.name, user.user_id, token.token])
     } else {
