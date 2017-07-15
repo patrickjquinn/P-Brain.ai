@@ -315,18 +315,20 @@ function * createDb(host, username, password, database) {
                 password: password,
                 database: database,
                 multipleStatements: true,
-                charset: "utf8mb4_unicode_ci"
+                charset: "utf8mb4_general_ci"
             });
             local_db.on('error', function (err) {
                 console.log("MySQL DB Error", err);
                 if (err.code == 'PROTOCOL_CONNECTION_LOST') {
-                    local_db.connect(function (err) {
-                        if (err) {
-                            console.log("Failed to reconnect to database");
-                        } else {
-                            console.log("Reconnected to database.");
-                        }
-                    });
+                    setTimeout(function() {
+                        local_db.connect(function (err) {
+                            if (err) {
+                                console.log("Failed to reconnect to database");
+                            } else {
+                                console.log("Reconnected to database.");
+                            }
+                        }, 1000)
+                    })
                 }
             });
             local_db.connect(function(err) {
