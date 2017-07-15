@@ -314,7 +314,8 @@ function * createDb(host, username, password, database) {
                 user: username,
                 password: password,
                 database: database,
-                multipleStatements: true
+                multipleStatements: true,
+                charset: "utf8mb4_unicode_ci"
             });
             local_db.on('error', function (err) {
                 console.log("MySQL DB Error", err);
