@@ -46,8 +46,8 @@ function mapKey(results) {
     }
 }
 
-function Database(sqlite_db) {
-    this.db = sqlite_db
+function Database() {
+    this.db = null
 }
 
 Database.prototype.loadDefaultSql = function * () {
@@ -306,38 +306,42 @@ Database.prototype.getResponses = function * (user, skill, token, timestamp) {
     return rows
 }
 
-function * createDb(host, username, password, database) {
+Database.prototype.connect = function * (host, username, password, database) {
+    const $this = this;
     return new Promise((resolve, reject) => {
         try {
-            const local_db = mysql.createConnection({
-                host: host,
-                user: username,
-                password: password,
-                database: database,
-                multipleStatements: true,
-                charset: "utf8mb4_general_ci"
-            });
-            local_db.on('error', function (err) {
-                console.log("MySQL DB Error", err);
-                if (err.code == 'PROTOCOL_CONNECTION_LOST') {
-                    setTimeout(function() {
-                        local_db.connect(function (err) {
-                            if (err) {
-                                console.log("Failed to reconnect to database");
-                            } else {
-                                console.log("Reconnected to database.");
-                            }
-                        }, 1000)
-                    })
-                }
-            });
-            local_db.connect(function(err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(local_db);
-                }
-            });
+            function connect(callback) {
+                const local_db = mysql.createConnection({
+                    host: host,
+                    user: username,
+                    password: password,
+                    database: database,
+                    multipleStatements: true,
+                    charset: "utf8mb4_general_ci"
+                });
+
+                local_db.on('error', function (err) {
+                    console.log("MySQL DB Error", err);
+                    if (err.code == 'PROTOCOL_CONNECTION_LOST') {
+                        connect();
+                    }
+                });
+
+                local_db.connect(function(err) {
+                    if (err) {
+                        console.log("Failed to connect to MySQL server, retrying in 10 seconds.");
+                        setTimeout(function() { connect(callback) }, 10000);
+                    } else {
+                        console.log("Connected to MySQL server.");
+                        if (callback) {
+                            callback();
+                        }
+                        $this.db = local_db;
+                    }
+                });
+            }
+
+            connect(resolve);
         } catch(err) {
             reject(err);
         }
@@ -345,9 +349,9 @@ function * createDb(host, username, password, database) {
 }
 
 function * setup(host, username, password, database) {
-    const mysql_db = yield createDb(host, username, password, database);
+    const db = new Database();
+    yield db.connect(host, username, password, database);
     console.log("MySQL database connected.");
-    const db = new Database(mysql_db);
     const setupQuery = yield db.loadDefaultSql();
     yield db.query(setupQuery, [], true);
     const version = yield db.getVersion();
