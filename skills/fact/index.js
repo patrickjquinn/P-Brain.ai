@@ -30,6 +30,11 @@ function * fact_resp(query) {
         return {text: not_found_responses[Math.floor(Math.random() * not_found_responses.length)] + query}
     }
 
+    if (fact.includes('|') && fact.includes('name') && fact.includes('location')){
+        let tokenized_fact = fact.split('|')
+        fact = 'You are in '+tokenized_fact[tokenized_fact.length-1].trim()
+    }
+
     return {text: fact}
 }
 

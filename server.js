@@ -30,6 +30,10 @@ app.use((req, res, next) => {
 
 app.use(cookieParser())
 
+app.get('/api/status', wrap(function * (req, res) {
+        res.json({status:200,msg:'OK'})
+}))
+
 app.use('/', [global.auth.filter(true), express.static('./src')])
 app.use('/api/settings', [global.auth.filter(false), settingsApi])
 app.use('/api/users', [global.auth.filter(false), usersApi])
@@ -38,6 +42,10 @@ app.get('/api/user', global.auth.filter(false), wrap(function * (req, res) {
 }))
 app.get('/api/token', global.auth.filter(false), wrap(function * (req, res) {
     res.json(req.token)
+}))
+
+app.get('/api/status', global.auth.filter(false), wrap(function * (req, res) {
+        res.json({status:200,msg:'OK'})
 }))
 
 // TODO parse services in query
