@@ -8,11 +8,11 @@ function * do_iot(device, state) {
     // On success the server returns { state: '<state>' } and on failure error will be set { error: 'Failure' }.
     const iot_url = yield global.db.getSkillValue('ts_iot', 'url')
     if (iot_url) {
-        let data = yield request(util.format(iot_url, device, state))
+        const parsed_device = device.split(' ').join('_')
+        let data = yield request(util.format(iot_url, parsed_device, state))
         data = JSON.parse(data.body)
         if (data.error) {
-            console.log(`IoT Error: ${data.error} - ${device} - ${state}`)
-            return {text: `I'm sorry, I can't turn the ${device} ${state}.`}
+            return {text: `I'm sorry, I can't find the ${device} device.`}
         } else if (state == 'state') {
             return {text: `The ${device} is ${data.state}.`}
         }
@@ -65,10 +65,7 @@ function * iot_resp(query) {
         return {text: `I'm sorry, I don't understand your query.`}
     }
 
-    device = device.split(' ').join('_')
-
-    const response = yield do_iot(device, state)
-    return response
+    return yield do_iot(device, state)
 }
 
 const examples = () => (
