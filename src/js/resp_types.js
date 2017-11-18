@@ -1,6 +1,66 @@
 let player
 const client = new WebTorrent()
-const recognition = new webkitSpeechRecognition()
+let recognition = null;
+if ('webkitSpeechRecognition' in window) {
+    console.log('Using webkitSpeechRecognition')
+    recognition = new webkitSpeechRecognition()
+} else if ('SpeechRecognition' in window) {
+    console.log('Using SpeechRecognition')
+    recognition = new SpeechRecognition()
+} else {
+    console.log('No speech recognition supported')
+}
+
+if (recognition) {
+    recognition.continuous = true
+    recognition.lang = 'en-GB'
+    recognition.onresult = function (event) {
+        let inputString = event.results['0']['0'].transcript
+
+        const yes_input = inputString.slice(0, 3)
+
+        if (yes_input == 'yes') {
+            inputString = inputString.replace('yes ', '')
+        }
+
+        push_statment(inputString)
+
+        if (inputString !== null && typeof inputString !== undefined) {
+            if (player && inputString.indexOf('pause') != -1) {
+                pause_song()
+            } else if (player && inputString.toUpperCase().trim() == 'PLAY') {
+                play_song()
+            } else if (player && inputString.indexOf('stop') != -1) {
+                stop_song()
+            } else {
+                get_resp(inputString, recognition.is_response)
+            }
+        } else {
+            console.log('testing')
+        }
+
+        annyang.start({
+            autoRestart: true,
+            continuous: false
+        })
+
+        console.log(inputString)
+    }
+
+    recognition.onerror = function (event) {
+        console.log(event.error)
+
+        if (player) {
+            if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() === 0) {}
+        }
+        if (event.error != 'aborted') {
+            annyang.start({
+                autoRestart: true,
+                continuous: false
+            })
+        }
+    }
+}
 
 function response_handler(response) {
     const intent = response.type
@@ -25,57 +85,6 @@ function response_handler(response) {
 client.on('error', err => {
     console.error('ERROR: ' + err.message)
 })
-
-recognition.continuous = true
-
-recognition.lang = 'en-GB'
-
-recognition.onresult = function (event) {
-    let inputString = event.results['0']['0'].transcript
-
-    const yes_input = inputString.slice(0, 3)
-
-    if (yes_input == 'yes') {
-        inputString = inputString.replace('yes ', '')
-    }
-
-    push_statment(inputString)
-
-    if (inputString !== null && typeof inputString !== undefined) {
-        if (player && inputString.indexOf('pause') != -1) {
-            pause_song()
-        } else if (player && inputString.toUpperCase().trim() == 'PLAY') {
-            play_song()
-        } else if (player && inputString.indexOf('stop') != -1) {
-            stop_song()
-        } else {
-            get_resp(inputString, recognition.is_response)
-        }
-    } else {
-        console.log('testing')
-    }
-
-    annyang.start({
-        autoRestart: true,
-        continuous: false
-    })
-
-    console.log(inputString)
-}
-
-recognition.onerror = function (event) {
-    console.log(event.error)
-
-    if (player) {
-        if (player.getPlayerState() == 1 || player.getPlayerState() == 2 || player.getPlayerState() === 0) {}
-    }
-    if (event.error != 'aborted') {
-        annyang.start({
-            autoRestart: true,
-            continuous: false
-        })
-    }
-}
 
 function hasExtension(inputID, exts) {
     const fileName = inputID
