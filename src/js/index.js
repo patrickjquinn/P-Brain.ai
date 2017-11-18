@@ -70,7 +70,6 @@ function push_movie_response(id) {
 $('#textbox').keypress(function (e) {
     if (e.which == 13) {
         $(this).blur()
-        push_statment($('#textbox').val())
         log_speech($('#textbox').val())
         document.getElementById('textbox').value = ''
 
