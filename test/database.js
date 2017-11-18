@@ -1,22 +1,20 @@
 import test from 'ava'
 const tmp = require('tmp')
-const Database = require('../sqlite_db')
+const Database = require('../db')
 
 let database = null
-let database_file = null
 
 function * expectThrow(t, fn) {
     try {
         yield fn
     } catch (err) {
-        return;
+        return
     }
-    t.fail('Function did not throw an error.');
+    t.fail('Function did not throw an error.')
 }
 
 test.before(function * () {
-    database_file = tmp.fileSync();
-    database = yield Database.setup(database_file.name)
+    database = yield Database.setup()
 })
 
 test('globalSettings', function * (t) {
@@ -101,7 +99,7 @@ test('userSettings', function * (t) {
 test('multiSetup', function * (t) {
     const multi_database_file = tmp.fileSync();
     for (let i = 0; i < 5; i++) {
-        const multi_database = yield Database.setup(multi_database_file.name)
+        const multi_database = yield Database.setup('localhost', 'pbrain', 'pbrain', 'pbrain_testing')
         yield multi_database.close()
     }
     multi_database_file.removeCallback()
@@ -109,6 +107,4 @@ test('multiSetup', function * (t) {
 
 test.after(function * () {
     yield database.close()
-    database_file.removeCallback()
 })
-
