@@ -8,3 +8,4 @@ yarn.lock
 pbrain.db
 package-lock.json
 log/*
+npm-debug.log
