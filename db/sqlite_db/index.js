@@ -173,11 +173,11 @@ Database.prototype.getUsers = function * () {
 }
 
 Database.prototype.setValue = function * (skill, user, key, value) {
-    if (skill && user && key && user.user_id) {
+    if (skill && user && key && user.user_id && value) {
         value = JSON.stringify(value)
         yield this.queryWrapper(this.db.run, 'INSERT OR REPLACE INTO user_settings(skill, user_id, key, value) VALUES (?, ?, ?, ?)', [skill, user.user_id, key, value])
     } else {
-        throw new Error('skill, user and key must be set')
+        throw new Error('skill, user, key, value and user.user_id must be set')
     }
 }
 
@@ -187,7 +187,7 @@ Database.prototype.deleteValue = function * (skill, user, key) {
 
 Database.prototype.getValue = function * (skill, user, key) {
     const base = 'SELECT skill, users.username, key, value FROM user_settings INNER JOIN users ON users.user_id = user_settings.user_id'
-    let user_id = (user) ? (user.user_id ? user.user_id : undefined) : undefined
+    const user_id = (user) ? (user.user_id ? user.user_id : undefined) : undefined
     const query = makeConditionalQuery(base, ['skill = ?', 'user_settings.user_id = ?', 'key = ?'], [skill, user_id, key])
     query.query += ' ORDER BY skill ASC, user_settings.user_id ASC, key ASC'
     return yield this.allQueryWrapper(query.query, query.values, key)

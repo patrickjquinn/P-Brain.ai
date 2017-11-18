@@ -14,12 +14,13 @@ function * expectThrow(t, fn) {
 }
 
 test.before(function * () {
-    database = yield Database.setup()
+    const database_file = tmp.fileSync({keep: true});
+    console.log(`Database file is ${database_file.name}`)
+    database = yield Database.setup({ file: database_file.name })
 })
 
 test('globalSettings', function * (t) {
     t.is(yield database.getGlobalValue(1234), undefined)
-    t.is(yield database.getGlobalValue(), undefined)
     t.is(yield database.getGlobalValue(null), undefined)
     t.is(yield database.getGlobalValue('test_key'), undefined)
 
@@ -44,7 +45,6 @@ test('globalSettings', function * (t) {
 
 test('skillSettings', function * (t) {
     t.is(yield database.getSkillValue(1234, 2342), undefined)
-    t.is(yield database.getSkillValue(), undefined)
     t.is(yield database.getSkillValue(1234), undefined)
     t.is(yield database.getSkillValue(null), undefined)
     t.is(yield database.getSkillValue(undefined, 'test_key'), undefined)
@@ -71,8 +71,9 @@ test('skillSettings', function * (t) {
 })
 
 test('userSettings', function * (t) {
+    yield database.saveUser({ username:'test', password: 'test', is_admin: true });
+
     t.is(yield database.getValue(1234, 2342, 34534), undefined)
-    t.is(yield database.getValue(), undefined)
     t.is(yield database.getValue(1234), undefined)
     t.is(yield database.getValue(1234, '45345'), undefined)
     t.is(yield database.getValue(null), undefined)
@@ -84,25 +85,23 @@ test('userSettings', function * (t) {
     yield expectThrow(t, database.setValue(''))
     yield expectThrow(t, database.setValue(null, ''))
     yield expectThrow(t, database.setValue(null, '', ''))
+    yield expectThrow(t, database.setValue('skill1', {user_id: 1}, 'test_key'))
 
-    yield database.setValue('skill1', {user_id: 1}, 'test_key')
-    console.log("a")
-    console.log(yield database.getValue('skill1', {user_id: 1}, 'test_key'))
-    console.log("b")
-    t.is(yield database.getValue('skill1', {user_id: 1}, 'test_key'), null)
+    t.is(yield database.getValue('skill1', {user_id: 1}, 'test_key'), undefined)
     yield database.setValue('skill1', {user_id: 1}, 'test_key', 'value1')
     t.is(yield database.getValue('skill1', {user_id: 1}, 'test_key'), 'value1')
     yield database.setValue('skill2', {user_id: 1}, 'test_key2', '?=+///z#;')
     t.is(yield database.getValue('skill2', {user_id: 1}, 'test_key2'), '?=+///z#;')
 })
 
-test('multiSetup', function * (t) {
+test('multiSetup', async function (t) {
     const multi_database_file = tmp.fileSync();
     for (let i = 0; i < 5; i++) {
-        const multi_database = yield Database.setup('localhost', 'pbrain', 'pbrain', 'pbrain_testing')
-        yield multi_database.close()
+        await t.notThrows(function * () {
+            const multi_database = yield Database.setup({ file: multi_database_file.name })
+            yield multi_database.close()
+        });
     }
-    multi_database_file.removeCallback()
 })
 
 test.after(function * () {

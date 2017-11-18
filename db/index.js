@@ -8,7 +8,10 @@ try {
 
 if (Config.databaseType == 'sqlite') {
     module.exports = {
-        setup: function * () {
+        setup: function * (args) {
+            if (args && args.file) {
+                Config.databaseArguments.file = args.file;
+            }
             const Database = require('./sqlite_db')
             return yield Database.setup(Config.databaseArguments.file)
         }
