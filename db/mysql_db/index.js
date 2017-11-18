@@ -52,7 +52,7 @@ function Database() {
 
 Database.prototype.loadDefaultSql = function * () {
     return new Promise((resolve, reject) => {
-        fs.readFile('./mysql_db/database.sql', 'utf8', function (err, data) {
+        fs.readFile('./db/mysql_db/database.sql', 'utf8', function (err, data) {
             if (err) {
                 reject(err);
             } else {
