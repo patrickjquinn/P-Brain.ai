@@ -6,3 +6,5 @@ config/*
 db/config.json
 yarn.lock
 pbrain.db
+package-lock.json
+log/*
