@@ -1,89 +1,29 @@
-const db = require('diskdb').connect('./db/memorybank', ['users', 'responses', 'queries', 'tokens', 'global'])
-
-function add_user(details) {
-    if (details.name && details.id) {
-        const user = {
-            id: details.id,
-            avatar: details.avatar,
-            name: {name: 'Brain'},
-            personal_details: {name: details.name},
-            responses: {},
-            log: {}
-        }
-        try {
-            db.users.save(user)
-            return {status: 'OK', code: 200}
-        } catch (err) {
-            return {status: 'FAIL', code: 500, reason: err}
-        }
-    } else {
-        let error_reason = 'missing'
-        if (!details.id) {
-            error_reason += ' id'
-        }
-        if (!details.name) {
-            error_reason += ',name'
-        }
-        return {status: 'FAIL', code: 500, reason: error_reason}
-    }
+let Config = null
+try {
+    Config = require('./config.json')
+} catch (err) {
+    console.log('Using default SQLite database provider')
+    Config = require('./sqlite_db/config.json')
 }
 
-function get_user_from_token(token) {
-    if (token) {
-        try {
-            const profile = db.users.find({id: token})
-            return {status: 'OK', code: 200, body: profile}
-        } catch (err) {
-            return {status: 'FAIL', code: 500, reason: err}
-        }
-    } else {
-        return {status: 'FAIL', code: 500, reason: 'a valid token is required'}
-    }
-}
-
-function get_user(username, password) {
-
-}
-
-function add_token() {
-
-}
-
-function remove_token() {
-
-}
-
-function set_global_value(key, value) {
-    if (key && value) {
-        const pair = {key, value}
-
-        try {
-            db.global.save(pair)
-            return {status: 'OK', code: 200}
-        } catch (err) {
-            return {status: 'FAIL', code: 500, reason: err}
+if (Config.databaseType == 'sqlite') {
+    module.exports = {
+        setup: function * (args) {
+            if (args && args.file) {
+                Config.databaseArguments.file = args.file;
+            }
+            const Database = require('./sqlite_db')
+            return yield Database.setup(Config.databaseArguments.file)
         }
     }
-    return {status: 'FAIL', code: 500, reason: 'a valid key and value are required'}
-}
-
-function get_global_value(key) {
-    if (key) {
-        try {
-            const value = db.global.find({key})
-            return {status: 'OK', code: 200, body: value}
-        } catch (err) {
-            return {status: 'FAIL', code: 500, reason: err}
+} else if (Config.databaseType == 'mysql') {
+    module.exports = {
+        setup: function * () {
+            const Database = require('./mysql_db')
+            return yield Database.setup(Config.databaseArguments.host,
+                                        Config.databaseArguments.username,
+                                        Config.databaseArguments.password,
+                                        Config.databaseArguments.database)
         }
     }
-    return {status: 'FAIL', code: 500, reason: 'a valid key is required'}
-}
-
-module.exports = {
-    add_user,
-    get_user,
-    get_global_value,
-    set_global_value,
-    add_token,
-    remove_token
 }

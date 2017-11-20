@@ -2,7 +2,7 @@ const co = require('co')
 const express = require('express')
 const app = express()
 const http = require('http').Server(app)
-const io = require('socket.io')(http)
+const io = require('socket.io')(http, {'pingInterval': 2000, 'pingTimeout': 7000})
 const wrap = require('co-express')
 const compression = require('compression')
 const fs = require('fs')
@@ -13,7 +13,7 @@ const settingsApi = require('./api/settings.js')
 const usersApi = require('./api/users.js')
 const cookieParser = require('cookie-parser')
 global.auth = require('./authentication')
-global.db = require('./sqlite_db')
+const Database = require('./db')
 
 app.use(compression({
     threshold: 0,
@@ -95,7 +95,7 @@ function * initialSetup() {
 
 co(function * () {
     console.log('Setting up database.')
-    yield global.db.setup('pbrain.db')
+    global.db = yield Database.setup()
     yield initialSetup()
 
     global.sendToUser = function (user, type, message) {

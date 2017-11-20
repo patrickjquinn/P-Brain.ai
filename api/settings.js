@@ -41,7 +41,7 @@ router.get('/user_setting/:user?/:skill?/:name?', wrap(function *(req, res) {
     let user = req.user
     if (req.params.user) {
         if (user.is_admin || req.params.user == user.username) {
-            user = yield global.db.getUserFromName(req.params.user)
+            user = yield global.db.getUser({username:req.params.user})
             if (user) {
                 if (req.params.user && req.params.skill && req.params.name && req.query.value) {
                     const value = JSON.parse(req.query.value)

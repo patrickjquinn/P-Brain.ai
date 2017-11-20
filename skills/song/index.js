@@ -22,7 +22,7 @@ function * song_resp(query) {
 
     const data = yield yt.get(track, artist)
     if (data) {
-        return {id: data.id, text: `Playing ${data.title}.`, url: `https://www.youtube.com/watch?v=${data.id}`}
+        return {id: data.id, text: `Playing ${data.title}.`, url: `https://www.youtube.com/watch?v=${data.id}`, url_autolaunch: true}
     }
     return {text: 'Could not play song.'}
 }
