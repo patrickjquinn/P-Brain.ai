@@ -50,7 +50,7 @@ function * train_recognizer(skills) {
                             throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
                         }
                         classifier.addDocument(strip(keyword).toLowerCase(), skill.name)
-                        failed.push({keyword, skill: recognised})
+                        failed.push({keyword, skill: recognised, expected: skill.name})
                     }
                 }
             }
@@ -66,6 +66,9 @@ function * train_recognizer(skills) {
     let failed = yield validate()
     if (failed.length > 0) {
         console.log(`${failed.length} queries were not routed correctly, attempting re-education.`)
+    }
+    for (let i = 0; i < failed.length; i++) {
+        console.log(`Expected (${failed[i].expected}), used (${failed[i].skill}) for: '${failed[i].keyword}'`);
     }
     while (failed.length > 0) {
         if (retrainCount > MAX_RETRAINS) {
