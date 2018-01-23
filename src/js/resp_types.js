@@ -182,17 +182,8 @@ function isURL(str) {
     return pattern.test(str)
 }
 
-function get_resp(q, is_response = false) {
+function get_resp(query, is_response = false) {
     push_response('Just a second...')
-
-    let query = q
-    if (query.indexOf('+') != -1) {
-        query = query.replace('+', 'plus')
-    } else if (query.indexOf('÷') != -1) {
-        query = query.replace('÷', 'divided by')
-    } else if (query.indexOf('√') != -1) {
-        query = query.replace('√', 'square root of')
-    }
 
     socket.emit('ask', {text: query, isResponse: is_response})
 }
