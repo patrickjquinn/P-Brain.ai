@@ -10,7 +10,8 @@ String.prototype.replaceAll = function (str1, str2, ignore) {
 }
 
 const intent = () => ({
-    keywords: ['what qqqq', 'Who won qqqq', 'who is qqqq', 'where is qqqq', 'when did qqqq', 'what is qqqq', 'what is qqqq in qqqq', '√ ', '-', '+', '%'],
+    keywords: ['what qqqq', 'who won qqqq', 'who is qqqq', 'where is qqqq', 'when did qqqq',
+               'what is qqqq', 'what is qqqq in qqqq', 'whats qqqq', '√ ', '-', '+', '%', '/', '*'],
     module: 'fact'
 })
 
@@ -39,7 +40,8 @@ function * fact_resp(query) {
 }
 
 const examples = () => (
-    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?', 'What is 200 Pounds in Euro?']
+    ['What color is the sky?', 'When is season 7 of Game Of Thrones?', 'Where is Paris?', 'What is 200 Pounds in Euro?',
+     'What\'s 2+2?', 'What is 3/4', 'what is two plus two']
 )
 
 module.exports = {
