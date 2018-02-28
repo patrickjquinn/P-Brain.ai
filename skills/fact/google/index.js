@@ -11,6 +11,7 @@ function * google_resp(query) {
     // Remove spaces and replace with +
     query = query.toLowerCase()
     query = query.replace('ask google', '')
+    query = query.replace('+', '%2B')
     query = query.replace(' ', '+')
 
     // Remove _ and replace with +
