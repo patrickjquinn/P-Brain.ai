@@ -16,7 +16,7 @@ String.prototype.replaceAll = function (search, replacement) {
 }
 
 function strip(word) {
-    return word.replaceAll('\'', '').replace(/\?/g, '').replaceAll('.', '').toLowerCase().trim()
+    return word.replaceAll('\'', '').replace(/\?/g, '').replaceAll('\\.', '').toLowerCase().trim()
 }
 
 function * train_recognizer(skills) {
@@ -122,7 +122,7 @@ function * classify(q, user, token, isResponse) {
         const result = classifier.getClassifications(q)[0]
         const confidence = result.value
         if (confidence > 0.5) {
-            throw new Error('error')
+            console.log(`Warning: Confidence for query '${q}' to skill '${result.label}' is unusually high at ${confidence}`)
         }
         for (let i = 0; i < loaded_skills.length; i++) {
             if (loaded_skills[i].name == result.label) {
