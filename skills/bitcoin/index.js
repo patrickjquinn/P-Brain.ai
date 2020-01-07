@@ -1,33 +1,36 @@
-const request = require('co-request')
+const request = require('../../api/request');
 
-function * bitcoin_resp(query) {
-    const bitcoin_url = 'https://blockchain.info/ticker'
+async function bitcoin_resp(query) {
+    const bitcoin_url = 'https://blockchain.info/ticker';
 
-    let data = yield request(bitcoin_url)
-    let key = 'USD'
+    let data = await request(bitcoin_url);
+    let key = 'USD';
 
-    data = JSON.parse(data.body)
-    query = query.toUpperCase()
+    data = JSON.parse(data.body);
+    query = query.toUpperCase();
 
     if (query.includes('EURO')) {
-    	key = 'EUR'
+        key = 'EUR';
     } else if (query.includes('POUNDS')) {
-    	key = 'GBP'
+        key = 'GBP';
     }
 
-    return {text: 'The current Bitcoin price is ' + data[key].symbol + data[key].last}
+    return { text: 'The current Bitcoin price is ' + data[key].symbol + data[key].last };
 }
 
 const intent = () => ({
-    keywords: ['bitcoin'], module: 'bitcoin'
-})
+    keywords: ['bitcoin'],
+    module: 'bitcoin',
+});
 
-const examples = () => (
-    ['Show me the current bitcoin value.', 'What\'s the bitcoin value?', 'Bitcoin value.']
-)
+const examples = () => [
+    'Show me the current bitcoin value.',
+    "What's the bitcoin value?",
+    'Bitcoin value.',
+];
 
 module.exports = {
     get: bitcoin_resp,
     intent,
-    examples
-}
+    examples,
+};

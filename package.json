@@ -1,51 +1,51 @@
 {
-  "name": "P-Brain.ai",
-  "version": "0.5.3",
-  "description": "NodeJS-powered AI assistant",
-  "main": "server.js",
-  "scripts": {
-    "test": "ava"
-  },
-  "author": "Patrick Quinn",
-  "license": "GPLv3",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/patrickjquinn/P-Brain.ai"
-  },
-  "bugs": {
-    "url": "https://github.com/patrickjquinn/P-Brain.ai/issues",
-    "email": "noreply@github.com"
-  },
-  "dependencies": {
-    "basic-auth": "^1.1.0",
-    "body-parser": "^1.17.2",
-    "cheerio": "^0.22.0",
-    "co": "^4.6.0",
-    "co-express": "^2.0.0",
-    "co-fs": "^1.2.0",
-    "co-request": "^1.0.0",
-    "compression": "^1.7.0",
-    "cookie-parser": "^1.4.3",
-    "diskdb": "^0.1.17",
-    "express": "^4.15.3",
-    "html-entities": "^1.2.1",
-    "ip": "^1.1.5",
-    "json2csv": "^3.9.0",
-    "jsonwebtoken": "^7.4.1",
-    "md5": "^2.2.1",
-    "natural": "^0.5.4",
-    "socket.io": "^2.0.3",
-    "speakeasy-nlp": "^0.2.12",
-    "sqlite3": "^3.1.8",
-    "striptags": "^3.0.1",
-    "tabletojson": "^0.6.0",
-    "thunkify-wrap": "^1.0.4",
-    "wolfram-alpha": "^0.6.0",
-    "words-to-num": "0.0.2",
-    "x-ray": "^2.3.2"
-  },
-  "devDependencies": {
-    "ava": "^0.20.0",
-    "tmp": "0.0.31"
-  }
+    "name": "P-Brain.ai",
+    "version": "0.6.0",
+    "description": "NodeJS-powered AI assistant",
+    "main": "server.js",
+    "scripts": {
+        "test": "ava",
+        "lint": "./node_modules/.bin/eslint --ext .js ./ && ./node_modules/.bin/prettier --check '**/*.{js,json,md,html,css,yaml,yml}'",
+        "fix": "./node_modules/.bin/eslint --ext .js --fix ./ && ./node_modules/.bin/prettier --check --write '**/*.{js,json,md,html,css,yaml,yml}'"
+    },
+    "author": "Patrick Quinn",
+    "license": "GPLv3",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/patrickjquinn/P-Brain.ai"
+    },
+    "bugs": {
+        "url": "https://github.com/patrickjquinn/P-Brain.ai/issues",
+        "email": "noreply@github.com"
+    },
+    "dependencies": {
+        "basic-auth": "^2.0.1",
+        "cheerio": "^1.0.0-rc.3",
+        "compression": "^1.7.4",
+        "cookie-parser": "^1.4.4",
+        "express": "^4.17.1",
+        "html-entities": "^1.2.1",
+        "ip": "^1.1.5",
+        "json2csv": "^4.5.4",
+        "jsonwebtoken": "^8.5.1",
+        "md5": "^2.2.1",
+        "natural": "^0.6.3",
+        "node-fetch": "^2.6.0",
+        "socket.io": "^2.3.0",
+        "speakeasy-nlp": "^0.2.13",
+        "sqlite3": "^4.1.1",
+        "striptags": "^3.1.1",
+        "tabletojson": "^1.0.4",
+        "thunkify-wrap": "^1.0.4",
+        "words-to-num": "^0.2.0",
+        "x-ray": "^2.3.4"
+    },
+    "devDependencies": {
+        "ava": "^2.4.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.9.0",
+        "eslint-plugin-prettier": "^3.1.2",
+        "prettier": "^1.19.1",
+        "tmp": "^0.1.0"
+    }
 }

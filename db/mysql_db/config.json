@@ -1,9 +1,0 @@
-{
-    "databaseType": "mysql",
-    "databaseArguments": {
-        "host": "localhost",
-        "username": "username",
-        "password": "password",
-        "database": "database"
-    }
-}

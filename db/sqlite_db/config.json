@@ -1,6 +1,0 @@
-{
-    "databaseType": "sqlite",
-    "databaseArguments": {
-        "file": "pbrain.db"
-    }
-}

@@ -1,17 +1,16 @@
-function * hello_resp() {
-    return {text: 'Hello World'}
+async function hello_resp() {
+    return { text: 'Hello World' };
 }
 
 const intent = () => ({
-    keywords: [], module: 'hello'
-})
+    keywords: [],
+    module: 'hello',
+});
 
-const examples = () => (
-    []
-)
+const examples = () => [];
 
 module.exports = {
     get: hello_resp,
     intent,
-    examples
-}
+    examples,
+};

@@ -1,0 +1,8 @@
+version: '3'
+services:
+    pbrain:
+        build: .
+        ports:
+            - 4567:4567
+        volumes:
+            - ./data:/app/data

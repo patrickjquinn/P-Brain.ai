@@ -1,30 +1,35 @@
-const request = require('co-request')
+const request = require('../../../api/request');
 
-function * yt(title, artist) {
-    title = title.replace(/[^\w\s]/gi, '')
-    artist = artist.replace(/[^\w\s]/gi, '')
+async function yt(title, artist) {
+    title = title.replace(/[^\w\s]/gi, '');
+    artist = artist.replace(/[^\w\s]/gi, '');
 
-    const url = 'https://www.googleapis.com/youtube/v3/search?q=' + title + ' ' + artist + '&part=snippet&maxResults=10&order=relevance&type=video&key=AIzaSyDY53lC9729bLz26TfKXYKINoYLLZOn0A8'
+    const url =
+        'https://www.googleapis.com/youtube/v3/search?q=' +
+        title +
+        ' ' +
+        artist +
+        '&part=snippet&maxResults=10&order=relevance&type=video&key=AIzaSyDY53lC9729bLz26TfKXYKINoYLLZOn0A8';
     try {
-        let data = yield request(url)
+        let data = await request(url);
 
-        data = JSON.parse(data.body)
+        data = JSON.parse(data.body);
 
         if (!data || !data.items || !data.items.length || !data.items[0]) {
-            return null
+            return null;
         } else {
             const video = {
                 title: data.items[0].snippet.title,
-                id: data.items[0].id.videoId
-            }
-            return video
+                id: data.items[0].id.videoId,
+            };
+            return video;
         }
     } catch (e) {
-        console.error(e)
-        return null
+        console.error(e);
+        return null;
     }
 }
 
 module.exports = {
-    get: yt
-}
+    get: yt,
+};

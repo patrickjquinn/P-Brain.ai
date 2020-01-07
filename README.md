@@ -14,9 +14,9 @@ https://www.youtube.com/watch?v=4EF_qEYNNwU
 
 # Dependencies
 
-- Node 6
-- Python >= 2
-- Yarn / npm
+-   Node >= 10
+-   Python >= 2
+-   Yarn / npm
 
 # Setup
 
@@ -40,30 +40,19 @@ Install Node.js v6: https://nodejs.org/en/download/
 
 Install Windows Build Tools: `npm install --global --production windows-build-tools`
 
-
 # Skills
 
 ## Adding Skills
 
 Add a skill by creating a new folder with the name of your new skill and adding an `index.js`.
 
-
-
 Add functions for `intent` and `{skill_name}_resp` to that index, the latter contining the logic that will respond to a query. The `{skill_name}_resp` function must have a response type of `String`
-
-
 
 In `intent` add `return {keywords:['key 1','key 2'], module:'{skill_name}'}` where `keywords` are the phrases you wish the skill to respond to and `{skill_name}` is the name of your new skill.
 
-
-
 Add `module.exports = {intent, get: {skill_name}_resp};` to the end of your `index.js`
 
-
-
 Add that new folder to the `skills` directory in the project.
-
-
 
 And bang, Brain will automatically import and enable your new skill!
 
@@ -74,12 +63,13 @@ For more detail on adding skills see the Wiki page [Adding Skills](https://githu
 # Clients
 
 ### Web Client
+
 `http://localhost:4567/api/ask?q={query}`
 `http://localhost:4567/`
 `http://localhost:4567/settings.html`
 `http://localhost:4567/users.html`
 
-### Raspberry Pi Client 
+### Raspberry Pi Client
 
 The Raspberry Pi Client for this project is available here: https://github.com/patrickjquinn/P-Brain.ai-RasPi
 
@@ -98,16 +88,12 @@ https://github.com/patrickjquinn/P-Brain.ai-iOS
 # Docker
 
 You can run this application via Docker. Prequisites are that you have docker installed
-and cloned this repository locally. Then execute the following command to create an docker image
-called _p-brain_ and a container called _p-brain_.
+and cloned this repository locally. Then execute the following command to bring-up an instance
+on `http://localhost:4567`:
 
-    docker build -t p-brain .
-    docker run --name=p-brain --net=host -v `pwd`:/home/app -v /home/app/node_modules -p 4567:4567  p-brain npm start
-
-After doing this you can stop the container by running `docker stop p-brain`. Starting it again
-is done by running `docker start p-brain`.
+`docker-compose up --build`
 
 ### Easter eggs
 
-- One can ask brain about 'trip to mordor'
-- or 'what is love'
+-   One can ask brain about 'trip to mordor'
+-   or 'what is love'
