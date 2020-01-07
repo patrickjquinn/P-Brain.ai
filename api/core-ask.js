@@ -1,133 +1,149 @@
-const natural = require('natural')
-const speakeasy = require('speakeasy-nlp')
-const genify = require('thunkify-wrap').genify
-const fs = require('fs')
+const natural = require('natural');
+const speakeasy = require('speakeasy-nlp');
+const genify = require('thunkify-wrap').genify;
 
-const classifier = new natural.BayesClassifier()
+const classifier = new natural.BayesClassifier();
 
-natural.BayesClassifier.load = genify(natural.BayesClassifier.load)
+natural.BayesClassifier.load = genify(natural.BayesClassifier.load);
 
-const MAX_RETRAINS = 20
-let loaded_skills = []
+const MAX_RETRAINS = 20;
+let loaded_skills = [];
 
-String.prototype.replaceAll = function (search, replacement) {
-    const target = this
-    return target.replace(new RegExp(search, 'g'), replacement)
-}
+String.prototype.replaceAll = function(str1, str2, ignore) {
+    return this.replace(
+        new RegExp(
+            // eslint-disable-next-line no-useless-escape
+            str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'),
+            ignore ? 'gi' : 'g',
+        ),
+        typeof str2 === 'string' ? str2.replace(/\$/g, '$$$$') : str2,
+    );
+};
 
 function strip(word) {
-    return word.replaceAll('\'', '').replace(/\?/g, '').replaceAll('\\.', '').toLowerCase().trim()
+    return word
+        .replaceAll("'", '')
+        .replace('?', '')
+        .replaceAll('.', '')
+        .toLowerCase()
+        .trim();
 }
 
-function * train_recognizer(skills) {
-    loaded_skills = skills
+async function train_recognizer(skills) {
+    loaded_skills = skills;
     // train a classifier
     skills.map(skill => {
         if (skill.intent) {
-            const intent_funct = skill.intent
-            const intent = intent_funct()
+            const intent_funct = skill.intent;
+            const intent = intent_funct();
 
             intent.keywords.map(keyword => {
-                classifier.addDocument(strip(keyword), skill.name)
-            })
+                classifier.addDocument(strip(keyword), skill.name);
+            });
         }
-    })
+    });
 
-    classifier.train()
+    classifier.train();
 
     // Now verify all the responses.
-    function * validate() {
-        const failed = []
+    async function validate() {
+        const failed = [];
         for (let i = 0; i < skills.length; i++) {
-            const skill = skills[i]
+            const skill = skills[i];
             if (skill.examples) {
-                const examples = skill.examples()
+                const examples = skill.examples();
                 for (let j = 0; j < examples.length; j++) {
-                    const keyword = examples[j]
-                    const recognised = (yield classify(keyword)).skill.name
+                    const keyword = examples[j];
+                    const recognised = (await classify(keyword)).skill.name;
                     if (recognised != skill.name) {
                         if (skill.hardRule && skill.intent == null) {
-                            throw new Error(`Example for hard rule failed to parse for ${skill.name}`)
+                            throw new Error(
+                                `Example for hard rule failed to parse for ${skill.name}`,
+                            );
                         }
-                        classifier.addDocument(strip(keyword).toLowerCase(), skill.name)
-                        failed.push({keyword, skill: recognised, expected: skill.name})
+                        classifier.addDocument(strip(keyword).toLowerCase(), skill.name);
+                        failed.push({ keyword, skill: recognised, expected: skill.name });
                     }
                 }
             }
         }
 
         if (failed.length > 0) {
-            classifier.retrain()
+            classifier.retrain();
         }
-        return failed
+        return failed;
     }
 
-    let retrainCount = 0
-    let failed = yield validate()
+    let retrainCount = 0;
+    let failed = await validate();
     if (failed.length > 0) {
-        console.log(`${failed.length} queries were not routed correctly, attempting re-education.`)
+        console.log(`${failed.length} queries were not routed correctly, attempting re-education.`);
     }
     for (let i = 0; i < failed.length; i++) {
-        console.log(`Expected (${failed[i].expected}), used (${failed[i].skill}) for: '${failed[i].keyword}'`);
+        console.log(
+            `Expected (${failed[i].expected}), used (${failed[i].skill}) for: '${failed[i].keyword}'`,
+        );
     }
     while (failed.length > 0) {
         if (retrainCount > MAX_RETRAINS) {
-            console.log(`Maximum number of re-trainings reached with ${failed.length} failures.`)
-            console.log(failed)
-            break
+            console.log(`Maximum number of re-trainings reached with ${failed.length} failures.`);
+            console.log(failed);
+            break;
         }
-        failed = yield validate()
-        retrainCount++
+        failed = await validate();
+        retrainCount++;
     }
     if (failed.length == 0) {
-        console.log(`Re-education successful after ${retrainCount + 1} iterations.`)
+        console.log(`Re-education successful after ${retrainCount + 1} iterations.`);
     }
 }
 
-function * classify(q, user, token, isResponse) {
-    const intent_breakdown = speakeasy.classify(q)
-    q = strip(q)
-    const hard_skills = []
-    const conditional_skills = []
+async function classify(q, user, token, isResponse) {
+    const intent_breakdown = speakeasy.classify(q);
+    q = strip(q);
+    const hard_skills = [];
+    const conditional_skills = [];
     for (let i = 0; i < loaded_skills.length; i++) {
-        const skill = loaded_skills[i]
+        const skill = loaded_skills[i];
         if (skill.hardRule) {
             if (skill.hardRule(q, intent_breakdown)) {
-                hard_skills.push(skill)
+                hard_skills.push(skill);
             }
         }
         if (skill.conditionalRule && user && token) {
-            if (yield skill.conditionalRule(q, intent_breakdown, user, token, isResponse)) {
-                conditional_skills.push(skill)
+            if (await skill.conditionalRule(q, intent_breakdown, user, token, isResponse)) {
+                conditional_skills.push(skill);
             }
         }
     }
 
-    let result_skill = null
+    let result_skill = null;
     if (hard_skills.length > 0) {
         if (hard_skills.length > 1) {
-            console.log(`Multiple hard skills for query '${q}'`)
-            throw new Error('Multiple hard skills')
+            console.log(`Multiple hard skills for query '${q}'`);
+            throw new Error('Multiple hard skills');
         } else {
-            result_skill = hard_skills[0]
+            result_skill = hard_skills[0];
         }
     } else if (conditional_skills.length > 0) {
         if (conditional_skills.length > 1) {
-            console.log(`Multiple conditional skills for query '${q}'`)
-            throw new Error('Multiple conditional skills')
+            console.log(`Multiple conditional skills for query '${q}'`);
+            throw new Error('Multiple conditional skills');
         } else {
-            result_skill = conditional_skills[0]
+            result_skill = conditional_skills[0];
         }
     } else {
-        const result = classifier.getClassifications(q)[0]
-        const confidence = result.value
-        if (confidence > 0.5) {
-            console.log(`Warning: Confidence for query '${q}' to skill '${result.label}' is unusually high at ${confidence}`)
-        }
-        for (let i = 0; i < loaded_skills.length; i++) {
-            if (loaded_skills[i].name == result.label) {
-                result_skill = loaded_skills[i]
-                break
+        const result = classifier.getClassifications(q)[0];
+        if (result) {
+            const confidence = result.value;
+            if (confidence > 0.5) {
+                throw new Error('error');
+            }
+            for (let i = 0; i < loaded_skills.length; i++) {
+                if (loaded_skills[i].name == result.label) {
+                    result_skill = loaded_skills[i];
+                    break;
+                }
             }
         }
     }
@@ -135,34 +151,39 @@ function * classify(q, user, token, isResponse) {
     if (result_skill) {
         return {
             skill: result_skill,
-            intent_breakdown
-        }
+            intent_breakdown,
+        };
     }
-    throw new Error('No skill found.')
+    throw new Error('No skill found.');
 }
 
-function * query(input, user, token) {
-    let query = input
+async function query(input, user, token) {
+    let query = input;
     if (query.text) {
-        query = query.text
+        query = query.text;
     }
-    const query_data = yield global.db.addQuery(query, user, token)
-    const classification = yield classify(query, user, token, query.isResponse)
+    const query_data = await global.db.addQuery(query, user, token);
+    const classification = await classify(query, user, token, query.isResponse);
 
-    console.log(`Using skill ${classification.skill.name} for ${query}`)
-    const resp = yield classification.skill.get(strip(query), classification.intent_breakdown, user, token)
+    console.log(`Using skill ${classification.skill.name} for ${query}`);
+    const resp = await classification.skill.get(
+        strip(query),
+        classification.intent_breakdown,
+        user,
+        token,
+    );
 
-    yield global.db.addResponse(query_data, classification.skill.name, resp)
+    await global.db.addResponse(query_data, classification.skill.name, resp);
 
     return {
         msg: resp,
         type: classification.skill.name,
-        question: query
-    }
+        question: query,
+    };
 }
 
-global.query = query
+global.query = query;
 module.exports = {
     query,
-    train_recognizer
-}
+    train_recognizer,
+};
