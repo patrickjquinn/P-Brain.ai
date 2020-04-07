@@ -75,6 +75,9 @@ function response_handler(response) {
         case 'movie':
             response_funct = load_torrent
             break
+        case 'nasa':
+            response_funct = show_nasa
+            break
         default:
             response_funct = display_response
     }
@@ -212,6 +215,11 @@ function onPlayerStateChange(event) {
     } else if (event.data == 1) {
         console.log(player.getPlaylist())
     }
+}
+
+function show_nasa(msg){
+    push_image(msg.image, 300,500);
+    display_response(msg.text);
 }
 
 function play_yt(msg) {
