@@ -218,7 +218,7 @@ function onPlayerStateChange(event) {
 }
 
 function show_nasa(msg){
-    push_image(msg.image, 300,500);
+    push_image(msg.image);
     display_response(msg.text);
 }
 
