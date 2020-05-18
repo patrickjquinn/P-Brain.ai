@@ -47,7 +47,7 @@ function push_yt_response(id) {
     $('.chat').append('<div style="border-radius: 5px !important;" class="bubble you"><div id="player_container"><div class="player" id="player' + id + '"></div></div></div>')
 }
 function push_image(url){
-    $('.chat').append('<div style="border-radius: 5px !important;height:340px;width:540px;" class="bubble you"><div><img src="'+url+'" height="300" width="500'"></div></div></div>');
+    $('.chat').append('<div style="border-radius: 5px !important;height:340px;width:540px;" class="bubble you"><div><img src="'+url+'" height="300" width="500"></div></div></div>');
 }
 
 function push_timer_response(msg) {
