@@ -1,6 +1,6 @@
 # P-Brain.ai - Voice Controlled Personal Assistant
 
-[![Join the chat at https://gitter.im/P-Brain/Lobby](https://badges.gitter.im/P-Brain/Lobby.svg)](https://gitter.im/P-Brain/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pat64%2eai%40gmail%2ecom&lc=IE&item_name=P%2dBrain%2eai&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
+[![Financial Contributors on Open Collective](https://opencollective.com/p-brainai/all/badge.svg?label=financial+contributors)](https://opencollective.com/p-brainai) [![Join the chat at https://gitter.im/P-Brain/Lobby](https://badges.gitter.im/P-Brain/Lobby.svg)](https://gitter.im/P-Brain/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pat64%2eai%40gmail%2ecom&lc=IE&item_name=P%2dBrain%2eai&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted)
 
 Natural language virtual assistant using Node + Bootstrap
 
@@ -97,3 +97,33 @@ on `http://localhost:4567`:
 
 -   One can ask brain about 'trip to mordor'
 -   or 'what is love'
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/patrickjquinn/P-Brain.ai/graphs/contributors"><img src="https://opencollective.com/p-brainai/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/p-brainai/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/p-brainai"><img src="https://opencollective.com/p-brainai/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/p-brainai/contribute)]
+
+<a href="https://opencollective.com/p-brainai/organization/0/website"><img src="https://opencollective.com/p-brainai/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/1/website"><img src="https://opencollective.com/p-brainai/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/2/website"><img src="https://opencollective.com/p-brainai/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/3/website"><img src="https://opencollective.com/p-brainai/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/4/website"><img src="https://opencollective.com/p-brainai/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/5/website"><img src="https://opencollective.com/p-brainai/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/6/website"><img src="https://opencollective.com/p-brainai/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/7/website"><img src="https://opencollective.com/p-brainai/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/8/website"><img src="https://opencollective.com/p-brainai/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/p-brainai/organization/9/website"><img src="https://opencollective.com/p-brainai/organization/9/avatar.svg"></a>
