@@ -35,7 +35,7 @@
         "node-fetch": "^2.6.1",
         "speakeasy-nlp": "^0.2.13",
         "sqlite3": "^4.1.1",
-        "striptags": "^3.1.1",
+        "striptags": "^3.2.0",
         "tabletojson": "^1.0.4",
         "thunkify-wrap": "^1.0.4",
         "words-to-num": "^0.2.0",
