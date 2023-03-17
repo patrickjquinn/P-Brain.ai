@@ -27,7 +27,7 @@
         "html-entities": "^1.2.1",
         "ip": "^1.1.5",
         "json2csv": "^4.5.4",
-        "jsonwebtoken": "^8.5.1",
+        "jsonwebtoken": "^9.0.0",
         "md5": "^2.2.1",
         "natural": "^0.6.3",
         "node-fetch": "^2.6.0",
